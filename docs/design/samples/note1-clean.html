@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="ja" class="scroll-smooth">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ReNovel — note風</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Shippori+Mincho:wght@600;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  theme: { extend: {
+    fontFamily: { sans:['"Noto Sans JP"','sans-serif'], mincho:['"Shippori Mincho"','serif'] },
+    colors: { note:{ DEFAULT:'#2cb696', 600:'#25a487', 700:'#1f8d74' }, ink:'#292929', sub:'#7a7a7a' }
+  } }
+}
+</script>
+<style> ruby rt{ font-size:.5em; color:#25a487; } </style>
+</head>
+<body class="bg-white text-ink font-sans antialiased">
+
+<!-- ===== Header ===== -->
+<header class="sticky top-0 z-20 bg-white border-b border-neutral-100">
+  <div class="mx-auto max-w-5xl px-4 h-14 flex items-center gap-3">
+    <a href="#" class="text-xl font-black tracking-tight shrink-0">ReNovel</a>
+    <div class="flex-1 max-w-sm hidden sm:block">
+      <div class="relative">
+        <input placeholder="検索" class="w-full bg-neutral-100 rounded-full text-sm pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-note/40">
+        <svg class="w-4 h-4 absolute left-3.5 top-2.5 text-sub" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+      </div>
+    </div>
+    <div class="flex items-center gap-2 ml-auto">
+      <button class="w-9 h-9 rounded-full hover:bg-neutral-100 flex items-center justify-center text-sub" title="通知">🔔</button>
+      <a href="#" class="hidden sm:inline text-sm font-bold px-4 py-2 rounded-full border border-neutral-300 hover:bg-neutral-50">ログイン</a>
+      <a href="#" class="text-sm font-bold px-4 py-2 rounded-full bg-note text-white hover:bg-note-600">投稿</a>
+      <span class="w-9 h-9 rounded-full bg-gradient-to-br from-note to-emerald-400 text-white text-xs flex items-center justify-center font-bold">你</span>
+    </div>
+  </div>
+  <!-- タブ -->
+  <div class="mx-auto max-w-5xl px-4">
+    <nav class="flex gap-6 text-sm overflow-x-auto">
+      <a href="#" class="py-3 border-b-2 border-ink font-bold whitespace-nowrap">おすすめ</a>
+      <a href="#" class="py-3 border-b-2 border-transparent text-sub hover:text-ink whitespace-nowrap">新着</a>
+      <a href="#" class="py-3 border-b-2 border-transparent text-sub hover:text-ink whitespace-nowrap">フォロー中</a>
+      <a href="#" class="py-3 border-b-2 border-transparent text-sub hover:text-ink whitespace-nowrap">コンテスト</a>
+      <a href="#" class="py-3 border-b-2 border-transparent text-sub hover:text-ink whitespace-nowrap">ランキング</a>
+    </nav>
+  </div>
+</header>
+
+<div class="mx-auto max-w-5xl px-4 py-6 grid lg:grid-cols-[1fr_300px] gap-8">
+
+  <!-- ===== フィード ===== -->
+  <main class="min-w-0">
+    <!-- 特集(ピックアップ) -->
+    <a href="#" class="block rounded-2xl overflow-hidden bg-gradient-to-br from-emerald-50 to-teal-50 p-6 mb-6 hover:opacity-95">
+      <span class="text-xs font-bold text-note-700 bg-white/70 rounded-full px-3 py-1">今日のピックアップ</span>
+      <h2 class="font-mincho text-2xl font-bold mt-3 leading-snug">神は勇者を選ばない</h2>
+      <p class="text-sm text-sub mt-2 leading-relaxed">選ばれなかった少年が、選ばれた者たちの物語をその手で書き換えていく異世界群像劇。</p>
+      <div class="flex items-center gap-2 mt-4 text-xs text-sub">
+        <span class="w-6 h-6 rounded-full bg-note text-white flex items-center justify-center font-bold">三</span>三日月 灯
+        <span class="ml-auto">♡ 1,204</span>
+      </div>
+    </a>
+
+    <div id="feed" class="space-y-1"></div>
+
+    <div class="text-center mt-6">
+      <a href="#" class="inline-block text-sm font-bold px-6 py-3 rounded-full border border-neutral-300 hover:bg-neutral-50">もっと見る</a>
+    </div>
+  </main>
+
+  <!-- ===== 右レール ===== -->
+  <aside class="space-y-6">
+    <section>
+      <h2 class="text-sm font-bold mb-3">週間ランキング</h2>
+      <ol id="rank" class="space-y-3"></ol>
+    </section>
+
+    <section>
+      <h2 class="text-sm font-bold mb-3">おすすめの作者</h2>
+      <ul class="space-y-3" id="authors"></ul>
+    </section>
+
+    <section>
+      <h2 class="text-sm font-bold mb-3">人気のタグ</h2>
+      <div class="flex flex-wrap gap-2">
+        <a href="#" class="text-xs px-3 py-1.5 rounded-full bg-neutral-100 hover:bg-neutral-200">#異世界転生</a>
+        <a href="#" class="text-xs px-3 py-1.5 rounded-full bg-neutral-100 hover:bg-neutral-200">#恋愛</a>
+        <a href="#" class="text-xs px-3 py-1.5 rounded-full bg-neutral-100 hover:bg-neutral-200">#切ない</a>
+        <a href="#" class="text-xs px-3 py-1.5 rounded-full bg-neutral-100 hover:bg-neutral-200">#どんでん返し</a>
+        <a href="#" class="text-xs px-3 py-1.5 rounded-full bg-neutral-100 hover:bg-neutral-200">#slow-life</a>
+      </div>
+    </section>
+
+    <section class="rounded-2xl bg-neutral-50 p-5">
+      <h2 class="text-sm font-bold mb-1">あなたも書いてみませんか</h2>
+      <p class="text-xs text-sub leading-relaxed">記法を気にせず、文章に集中。自動保存とリビジョンで安心して執筆できます。</p>
+      <a href="#" class="inline-block mt-3 text-sm font-bold px-4 py-2 rounded-full bg-note text-white hover:bg-note-600">執筆をはじめる</a>
+    </section>
+  </aside>
+</div>
+
+<footer class="border-t border-neutral-100 mt-6">
+  <div class="mx-auto max-w-5xl px-4 py-8 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-sub">
+    <span class="font-black text-ink">ReNovel</span>
+    <a href="#" class="hover:text-ink">おすすめ</a><a href="#" class="hover:text-ink">ランキング</a><a href="#" class="hover:text-ink">タグ</a>
+    <a href="#" class="hover:text-ink">執筆</a><a href="#" class="hover:text-ink">ヘルプ</a><a href="#" class="hover:text-ink">利用規約</a>
+  </div>
+</footer>
+
+<script>
+const cols=['from-rose-100 to-orange-100 text-rose-500','from-sky-100 to-indigo-100 text-sky-600','from-amber-100 to-yellow-100 text-amber-600','from-emerald-100 to-teal-100 text-emerald-600','from-violet-100 to-fuchsia-100 text-violet-500','from-slate-100 to-neutral-200 text-slate-500'];
+const feed=[
+  {t:'星の降る夜、君と',a:'白瀬 みなと',ini:'白',d:'余命一年の彼女と、天文部の最後の夏。言葉にできない距離を描く青春恋愛。',g:'恋愛',like:'982',cm:'64',date:'9/13'},
+  {t:'六番目の遺言',a:'灰田 透',ini:'灰',d:'五つの遺言はすべて嘘だった。六番目を書いたのは、死者自身だった——。',g:'ミステリー',like:'711',cm:'88',date:'9/10'},
+  {t:'機械仕掛けの神様',a:'藤堂 詩織',ini:'藤',d:'感情を持つよう設計された最後のAIは、なぜ祈ることを覚えたのか。',g:'SF',like:'544',cm:'37',date:'9/14'},
+  {t:'彼女は毒を綴る',a:'七尾 凛',ini:'七',d:'言葉に毒を込められる少女と、それを浴び続ける代筆屋の静かな記録。',g:'ファンタジー',like:'403',cm:'25',date:'9/8'},
+  {t:'最果ての図書館',a:'青柳 water',ini:'青',d:'世界の終わりで、司書だけが本を守り続けている。最後の来館者が訪れる日まで。',g:'文芸',like:'312',cm:'41',date:'9/12'},
+  {t:'火曜日の喫茶店',a:'遠野 珈琲',ini:'遠',d:'閉店間際の喫茶店に、毎週火曜だけ現れる客の話。',g:'現代ドラマ',like:'188',cm:'12',date:'9/14'},
+];
+document.getElementById('feed').innerHTML = feed.map((x,i)=>`
+  <article class="rounded-2xl hover:bg-neutral-50 p-4 transition">
+    <div class="flex gap-4">
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center gap-1.5 text-xs text-sub mb-1.5">
+          <span class="w-5 h-5 rounded-full bg-neutral-200 flex items-center justify-center text-[10px] font-bold text-sub">${x.ini}</span>
+          <span class="font-medium text-ink">${x.a}</span><span>・ ${x.date}</span>
+          <span class="text-xs px-2 py-0.5 rounded-full bg-neutral-100 ml-1">${x.g}</span>
+        </div>
+        <h3 class="font-bold text-lg leading-snug line-clamp-2 hover:opacity-80"><a href="#">${x.t}</a></h3>
+        <p class="text-sm text-sub mt-1.5 leading-relaxed line-clamp-2">${x.d}</p>
+        <div class="flex items-center gap-4 mt-3 text-xs text-sub">
+          <span class="inline-flex items-center gap-1">♡ ${x.like}</span>
+          <span class="inline-flex items-center gap-1">💬 ${x.cm}</span>
+          <button class="ml-auto text-sub hover:text-ink">···</button>
+        </div>
+      </div>
+      <a href="#" class="shrink-0 w-24 h-24 rounded-2xl bg-gradient-to-br ${cols[i%cols.length]} hidden sm:flex items-center justify-center">
+        <span class="font-mincho text-3xl font-bold">${x.t.slice(0,1)}</span>
+      </a>
+    </div>
+  </article>
+  ${i<feed.length-1?'<div class="h-px bg-neutral-100 mx-4"></div>':''}`).join('');
+
+const rank=[['神は勇者を選ばない','三日月 灯'],['星の降る夜、君と','白瀬 みなと'],['六番目の遺言','灰田 透'],['機械仕掛けの神様','藤堂 詩織'],['彼女は毒を綴る','七尾 凛']];
+document.getElementById('rank').innerHTML = rank.map((x,i)=>`
+  <li><a href="#" class="flex items-start gap-3 group">
+    <span class="font-black text-lg ${i<3?'text-note':'text-neutral-300'} w-5 shrink-0">${i+1}</span>
+    <div class="min-w-0"><p class="text-sm font-bold leading-snug line-clamp-2 group-hover:opacity-80">${x[0]}</p><p class="text-xs text-sub mt-0.5">${x[1]}</p></div>
+  </a></li>`).join('');
+
+const authors=[['三日月 灯','三','異世界ファンタジー'],['白瀬 みなと','白','恋愛'],['灰田 透','灰','ミステリー']];
+document.getElementById('authors').innerHTML = authors.map(x=>`
+  <li class="flex items-center gap-3">
+    <span class="w-10 h-10 rounded-full bg-gradient-to-br from-note to-emerald-400 text-white flex items-center justify-center font-bold shrink-0">${x[1]}</span>
+    <div class="min-w-0 flex-1"><p class="text-sm font-bold truncate">${x[0]}</p><p class="text-xs text-sub truncate">${x[2]}</p></div>
+    <button class="text-xs font-bold px-3 py-1.5 rounded-full border border-neutral-300 hover:bg-neutral-50 shrink-0">フォロー</button>
+  </li>`).join('');
+</script>
+</body>
+</html>
