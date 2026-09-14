@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="ja" class="scroll-smooth">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ReNovel — K1 Kiwa UI コンポーネント × 文芸トーン</title>
+<!--
+  これは「Kiwa UI (shadcn系) のコンポーネントで組んだらこう見える」を示すモック。
+  実装では各ブロックを Kiwa UI の <Button>/<Card>/<Badge>/<Tabs>/<Separator>/<Input>/<Avatar>/<Progress>
+  に置き換える。色・角丸は globals.css のデザイントークン (CSS変数) で管理し、ここでは
+  x1 の文芸トーン（温かい紙色＋くすんだ水色）を各トークンに割り当てている。
+-->
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  /* ===== デザイントークン（globals.css 相当）===== */
+  :root{
+    --background:#f7f3ea; --foreground:#2b2723;
+    --card:#fdfbf6; --card-foreground:#2b2723;
+    --popover:#fdfbf6; --popover-foreground:#2b2723;
+    --primary:#3d6480; --primary-foreground:#fbfaf7;
+    --secondary:#efe7d8; --secondary-foreground:#3a352f;
+    --muted:#efe7d8; --muted-foreground:#6f675d;
+    --accent:#e6edf1; --accent-foreground:#22303a;
+    --border:#e3dccd; --input:#e3dccd; --ring:#3d6480;
+    --gold:#b0842f;
+    --radius:0.375rem;
+  }
+  .dark{
+    --background:#211d18; --foreground:#ece4d6;
+    --card:#2a251f; --card-foreground:#ece4d6;
+    --popover:#2a251f; --popover-foreground:#ece4d6;
+    --primary:#83abc6; --primary-foreground:#181511;
+    --secondary:#332d25; --secondary-foreground:#ece4d6;
+    --muted:#332d25; --muted-foreground:#a99f8f;
+    --accent:#2f3a40; --accent-foreground:#ece4d6;
+    --border:#3a332a; --input:#3a332a; --ring:#83abc6;
+    --gold:#d0a24a;
+  }
+  ruby rt{ font-size:.5em; color:var(--primary); }
+</style>
+<script>
+tailwind.config = {
+  theme: { extend: {
+    fontFamily: { sans:['"Noto Sans JP"','sans-serif'], serif:['"Shippori Mincho"','serif'] },
+    colors: {
+      background:'var(--background)', foreground:'var(--foreground)',
+      card:'var(--card)', 'card-foreground':'var(--card-foreground)',
+      primary:'var(--primary)', 'primary-foreground':'var(--primary-foreground)',
+      secondary:'var(--secondary)', 'secondary-foreground':'var(--secondary-foreground)',
+      muted:'var(--muted)', 'muted-foreground':'var(--muted-foreground)',
+      accent:'var(--accent)', 'accent-foreground':'var(--accent-foreground)',
+      border:'var(--border)', input:'var(--input)', ring:'var(--ring)', gold:'var(--gold)',
+    },
+    borderRadius: { lg:'var(--radius)', md:'calc(var(--radius) - 2px)', sm:'calc(var(--radius) - 4px)' },
+  } }
+}
+</script>
+</head>
+<body class="bg-background text-foreground font-sans antialiased">
+
+<!-- ===== Header ===== -->
+<header class="border-b border-border sticky top-0 z-20 bg-background/85 backdrop-blur">
+  <div class="mx-auto max-w-6xl px-6 h-16 flex items-center gap-4">
+    <a href="#" class="font-serif text-2xl font-bold">Re<span class="text-primary">Novel</span></a>
+    <span class="hidden md:inline font-serif text-sm text-muted-foreground border-l border-border pl-4">読む人を、いちばん大切に。</span>
+
+    <div class="ml-auto flex items-center gap-2">
+      <!-- Input (component) -->
+      <div class="relative hidden sm:block">
+        <input placeholder="作品・作者・タグを検索"
+          class="h-9 w-64 rounded-md border border-input bg-card px-3 text-sm outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1 focus:ring-offset-background placeholder:text-muted-foreground">
+      </div>
+      <!-- Button variant=ghost size=icon : テーマ切替 -->
+      <button onclick="document.documentElement.classList.toggle('dark')" title="テーマ切替"
+        class="inline-flex items-center justify-center h-9 w-9 rounded-md hover:bg-accent hover:text-accent-foreground transition">◐</button>
+      <a href="#" class="hidden sm:inline text-sm text-muted-foreground hover:text-foreground px-2">ログイン</a>
+      <!-- Button variant=outline -->
+      <a href="#" class="inline-flex items-center h-9 px-4 rounded-md border border-input bg-card text-sm font-medium hover:bg-accent hover:text-accent-foreground transition">執筆する</a>
+      <!-- Button variant=default -->
+      <a href="#" class="inline-flex items-center h-9 px-4 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition">新規登録</a>
+    </div>
+  </div>
+  <!-- ジャンルナビ: Button variant=ghost の並び -->
+  <div class="border-t border-border">
+    <nav class="mx-auto max-w-6xl px-6 h-11 flex items-center gap-1 overflow-x-auto text-sm">
+      <a href="#" class="px-3 py-1.5 rounded-md bg-accent text-accent-foreground font-medium whitespace-nowrap">総合</a>
+      <a href="#" class="px-3 py-1.5 rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground whitespace-nowrap">恋愛</a>
+      <a href="#" class="px-3 py-1.5 rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground whitespace-nowrap">ファンタジー</a>
+      <a href="#" class="px-3 py-1.5 rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground whitespace-nowrap">文芸</a>
+      <a href="#" class="px-3 py-1.5 rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground whitespace-nowrap">SF</a>
+      <a href="#" class="px-3 py-1.5 rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground whitespace-nowrap">ミステリー</a>
+      <a href="#" class="px-3 py-1.5 rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground whitespace-nowrap">ホラー</a>
+      <a href="#" class="px-3 py-1.5 rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground whitespace-nowrap">歴史・時代</a>
+      <a href="#" class="px-3 py-1.5 rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground whitespace-nowrap">現代ドラマ</a>
+      <a href="#" class="px-3 py-1.5 rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground whitespace-nowrap">その他</a>
+    </nav>
+  </div>
+</header>
+
+<main class="mx-auto max-w-6xl px-6 py-6 space-y-6">
+
+  <!-- ===== 特集: Card ===== -->
+  <div class="rounded-lg border border-border bg-card text-card-foreground shadow-sm">
+    <div class="p-6 flex flex-col md:flex-row md:items-center gap-4">
+      <div class="flex-1">
+        <!-- Badge variant=secondary -->
+        <span class="inline-flex items-center rounded-md border border-transparent bg-secondary text-secondary-foreground px-2 py-0.5 text-xs font-medium">開催中 ・ FEATURED</span>
+        <h2 class="font-serif text-2xl font-bold mt-3">第1回 ReNovel 新人賞</h2>
+        <p class="text-sm text-muted-foreground mt-1">ジャンル不問・大賞100万円　／　締切まで 42 日　／　応募 312 作品</p>
+      </div>
+      <!-- Button variant=default -->
+      <a href="#" class="inline-flex items-center justify-center h-10 px-5 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 shrink-0">詳しく見る</a>
+    </div>
+  </div>
+
+  <div class="grid lg:grid-cols-[1fr_290px] gap-6">
+    <div class="min-w-0 space-y-6">
+
+      <!-- ===== ランキング: Card + Tabs ===== -->
+      <div class="rounded-lg border border-border bg-card text-card-foreground shadow-sm">
+        <div class="p-5 flex items-center justify-between gap-4 flex-wrap">
+          <h2 class="font-serif text-xl font-semibold">週間ランキング</h2>
+          <!-- Tabs > TabsList / TabsTrigger -->
+          <div class="inline-flex h-9 items-center rounded-md bg-muted p-1 text-muted-foreground text-sm">
+            <button class="px-3 py-1 rounded-sm bg-card text-foreground shadow-sm font-medium">総合</button>
+            <button class="px-3 py-1 rounded-sm hover:text-foreground">日間</button>
+            <button class="px-3 py-1 rounded-sm hover:text-foreground">週間</button>
+            <button class="px-3 py-1 rounded-sm hover:text-foreground">月間</button>
+          </div>
+        </div>
+        <!-- Separator -->
+        <div class="h-px bg-border"></div>
+        <ol id="rank"></ol>
+        <div class="h-px bg-border"></div>
+        <div class="p-3 text-center">
+          <!-- Button variant=ghost -->
+          <a href="#" class="inline-flex items-center h-8 px-3 rounded-md text-sm text-primary hover:bg-accent">ランキングをもっと見る（〜300位）→</a>
+        </div>
+      </div>
+
+      <!-- ===== 新着の更新: Card ===== -->
+      <div class="rounded-lg border border-border bg-card text-card-foreground shadow-sm">
+        <div class="p-5 pb-3 flex items-center justify-between">
+          <h2 class="font-serif text-lg font-semibold">新着の更新</h2>
+          <a href="#" class="text-sm text-primary hover:underline">もっと見る →</a>
+        </div>
+        <div class="h-px bg-border"></div>
+        <ul id="upd" class="divide-y divide-border"></ul>
+      </div>
+    </div>
+
+    <!-- ===== サイドバー ===== -->
+    <aside class="space-y-6">
+      <!-- 続きから読む: Card + Progress -->
+      <div class="rounded-lg border border-border bg-card text-card-foreground shadow-sm p-5">
+        <h3 class="font-serif text-base font-semibold mb-3">続きから読む</h3>
+        <div class="flex items-center gap-3">
+          <!-- Avatar -->
+          <span class="h-9 w-9 rounded-full bg-muted text-muted-foreground text-xs flex items-center justify-center font-medium shrink-0">神</span>
+          <div class="min-w-0">
+            <p class="font-serif text-sm truncate">神は勇者を選ばない</p>
+            <p class="text-xs text-muted-foreground">第18話 まで読了</p>
+          </div>
+        </div>
+        <!-- Progress -->
+        <div class="mt-3 h-2 rounded-full bg-secondary overflow-hidden"><div class="h-full w-[56%] bg-primary rounded-full"></div></div>
+      </div>
+
+      <!-- ランキング導線: Card -->
+      <div class="rounded-lg border border-border bg-card text-card-foreground shadow-sm p-5">
+        <h3 class="font-serif text-base font-semibold pb-2 border-b border-border mb-2">ランキング</h3>
+        <ul class="text-sm">
+          <li><a href="#" class="block py-1.5 text-muted-foreground hover:text-primary">日刊ランキング</a></li>
+          <li><a href="#" class="block py-1.5 text-muted-foreground hover:text-primary">週間ランキング</a></li>
+          <li><a href="#" class="block py-1.5 text-muted-foreground hover:text-primary">月間ランキング</a></li>
+          <li><a href="#" class="block py-1.5 text-muted-foreground hover:text-primary">年間・累計</a></li>
+          <li><a href="#" class="block py-1.5 text-muted-foreground hover:text-primary">完結済ランキング</a></li>
+        </ul>
+      </div>
+
+      <!-- ジャンル: Card + Badge(outline) -->
+      <div class="rounded-lg border border-border bg-card text-card-foreground shadow-sm p-5">
+        <h3 class="font-serif text-base font-semibold mb-3">ジャンルから探す</h3>
+        <div class="flex flex-wrap gap-1.5">
+          <a href="#" class="inline-flex items-center rounded-md border border-border px-2.5 py-1 text-xs text-foreground hover:bg-accent">恋愛</a>
+          <a href="#" class="inline-flex items-center rounded-md border border-border px-2.5 py-1 text-xs text-foreground hover:bg-accent">ファンタジー</a>
+          <a href="#" class="inline-flex items-center rounded-md border border-border px-2.5 py-1 text-xs text-foreground hover:bg-accent">文芸</a>
+          <a href="#" class="inline-flex items-center rounded-md border border-border px-2.5 py-1 text-xs text-foreground hover:bg-accent">SF</a>
+          <a href="#" class="inline-flex items-center rounded-md border border-border px-2.5 py-1 text-xs text-foreground hover:bg-accent">ミステリー</a>
+          <a href="#" class="inline-flex items-center rounded-md border border-border px-2.5 py-1 text-xs text-foreground hover:bg-accent">ホラー</a>
+          <a href="#" class="inline-flex items-center rounded-md border border-border px-2.5 py-1 text-xs text-foreground hover:bg-accent">歴史・時代</a>
+        </div>
+      </div>
+
+      <!-- 話題のタグ: Card + Badge(secondary) -->
+      <div class="rounded-lg border border-border bg-card text-card-foreground shadow-sm p-5">
+        <h3 class="font-serif text-base font-semibold mb-3">話題のタグ</h3>
+        <div class="flex flex-wrap gap-1.5 text-xs">
+          <a href="#" class="inline-flex items-center rounded-md bg-secondary text-secondary-foreground px-2.5 py-1 hover:opacity-80">#異世界転生</a>
+          <a href="#" class="inline-flex items-center rounded-md bg-secondary text-secondary-foreground px-2.5 py-1 hover:opacity-80">#切ない</a>
+          <a href="#" class="inline-flex items-center rounded-md bg-secondary text-secondary-foreground px-2.5 py-1 hover:opacity-80">#どんでん返し</a>
+          <a href="#" class="inline-flex items-center rounded-md bg-secondary text-secondary-foreground px-2.5 py-1 hover:opacity-80">#slow-life</a>
+        </div>
+      </div>
+
+      <!-- 読書設定プレビュー -->
+      <div class="rounded-lg border border-border bg-card text-card-foreground shadow-sm p-5">
+        <h3 class="font-serif text-base font-semibold mb-2">読みやすさは自由</h3>
+        <p class="font-serif text-[15px] leading-loose"><ruby>黄昏<rt>たそがれ</rt></ruby>が<ruby>稜線<rt>りょうせん</rt></ruby>を溶かしていく。</p>
+        <p class="text-xs text-muted-foreground mt-2">文字サイズ・行間・縦横・テーマを読者が調整できます。</p>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="border-t border-border">
+  <div class="mx-auto max-w-6xl px-6 py-8 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
+    <a href="#" class="font-serif text-lg font-bold text-foreground">Re<span class="text-primary">Novel</span></a>
+    <a href="#" class="hover:text-primary">ランキング</a><a href="#" class="hover:text-primary">新着</a>
+    <a href="#" class="hover:text-primary">ジャンル</a><a href="#" class="hover:text-primary">執筆する</a><a href="#" class="hover:text-primary">ヘルプ</a>
+  </div>
+</footer>
+
+<script>
+const rank=[
+  {t:'神は勇者を選ばない',a:'三日月 灯',g:'異世界ファンタジー',s:'連載中',d:'選ばれなかった少年が、選ばれた者たちの物語をその手で書き換えていく異世界群像劇。',tags:['#群像劇','#下剋上'],n:32,c:'28.4万',r:'4.8',b:'1.2万',u:'9/14'},
+  {t:'星の降る夜、君と',a:'白瀬 みなと',g:'恋愛・現代',s:'連載中',d:'余命一年の彼女と、天文部の最後の夏。言葉にできない距離を描く青春恋愛。',tags:['#青春','#切ない'],n:18,c:'9.2万',r:'4.9',b:'9,812',u:'9/13'},
+  {t:'六番目の遺言',a:'灰田 透',g:'ミステリー',s:'完結',d:'五つの遺言はすべて嘘だった。六番目を書いたのは、死者自身だった——。',tags:['#どんでん返し','#本格'],n:24,c:'15.6万',r:'4.7',b:'7,109',u:'9/10'},
+  {t:'機械仕掛けの神様',a:'藤堂 詩織',g:'SF',s:'連載中',d:'感情を持つよう設計された最後のAIは、なぜ祈ることを覚えたのか。',tags:['#AI','#静謐'],n:24,c:'9.2万',r:'4.7',b:'5,442',u:'9/14'},
+  {t:'彼女は毒を綴る',a:'七尾 凛',g:'ローファンタジー',s:'完結',d:'言葉に毒を込められる少女と、それを浴び続ける代筆屋の静かな記録。',tags:['#書簡体','#ダーク'],n:58,c:'21.7万',r:'4.6',b:'4,003',u:'9/08'},
+  {t:'最果ての図書館',a:'青柳 water',g:'文芸',s:'連載中',d:'世界の終わりで、司書だけが本を守り続けている。最後の来館者が訪れる日まで。',tags:['#静謐','#世界観'],n:11,c:'4.4万',r:'4.5',b:'3,120',u:'9/12'},
+];
+const statusBadge=(s)=> s==='連載中'
+  ? '<span class="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium" style="background:color-mix(in srgb,var(--primary) 14%,transparent);color:var(--primary)">連載中</span>'
+  : '<span class="inline-flex items-center rounded-md border border-border px-2 py-0.5 text-xs text-muted-foreground">完結</span>';
+document.getElementById('rank').innerHTML = rank.map((x,i)=>{
+  const num = i<3
+    ? `<span class="font-serif text-3xl font-bold text-primary w-10 text-center shrink-0">${i+1}</span>`
+    : `<span class="font-serif text-3xl font-bold text-muted-foreground/50 w-10 text-center shrink-0">${i+1}</span>`;
+  const border = i<rank.length-1 ? 'border-b border-border' : '';
+  return `<li class="flex gap-4 px-5 py-4 ${border} hover:bg-accent/40 transition">
+    ${num}
+    <div class="min-w-0">
+      <a href="#" class="font-serif text-lg font-semibold hover:text-primary">${x.t}</a>${statusBadge(x.s)}
+      <p class="text-sm text-muted-foreground mt-1">${x.d}</p>
+      <div class="flex flex-wrap items-center gap-2 mt-2">
+        ${x.tags.map(t=>`<a href="#" class="text-xs text-primary hover:underline">${t}</a>`).join('')}
+        <span class="text-xs text-muted-foreground">${x.g}</span>
+      </div>
+      <div class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-xs text-muted-foreground">
+        <span class="inline-flex items-center gap-1.5"><span class="h-5 w-5 rounded-full bg-muted text-[10px] flex items-center justify-center shrink-0">${x.a.slice(0,1)}</span>${x.a}</span>
+        <span class="text-gold">★${x.r}</span><span>ブックマーク ${x.b}</span><span>全${x.n}話・${x.c}字</span><span>更新 ${x.u}</span>
+      </div>
+    </div>
+  </li>`;
+}).join('');
+
+const upd=[
+  {t:'神は勇者を選ばない',e:'第32話「選ばれざる者の王」',d:'9/14 21:03'},
+  {t:'機械仕掛けの神様',e:'第24話「祈り」',d:'9/14 19:40'},
+  {t:'星の降る夜、君と',e:'第18話「流星群の夜に」',d:'9/13 22:50'},
+  {t:'最果ての図書館',e:'第11話「最後の来館者」',d:'9/12 08:12'},
+];
+document.getElementById('upd').innerHTML = upd.map(x=>`
+  <li class="px-5 py-3 flex items-center gap-3 hover:bg-accent/40">
+    <span class="text-xs text-muted-foreground shrink-0 w-16">${x.d}</span>
+    <a href="#" class="font-serif text-sm truncate hover:text-primary">${x.t}</a>
+    <span class="text-xs text-muted-foreground truncate hidden sm:inline">${x.e}</span>
+  </li>`).join('');
+</script>
+</body>
+</html>
