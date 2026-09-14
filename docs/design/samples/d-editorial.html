@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="ja" class="scroll-smooth">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ReNovel — 案D エディトリアル</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700;800&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  theme: { extend: {
+    fontFamily: { mincho:['"Shippori Mincho"','serif'], sans:['"Noto Sans JP"','sans-serif'] },
+    colors: { paper:'#faf8f4', ink:'#161311', vermilion:'#d1442f' }
+  } }
+}
+</script>
+<style> ruby rt{ font-size:.5em; color:#d1442f; } </style>
+</head>
+<body class="bg-paper text-ink font-sans antialiased">
+
+<!-- masthead -->
+<header class="border-b-2 border-ink">
+  <div class="mx-auto max-w-6xl px-6 py-4 flex items-center justify-between">
+    <div class="flex items-baseline gap-3">
+      <a href="#" class="font-mincho text-3xl font-800 tracking-tight">ReNovel</a>
+      <span class="hidden md:inline text-xs text-ink/50 border-l border-ink/20 pl-3">読まれ方まで、つくる。</span>
+    </div>
+    <nav class="hidden md:flex gap-6 text-sm font-medium">
+      <a href="#" class="hover:text-vermilion">特集</a>
+      <a href="#" class="hover:text-vermilion">ランキング</a>
+      <a href="#" class="hover:text-vermilion">新着</a>
+      <a href="#" class="hover:text-vermilion">執筆</a>
+    </nav>
+    <a href="#" class="text-sm font-bold border-2 border-ink px-4 py-1.5 hover:bg-ink hover:text-paper transition">はじめる</a>
+  </div>
+</header>
+
+<!-- hero: featured -->
+<section class="mx-auto max-w-6xl px-6 py-12 grid lg:grid-cols-12 gap-10 border-b border-ink/10">
+  <div class="lg:col-span-7">
+    <span class="inline-block text-xs font-bold tracking-widest text-vermilion mb-4">今週の特集 ─ FEATURED</span>
+    <h1 class="font-mincho text-5xl md:text-6xl font-700 leading-[1.1]">
+      神は勇者を<br>選ばない。
+    </h1>
+    <p class="mt-6 text-ink/70 leading-relaxed max-w-lg">
+      選ばれなかった少年が、選ばれた者たちの物語をその手で書き換えていく。
+      いま最も読まれている異世界群像劇を、第一話から。
+    </p>
+    <div class="mt-6 flex items-center gap-4 text-sm">
+      <span class="font-mincho font-600">三日月 灯</span>
+      <span class="text-ink/40">|</span>
+      <span class="text-ink/60">★4.8 ・ 12.4万PV ・ 全32話</span>
+    </div>
+    <a href="#" class="inline-block mt-8 bg-vermilion text-paper text-sm font-bold px-6 py-3 hover:bg-ink transition">第一話を読む →</a>
+  </div>
+  <!-- pull quote / reading sample -->
+  <div class="lg:col-span-5 lg:border-l lg:border-ink/10 lg:pl-10 flex flex-col justify-center">
+    <p class="font-mincho text-2xl leading-loose">
+      <ruby>黄昏<rt>たそがれ</rt></ruby>が<ruby>稜線<rt>りょうせん</rt></ruby>を溶かしていく。<br>
+      彼女は最後の頁をめくり、<br>《《もう戻れない》》のだと悟った。
+    </p>
+    <p class="mt-4 text-xs text-ink/40">── 第一話「星を待つ夜」より</p>
+  </div>
+</section>
+
+<!-- ranking grid -->
+<section class="mx-auto max-w-6xl px-6 py-14">
+  <div class="flex items-center justify-between border-b-2 border-ink pb-3 mb-8">
+    <h2 class="font-mincho text-2xl font-700">週間ランキング</h2>
+    <a href="#" class="text-sm font-bold hover:text-vermilion">一覧 →</a>
+  </div>
+  <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-10">
+    <article class="group">
+      <div class="flex items-baseline gap-3 border-b border-ink/10 pb-2 mb-3">
+        <span class="font-mincho text-4xl font-800 text-vermilion">1</span>
+        <span class="text-[11px] text-ink/50">異世界 / 群像劇</span>
+      </div>
+      <h3 class="font-mincho text-xl font-600 leading-snug group-hover:text-vermilion">神は勇者を選ばない</h3>
+      <p class="mt-2 text-sm text-ink/60 leading-relaxed">選ばれなかった少年の反逆。</p>
+      <p class="mt-3 text-xs text-ink/40">三日月 灯 ・ ★4.8</p>
+    </article>
+    <article class="group">
+      <div class="flex items-baseline gap-3 border-b border-ink/10 pb-2 mb-3">
+        <span class="font-mincho text-4xl font-800 text-ink/30">2</span>
+        <span class="text-[11px] text-ink/50">恋愛 / 現代</span>
+      </div>
+      <h3 class="font-mincho text-xl font-600 leading-snug group-hover:text-vermilion">星の降る夜、君と</h3>
+      <p class="mt-2 text-sm text-ink/60 leading-relaxed">最後の夏の、天文部の記録。</p>
+      <p class="mt-3 text-xs text-ink/40">白瀬 みなと ・ ★4.9</p>
+    </article>
+    <article class="group">
+      <div class="flex items-baseline gap-3 border-b border-ink/10 pb-2 mb-3">
+        <span class="font-mincho text-4xl font-800 text-ink/30">3</span>
+        <span class="text-[11px] text-ink/50">ミステリー</span>
+      </div>
+      <h3 class="font-mincho text-xl font-600 leading-snug group-hover:text-vermilion">六番目の遺言</h3>
+      <p class="mt-2 text-sm text-ink/60 leading-relaxed">遺言はすべて嘘だった。</p>
+      <p class="mt-3 text-xs text-ink/40">灰田 透 ・ ★4.7</p>
+    </article>
+    <article class="group">
+      <div class="flex items-baseline gap-3 border-b border-ink/10 pb-2 mb-3">
+        <span class="font-mincho text-4xl font-800 text-ink/30">4</span>
+        <span class="text-[11px] text-ink/50">SF</span>
+      </div>
+      <h3 class="font-mincho text-xl font-600 leading-snug group-hover:text-vermilion">機械仕掛けの神様</h3>
+      <p class="mt-2 text-sm text-ink/60 leading-relaxed">祈ることを覚えたAIの話。</p>
+      <p class="mt-3 text-xs text-ink/40">藤堂 詩織 ・ ★4.7</p>
+    </article>
+  </div>
+</section>
+
+<!-- editorial band -->
+<section class="bg-ink text-paper">
+  <div class="mx-auto max-w-6xl px-6 py-16 grid md:grid-cols-3 gap-10">
+    <div><h3 class="font-mincho text-xl font-600 mb-2 text-vermilion">01 読む</h3><p class="text-sm text-paper/70 leading-relaxed">文字サイズも行間も自由。縦書きにも対応した、本文に集中できる読書画面。</p></div>
+    <div><h3 class="font-mincho text-xl font-600 mb-2 text-vermilion">02 書く</h3><p class="text-sm text-paper/70 leading-relaxed">記法を意識させないエディタ。自動保存とリビジョンで、安心して書ける。</p></div>
+    <div><h3 class="font-mincho text-xl font-600 mb-2 text-vermilion">03 知る</h3><p class="text-sm text-paper/70 leading-relaxed">読了率・離脱・流入。作者のためのGoogle Analytics級の分析。</p></div>
+  </div>
+</section>
+
+<footer class="border-t-2 border-ink">
+  <div class="mx-auto max-w-6xl px-6 py-8 flex justify-between items-center text-sm text-ink/50">
+    <span class="font-mincho text-lg font-700 text-ink">ReNovel</span>
+    <span>読む人を、いちばん大切に。</span>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="ja" class="scroll-smooth">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ReNovel — 案C ダークフォーカス</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  theme: { extend: {
+    fontFamily: { sans:['"Noto Sans JP"','sans-serif'], serif:['"Noto Serif JP"','serif'], mono:['"JetBrains Mono"','monospace'] },
+    colors: { ink:'#0b0f14', panel:'#121820', edge:'#1e2732', cyan:'#22d3ee', cyandim:'#0891b2' }
+  } }
+}
+</script>
+<style>
+  ruby rt{ font-size:.55em; color:#22d3ee; }
+  .glow{ box-shadow:0 0 0 1px #1e2732, 0 20px 60px -20px rgba(34,211,238,.15); }
+  .grid-bg{ background-image:radial-gradient(#1e2732 1px,transparent 1px); background-size:22px 22px; }
+</style>
+</head>
+<body class="bg-ink text-slate-200 font-sans antialiased">
+
+<header class="border-b border-edge sticky top-0 z-10 bg-ink/80 backdrop-blur">
+  <div class="mx-auto max-w-6xl px-6 h-16 flex items-center justify-between">
+    <a href="#" class="font-bold tracking-widest">Re<span class="text-cyan">Novel</span></a>
+    <div class="hidden md:flex items-center gap-6 text-sm text-slate-400">
+      <a href="#" class="hover:text-cyan">Discover</a>
+      <a href="#" class="hover:text-cyan">Ranking</a>
+      <a href="#" class="hover:text-cyan">Analytics</a>
+      <a href="#" class="hover:text-cyan">Write</a>
+    </div>
+    <a href="#" class="text-sm px-4 py-2 rounded-md bg-cyan text-ink font-semibold hover:bg-white transition">Start</a>
+  </div>
+</header>
+
+<!-- hero -->
+<section class="grid-bg border-b border-edge">
+  <div class="mx-auto max-w-6xl px-6 py-24 text-center">
+    <p class="font-mono text-xs text-cyan tracking-[0.3em] mb-6">READER_FIRST // NIGHT_MODE</p>
+    <h1 class="text-4xl md:text-6xl font-bold leading-tight">
+      夜に読むための、<span class="text-cyan">物語</span>。
+    </h1>
+    <p class="mt-6 text-slate-400 max-w-xl mx-auto leading-relaxed">
+      目にやさしいダーク基調。本文だけに集中できる読書画面と、作者のための精緻な分析。
+    </p>
+    <div class="mt-10 flex justify-center gap-3">
+      <a href="#" class="px-6 py-3 rounded-md bg-cyan text-ink font-semibold text-sm hover:bg-white">読みはじめる</a>
+      <a href="#" class="px-6 py-3 rounded-md border border-edge text-sm hover:border-cyan">執筆する</a>
+    </div>
+  </div>
+</section>
+
+<!-- realtime + ranking -->
+<section class="mx-auto max-w-6xl px-6 py-16 grid lg:grid-cols-3 gap-6">
+  <!-- realtime widget -->
+  <div class="rounded-xl bg-panel border border-edge p-6 glow">
+    <div class="flex items-center gap-2 text-xs text-slate-400 mb-4"><span class="w-2 h-2 rounded-full bg-cyan animate-pulse"></span> リアルタイム</div>
+    <p class="text-4xl font-bold">23<span class="text-base text-slate-500 font-normal ml-2">人が読書中</span></p>
+    <ul class="mt-5 space-y-2 font-mono text-sm text-slate-400">
+      <li class="flex justify-between"><span>第1話</span><span class="text-cyan">5</span></li>
+      <li class="flex justify-between"><span>第8話</span><span class="text-cyan">7</span></li>
+      <li class="flex justify-between"><span>第14話</span><span class="text-cyan">8</span></li>
+    </ul>
+  </div>
+  <!-- ranking list -->
+  <div class="lg:col-span-2 rounded-xl bg-panel border border-edge p-6">
+    <div class="flex items-center justify-between mb-5">
+      <h2 class="font-bold">今夜の人気作</h2><a href="#" class="text-xs text-cyan hover:underline">more →</a>
+    </div>
+    <ul class="divide-y divide-edge">
+      <li class="py-4 flex items-center gap-4 group">
+        <span class="font-mono text-cyan text-lg w-6">01</span>
+        <div class="flex-1"><h3 class="font-semibold group-hover:text-cyan">神は勇者を選ばない</h3><p class="text-xs text-slate-500 mt-0.5">異世界 · 群像劇 · 三日月 灯</p></div>
+        <span class="font-mono text-xs text-slate-500">★4.8</span>
+      </li>
+      <li class="py-4 flex items-center gap-4 group">
+        <span class="font-mono text-slate-500 text-lg w-6">02</span>
+        <div class="flex-1"><h3 class="font-semibold group-hover:text-cyan">星の降る夜、君と</h3><p class="text-xs text-slate-500 mt-0.5">恋愛 · 現代 · 白瀬 みなと</p></div>
+        <span class="font-mono text-xs text-slate-500">★4.9</span>
+      </li>
+      <li class="py-4 flex items-center gap-4 group">
+        <span class="font-mono text-slate-500 text-lg w-6">03</span>
+        <div class="flex-1"><h3 class="font-semibold group-hover:text-cyan">機械仕掛けの神様</h3><p class="text-xs text-slate-500 mt-0.5">SF · 藤堂 詩織</p></div>
+        <span class="font-mono text-xs text-slate-500">★4.7</span>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- reading preview -->
+<section class="mx-auto max-w-3xl px-6 pb-20">
+  <div class="rounded-xl bg-panel border border-edge p-10">
+    <p class="font-mono text-xs text-cyan mb-6">第一話 / 星を待つ夜</p>
+    <p class="font-serif text-lg leading-loose text-slate-100">
+      <ruby>黄昏<rt>たそがれ</rt></ruby>が<ruby>稜線<rt>りょうせん</rt></ruby>を溶かしていく。彼女は最後の頁をめくり、
+      《《もう戻れない》》のだと静かに悟った。暗闇のなかで、文字だけが淡く光っている。
+    </p>
+  </div>
+</section>
+
+<footer class="border-t border-edge">
+  <div class="mx-auto max-w-6xl px-6 py-10 flex justify-between text-sm text-slate-500">
+    <span class="font-bold text-slate-300">Re<span class="text-cyan">Novel</span></span>
+    <span class="font-mono text-xs">read in the dark.</span>
+  </div>
+</footer>
+
+</body>
+</html>
