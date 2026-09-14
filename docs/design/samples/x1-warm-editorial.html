@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ReNovel — X1 文芸エディトリアル（Tailwind不使用・手書きCSS）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  /* ===== デザイントークン（CSS変数）===== */
+  :root{
+    --paper:#f7f3ea;         /* 温かみのある紙 */
+    --paper-2:#fdfbf6;       /* カード面 */
+    --ink:#2b2723;           /* 文字 */
+    --sub:#6f675d;           /* 副次テキスト */
+    --line:#e3dccd;          /* 罫線（細く淡く）*/
+    --accent:#3d6480;        /* くすんだ水色（彩度を抑える）*/
+    --accent-weak:#eef2f3;
+    --gold:#b0842f;          /* 星などの差し色 */
+    --serif:"Shippori Mincho", serif;
+    --sans:"Noto Sans JP", system-ui, sans-serif;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{ background:var(--paper); color:var(--ink); font-family:var(--sans); font-size:14px; line-height:1.7; -webkit-font-smoothing:antialiased; }
+  a{ color:inherit; text-decoration:none; }
+  .wrap{ max-width:1000px; margin:0 auto; padding:0 24px; }
+  ruby rt{ font-size:.5em; color:var(--accent); }
+
+  /* ===== マストヘッド（フラットな色帯をやめ、余白と罫線で構成）===== */
+  .masthead{ border-bottom:1px solid var(--line); }
+  .masthead .row{ display:flex; align-items:center; gap:24px; height:72px; }
+  .logo{ font-family:var(--serif); font-weight:700; font-size:26px; letter-spacing:.02em; }
+  .logo span{ color:var(--accent); }
+  .tagline{ font-family:var(--serif); color:var(--sub); font-size:13px; border-left:1px solid var(--line); padding-left:16px; }
+  .mast-actions{ margin-left:auto; display:flex; align-items:center; gap:16px; font-size:13px; color:var(--sub); }
+  .btn{ font-family:var(--sans); font-size:13px; padding:7px 16px; border:1px solid var(--accent); color:var(--accent); background:transparent; cursor:pointer; }
+  .btn-fill{ background:var(--accent); color:#fff; border-color:var(--accent); }
+  .btn:hover{ opacity:.9; }
+
+  /* ジャンルナビ：テキスト＋下線ホバー（pill/塗りをやめる）*/
+  .genre{ border-bottom:1px solid var(--line); }
+  .genre .row{ display:flex; gap:22px; height:44px; align-items:center; overflow-x:auto; font-size:13px; }
+  .genre a{ color:var(--sub); white-space:nowrap; padding-bottom:2px; border-bottom:2px solid transparent; }
+  .genre a:hover{ color:var(--ink); border-color:var(--accent); }
+  .genre a.on{ color:var(--ink); border-color:var(--accent); font-weight:700; }
+
+  /* ===== レイアウト ===== */
+  .grid{ display:grid; grid-template-columns:1fr 260px; gap:40px; padding:32px 0; }
+  @media (max-width:820px){ .grid{ grid-template-columns:1fr; } }
+
+  .sec-title{ font-family:var(--serif); font-size:20px; font-weight:600; display:flex; align-items:baseline; gap:12px; margin-bottom:4px; }
+  .sec-title .en{ font-family:var(--sans); font-size:11px; letter-spacing:.2em; color:var(--accent); text-transform:uppercase; }
+  .rule{ height:1px; background:var(--line); margin:14px 0 4px; }
+
+  /* ランキング：枠で囲まず、罫線区切りの一覧。番号は明朝で大きく */
+  .rank{ list-style:none; }
+  .rank li{ display:flex; gap:18px; padding:18px 0; border-bottom:1px solid var(--line); }
+  .rank .no{ font-family:var(--serif); font-size:30px; font-weight:700; color:var(--accent); width:44px; text-align:center; line-height:1.2; flex:none; }
+  .rank .no.small{ color:#c4bcab; }
+  .rank .title{ font-family:var(--serif); font-size:19px; font-weight:600; }
+  .rank a.title:hover{ color:var(--accent); }
+  .badge{ font-size:11px; padding:1px 8px; border:1px solid var(--line); color:var(--sub); margin-left:8px; vertical-align:middle; }
+  .desc{ color:var(--sub); font-size:13px; margin-top:4px; }
+  .tags{ margin-top:7px; display:flex; flex-wrap:wrap; gap:8px; }
+  .tags a{ font-size:11px; color:var(--accent); }
+  .tags a:hover{ text-decoration:underline; }
+  .meta{ margin-top:8px; font-size:12px; color:var(--sub); display:flex; flex-wrap:wrap; gap:14px; }
+  .meta .star{ color:var(--gold); }
+  .more{ display:inline-block; margin-top:16px; font-size:13px; color:var(--accent); border-bottom:1px solid var(--accent); padding-bottom:1px; }
+
+  /* サイドバー：見出しは明朝、リンクは行間広め */
+  aside section{ margin-bottom:30px; }
+  aside h2{ font-family:var(--serif); font-size:16px; font-weight:600; padding-bottom:8px; border-bottom:1px solid var(--line); margin-bottom:10px; }
+  aside ul{ list-style:none; }
+  aside li a{ display:block; padding:5px 0; color:var(--sub); font-size:13px; }
+  aside li a:hover{ color:var(--accent); }
+  .sidecols{ columns:2; }
+  .quote{ font-family:var(--serif); font-size:16px; line-height:2; background:var(--paper-2); border:1px solid var(--line); padding:18px; }
+
+  /* 特集：塗りのバナーでなく、罫で囲った静かな告知 */
+  .feature{ border:1px solid var(--line); background:var(--paper-2); padding:22px 24px; display:flex; gap:24px; align-items:center; }
+  .feature .label{ font-family:var(--sans); font-size:11px; letter-spacing:.2em; color:var(--accent); }
+  .feature h3{ font-family:var(--serif); font-size:22px; font-weight:700; margin-top:6px; }
+  .feature p{ color:var(--sub); font-size:13px; margin-top:4px; }
+  .feature .cta{ margin-left:auto; flex:none; }
+
+  footer{ border-top:1px solid var(--line); margin-top:20px; }
+  footer .row{ display:flex; flex-wrap:wrap; gap:24px; padding:28px 0; color:var(--sub); font-size:13px; align-items:center; }
+  footer .logo{ font-size:18px; }
+</style>
+</head>
+<body>
+
+<!-- マストヘッド -->
+<header class="masthead">
+  <div class="wrap row">
+    <a href="#" class="logo">Re<span>Novel</span></a>
+    <span class="tagline">読む人を、いちばん大切に。</span>
+    <div class="mast-actions">
+      <a href="#">ログイン</a>
+      <a href="#" class="btn">執筆する</a>
+      <a href="#" class="btn btn-fill">新規登録</a>
+    </div>
+  </div>
+</header>
+
+<nav class="genre">
+  <div class="wrap row">
+    <a href="#" class="on">総合</a><a href="#">恋愛</a><a href="#">ファンタジー</a><a href="#">文芸</a>
+    <a href="#">SF</a><a href="#">ミステリー</a><a href="#">ホラー</a><a href="#">歴史・時代</a><a href="#">現代ドラマ</a><a href="#">その他</a>
+  </div>
+</nav>
+
+<div class="wrap">
+  <!-- 特集（静かな告知）-->
+  <div class="feature" style="margin-top:32px;">
+    <div>
+      <div class="label">FEATURED ─ 開催中</div>
+      <h3>第1回 ReNovel 新人賞</h3>
+      <p>ジャンル不問・大賞100万円　／　締切まで 42 日　／　応募 312 作品</p>
+    </div>
+    <a href="#" class="btn cta">詳しく見る</a>
+  </div>
+</div>
+
+<div class="wrap grid">
+  <!-- 本文：ランキング -->
+  <main>
+    <div class="sec-title">週間ランキング <span class="en">Weekly Ranking</span></div>
+    <div class="rule"></div>
+    <ol class="rank" id="rank"></ol>
+    <a href="#" class="more">ランキングをもっと見る（〜300位）</a>
+
+    <div class="sec-title" style="margin-top:40px;">新着の更新 <span class="en">Updates</span></div>
+    <div class="rule"></div>
+    <ol class="rank" id="upd" style="font-family:var(--sans)"></ol>
+  </main>
+
+  <!-- サイドバー -->
+  <aside>
+    <section>
+      <h2>続きから読む</h2>
+      <p style="font-family:var(--serif); font-size:16px;">神は勇者を選ばない</p>
+      <p style="color:var(--sub); font-size:12px; margin-top:2px;">第18話まで読了</p>
+    </section>
+    <section>
+      <h2>ランキング</h2>
+      <ul>
+        <li><a href="#">日刊ランキング</a></li><li><a href="#">週間ランキング</a></li>
+        <li><a href="#">月間ランキング</a></li><li><a href="#">年間・累計</a></li>
+        <li><a href="#">完結済ランキング</a></li>
+      </ul>
+    </section>
+    <section>
+      <h2>ジャンルから探す</h2>
+      <ul class="sidecols">
+        <li><a href="#">恋愛</a></li><li><a href="#">ファンタジー</a></li><li><a href="#">文芸</a></li><li><a href="#">SF</a></li>
+        <li><a href="#">ミステリー</a></li><li><a href="#">ホラー</a></li><li><a href="#">歴史・時代</a></li><li><a href="#">現代ドラマ</a></li>
+      </ul>
+    </section>
+    <section>
+      <h2>読みやすさは自由</h2>
+      <p class="quote"><ruby>黄昏<rt>たそがれ</rt></ruby>が<ruby>稜線<rt>りょうせん</rt></ruby>を溶かしていく。</p>
+      <p style="color:var(--sub); font-size:12px; margin-top:8px;">文字サイズ・行間・縦横・テーマを読者が調整できます。</p>
+    </section>
+  </aside>
+</div>
+
+<footer>
+  <div class="wrap row">
+    <a href="#" class="logo">Re<span>Novel</span></a>
+    <a href="#">ランキング</a><a href="#">新着</a><a href="#">ジャンル</a><a href="#">執筆する</a><a href="#">ヘルプ</a>
+  </div>
+</footer>
+
+<script>
+const rank=[
+  {t:'神は勇者を選ばない',a:'三日月 灯',g:'異世界ファンタジー',s:'連載中',d:'選ばれなかった少年が、選ばれた者たちの物語をその手で書き換えていく異世界群像劇。',tags:['#群像劇','#下剋上'],n:32,c:'28.4万',r:'4.8',b:'1.2万',u:'9/14'},
+  {t:'星の降る夜、君と',a:'白瀬 みなと',g:'恋愛・現代',s:'連載中',d:'余命一年の彼女と、天文部の最後の夏。言葉にできない距離を描く青春恋愛。',tags:['#青春','#切ない'],n:18,c:'9.2万',r:'4.9',b:'9,812',u:'9/13'},
+  {t:'六番目の遺言',a:'灰田 透',g:'ミステリー',s:'完結',d:'五つの遺言はすべて嘘だった。六番目を書いたのは、死者自身だった——。',tags:['#どんでん返し','#本格'],n:24,c:'15.6万',r:'4.7',b:'7,109',u:'9/10'},
+  {t:'機械仕掛けの神様',a:'藤堂 詩織',g:'SF',s:'連載中',d:'感情を持つよう設計された最後のAIは、なぜ祈ることを覚えたのか。',tags:['#AI','#静謐'],n:24,c:'9.2万',r:'4.7',b:'5,442',u:'9/14'},
+  {t:'彼女は毒を綴る',a:'七尾 凛',g:'ローファンタジー',s:'完結',d:'言葉に毒を込められる少女と、それを浴び続ける代筆屋の静かな記録。',tags:['#書簡体','#ダーク'],n:58,c:'21.7万',r:'4.6',b:'4,003',u:'9/08'},
+  {t:'最果ての図書館',a:'青柳 water',g:'文芸',s:'連載中',d:'世界の終わりで、司書だけが本を守り続けている。最後の来館者が訪れる日まで。',tags:['#静謐','#世界観'],n:11,c:'4.4万',r:'4.5',b:'3,120',u:'9/12'},
+];
+document.getElementById('rank').innerHTML = rank.map((x,i)=>`
+  <li>
+    <div class="no ${i>=3?'small':''}">${i+1}</div>
+    <div>
+      <a href="#" class="title">${x.t}</a><span class="badge">${x.s}</span>
+      <div class="desc">${x.d}</div>
+      <div class="tags">${x.tags.map(t=>`<a href="#">${t}</a>`).join('')}<span style="color:var(--sub);font-size:11px;">${x.g}</span></div>
+      <div class="meta"><span>${x.a}</span><span class="star">★${x.r}</span><span>ブックマーク ${x.b}</span><span>全${x.n}話・${x.c}字</span><span>更新 ${x.u}</span></div>
+    </div>
+  </li>`).join('');
+
+const upd=[
+  {t:'神は勇者を選ばない',e:'第32話「選ばれざる者の王」',d:'9/14 21:03'},
+  {t:'機械仕掛けの神様',e:'第24話「祈り」',d:'9/14 19:40'},
+  {t:'星の降る夜、君と',e:'第18話「流星群の夜に」',d:'9/13 22:50'},
+];
+document.getElementById('upd').innerHTML = upd.map(x=>`
+  <li style="padding:12px 0;">
+    <div class="no small" style="font-size:13px;font-family:var(--sans);width:64px;color:var(--sub);">${x.d}</div>
+    <div><a href="#" class="title" style="font-family:var(--serif);font-size:15px;">${x.t}</a><div class="desc">${x.e}</div></div>
+  </li>`).join('');
+</script>
+</body>
+</html>
