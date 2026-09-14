@@ -33,7 +33,7 @@ tailwind.config = {
     </nav>
     <div class="ml-auto flex items-center gap-3 text-xs">
       <a href="#" class="hover:underline">ログイン</a>
-      <a href="#" class="bg-white/15 rounded px-2 py-1 hover:bg-white/25">新規登録</a>
+      <a href="#" class="bg-white/15 rounded-none px-2 py-1 hover:bg-white/25">新規登録</a>
     </div>
   </div>
   <div style="background:#1f9d6b">
@@ -49,8 +49,8 @@ tailwind.config = {
 <!-- 検索 -->
 <div class="bg-white border-b border-line">
   <div class="mx-auto max-w-6xl px-3 py-2 flex gap-2 items-center">
-    <input placeholder="キーワード" class="flex-1 max-w-md border border-line rounded px-2 py-1 text-xs focus:outline-none focus:border-brand">
-    <button class="text-xs bg-brand text-white rounded px-3 py-1 hover:bg-brand-700">検索</button>
+    <input placeholder="キーワード" class="flex-1 max-w-md border border-line rounded-none px-2 py-1 text-xs focus:outline-none focus:border-brand">
+    <button class="text-xs bg-brand text-white rounded-none px-3 py-1 hover:bg-brand-700">検索</button>
     <span class="text-xs text-sub ml-2 hidden sm:inline">絞り込み: <a class="n" href="#">連載中</a>・<a class="n" href="#">完結済</a>・<a class="n" href="#">文字数</a>・<a class="n" href="#">更新日</a></span>
   </div>
 </div>
@@ -68,47 +68,72 @@ tailwind.config = {
   </div>
 </div>
 
-<main class="mx-auto max-w-6xl px-3 py-4 grid lg:grid-cols-[1fr_260px] gap-5">
+<main class="mx-auto max-w-6xl px-3 py-4 grid lg:grid-cols-[1fr_260px] gap-4">
 
   <div class="min-w-0 space-y-5">
     <!-- 順位表 -->
     <div>
       <div class="flex items-center gap-1 mb-2 text-xs">
-        <button class="px-3 py-1.5 rounded-t bg-white border border-line border-b-white font-bold text-brand-700 -mb-px">総合</button>
+        <button class="px-3 py-1.5 rounded-none bg-white border border-line border-b-white font-bold text-brand-700 -mb-px">総合</button>
         <button class="px-3 py-1.5 text-sub hover:text-ink">日間</button>
         <button class="px-3 py-1.5 text-sub hover:text-ink">週間</button>
         <button class="px-3 py-1.5 text-sub hover:text-ink">月間</button>
         <button class="px-3 py-1.5 text-sub hover:text-ink">四半期</button>
         <span class="ml-auto text-sub">2026/09/14 更新</span>
       </div>
-      <div class="bg-white border border-line rounded-b rounded-tr">
+      <div class="bg-white border border-line rounded-none rounded-none">
         <table class="w-full">
           <thead><tr class="text-xs text-sub border-b border-line bg-paper/60"><th class="text-center font-medium py-2 w-10">順位</th><th class="text-left font-medium py-2">作品</th><th class="text-right font-medium py-2 pr-3 w-24 hidden sm:table-cell">ポイント</th></tr></thead>
           <tbody>
             <tr class="border-b border-line hover:bg-brand-50/50 align-top">
-              <td class="text-center py-3"><span class="inline-block w-6 h-6 leading-6 rounded bg-brand text-white font-bold text-xs">1</span></td>
-              <td class="py-3 pr-2"><a href="#" class="n font-bold text-[14px]">神は勇者を選ばない</a><span class="text-[11px] text-white bg-brand rounded px-1 ml-1 align-middle">連載中</span><p class="text-sub mt-0.5 line-clamp-1">選ばれなかった少年が、選ばれた者たちの物語を書き換えていく異世界群像劇。</p><p class="text-[11px] text-sub mt-1"><a class="n" href="#">三日月 灯</a> ／ 異世界〔ファンタジー〕 ／ 全32話 28.4万字 ／ <span class="text-amber-600">★4.8</span> ／ ブックマーク 12,043 ／ 最終 09/14</p></td>
+              <td class="text-center py-3"><span class="inline-block w-6 h-6 leading-6 rounded-none bg-brand text-white font-bold text-xs">1</span></td>
+              <td class="py-3 pr-2"><a href="#" class="n font-bold text-[14px]">神は勇者を選ばない</a><span class="text-[11px] text-white bg-brand rounded-none px-1 ml-1 align-middle">連載中</span><p class="text-sub mt-0.5 line-clamp-1">選ばれなかった少年が、選ばれた者たちの物語を書き換えていく異世界群像劇。</p><p class="text-[11px] text-sub mt-1"><a class="n" href="#">三日月 灯</a> ／ 異世界〔ファンタジー〕 ／ 全32話 28.4万字 ／ <span class="text-amber-600">★4.8</span> ／ ブックマーク 12,043 ／ 最終 09/14</p></td>
               <td class="text-right py-3 pr-3 font-bold hidden sm:table-cell">184,220<span class="block text-[10px] text-sub font-normal">pt</span></td>
             </tr>
             <tr class="border-b border-line hover:bg-brand-50/50 align-top">
-              <td class="text-center py-3"><span class="inline-block w-6 h-6 leading-6 rounded bg-slate-400 text-white font-bold text-xs">2</span></td>
-              <td class="py-3 pr-2"><a href="#" class="n font-bold text-[14px]">星の降る夜、君と</a><span class="text-[11px] text-white bg-brand rounded px-1 ml-1 align-middle">連載中</span><p class="text-sub mt-0.5 line-clamp-1">余命一年の彼女と、天文部の最後の夏。切ない青春恋愛。</p><p class="text-[11px] text-sub mt-1"><a class="n" href="#">白瀬 みなと</a> ／ 恋愛〔現代〕 ／ 全18話 9.2万字 ／ <span class="text-amber-600">★4.9</span> ／ ブックマーク 9,812 ／ 最終 09/13</p></td>
+              <td class="text-center py-3"><span class="inline-block w-6 h-6 leading-6 rounded-none bg-slate-400 text-white font-bold text-xs">2</span></td>
+              <td class="py-3 pr-2"><a href="#" class="n font-bold text-[14px]">星の降る夜、君と</a><span class="text-[11px] text-white bg-brand rounded-none px-1 ml-1 align-middle">連載中</span><p class="text-sub mt-0.5 line-clamp-1">余命一年の彼女と、天文部の最後の夏。切ない青春恋愛。</p><p class="text-[11px] text-sub mt-1"><a class="n" href="#">白瀬 みなと</a> ／ 恋愛〔現代〕 ／ 全18話 9.2万字 ／ <span class="text-amber-600">★4.9</span> ／ ブックマーク 9,812 ／ 最終 09/13</p></td>
               <td class="text-right py-3 pr-3 font-bold hidden sm:table-cell">171,540<span class="block text-[10px] text-sub font-normal">pt</span></td>
             </tr>
             <tr class="border-b border-line hover:bg-brand-50/50 align-top">
-              <td class="text-center py-3"><span class="inline-block w-6 h-6 leading-6 rounded bg-amber-600 text-white font-bold text-xs">3</span></td>
-              <td class="py-3 pr-2"><a href="#" class="n font-bold text-[14px]">六番目の遺言</a><span class="text-[11px] text-sub bg-slate-100 rounded px-1 ml-1 align-middle">完結</span><p class="text-sub mt-0.5 line-clamp-1">五つの遺言はすべて嘘だった。六番目を書いたのは、死者自身。</p><p class="text-[11px] text-sub mt-1"><a class="n" href="#">灰田 透</a> ／ ミステリー ／ 全24話 15.6万字 ／ <span class="text-amber-600">★4.7</span> ／ ブックマーク 7,109 ／ 最終 09/10</p></td>
+              <td class="text-center py-3"><span class="inline-block w-6 h-6 leading-6 rounded-none bg-amber-600 text-white font-bold text-xs">3</span></td>
+              <td class="py-3 pr-2"><a href="#" class="n font-bold text-[14px]">六番目の遺言</a><span class="text-[11px] text-sub bg-slate-100 rounded-none px-1 ml-1 align-middle">完結</span><p class="text-sub mt-0.5 line-clamp-1">五つの遺言はすべて嘘だった。六番目を書いたのは、死者自身。</p><p class="text-[11px] text-sub mt-1"><a class="n" href="#">灰田 透</a> ／ ミステリー ／ 全24話 15.6万字 ／ <span class="text-amber-600">★4.7</span> ／ ブックマーク 7,109 ／ 最終 09/10</p></td>
               <td class="text-right py-3 pr-3 font-bold hidden sm:table-cell">150,988<span class="block text-[10px] text-sub font-normal">pt</span></td>
             </tr>
             <tr class="border-b border-line hover:bg-brand-50/50 align-top">
               <td class="text-center py-3 text-sub font-bold">4</td>
-              <td class="py-3 pr-2"><a href="#" class="n font-bold text-[14px]">機械仕掛けの神様</a><span class="text-[11px] text-white bg-brand rounded px-1 ml-1 align-middle">連載中</span><p class="text-[11px] text-sub mt-1"><a class="n" href="#">藤堂 詩織</a> ／ SF ／ 全24話 9.2万字 ／ <span class="text-amber-600">★4.7</span> ／ ブックマーク 5,442 ／ 最終 09/14</p></td>
+              <td class="py-3 pr-2"><a href="#" class="n font-bold text-[14px]">機械仕掛けの神様</a><span class="text-[11px] text-white bg-brand rounded-none px-1 ml-1 align-middle">連載中</span><p class="text-[11px] text-sub mt-1"><a class="n" href="#">藤堂 詩織</a> ／ SF ／ 全24話 9.2万字 ／ <span class="text-amber-600">★4.7</span> ／ ブックマーク 5,442 ／ 最終 09/14</p></td>
               <td class="text-right py-3 pr-3 font-bold hidden sm:table-cell">132,300<span class="block text-[10px] text-sub font-normal">pt</span></td>
             </tr>
-            <tr class="hover:bg-brand-50/50 align-top">
+            <tr class="border-b border-line hover:bg-brand-50/50 align-top">
               <td class="text-center py-3 text-sub font-bold">5</td>
-              <td class="py-3 pr-2"><a href="#" class="n font-bold text-[14px]">彼女は毒を綴る</a><span class="text-[11px] text-sub bg-slate-100 rounded px-1 ml-1 align-middle">完結</span><p class="text-[11px] text-sub mt-1"><a class="n" href="#">七尾 凛</a> ／ ファンタジー ／ 全58話 21.7万字 ／ <span class="text-amber-600">★4.6</span> ／ ブックマーク 4,003 ／ 最終 09/08</p></td>
+              <td class="py-3 pr-2"><a href="#" class="n font-bold text-[14px]">彼女は毒を綴る</a><span class="text-[11px] text-sub bg-slate-100 rounded-none px-1 ml-1 align-middle">完結</span><p class="text-[11px] text-sub mt-1"><a class="n" href="#">七尾 凛</a> ／ ファンタジー ／ 全58話 21.7万字 ／ <span class="text-amber-600">★4.6</span> ／ ブックマーク 4,003 ／ 最終 09/08</p></td>
               <td class="text-right py-3 pr-3 font-bold hidden sm:table-cell">118,760<span class="block text-[10px] text-sub font-normal">pt</span></td>
+            </tr>
+            <tr class="border-b border-line hover:bg-brand-50/50 align-top">
+              <td class="text-center py-3 text-sub font-bold">6</td>
+              <td class="py-3 pr-2"><a href="#" class="n font-bold text-[14px]">最果ての図書館</a><span class="text-[11px] text-white bg-brand rounded-none px-1 ml-1 align-middle">連載中</span><p class="text-[11px] text-sub mt-1"><a class="n" href="#">青柳 water</a> ／ 文芸 ／ 全11話 4.4万字 ／ <span class="text-amber-600">★4.5</span> ／ ブックマーク 3,120 ／ 最終 09/12</p></td>
+              <td class="text-right py-3 pr-3 font-bold hidden sm:table-cell">99,410<span class="block text-[10px] text-sub font-normal">pt</span></td>
+            </tr>
+            <tr class="border-b border-line hover:bg-brand-50/50 align-top">
+              <td class="text-center py-3 text-sub font-bold">7</td>
+              <td class="py-3 pr-2"><a href="#" class="n font-bold text-[14px]">七月の海に沈む</a><span class="text-[11px] text-sub bg-slate-100 rounded-none px-1 ml-1 align-middle">完結</span><p class="text-[11px] text-sub mt-1"><a class="n" href="#">凪 あさひ</a> ／ 現代ドラマ ／ 全12話 6.8万字 ／ <span class="text-amber-600">★4.5</span> ／ ブックマーク 2,890 ／ 最終 09/05</p></td>
+              <td class="text-right py-3 pr-3 font-bold hidden sm:table-cell">88,120<span class="block text-[10px] text-sub font-normal">pt</span></td>
+            </tr>
+            <tr class="border-b border-line hover:bg-brand-50/50 align-top">
+              <td class="text-center py-3 text-sub font-bold">8</td>
+              <td class="py-3 pr-2"><a href="#" class="n font-bold text-[14px]">灯台守の娘</a><span class="text-[11px] text-sub bg-slate-100 rounded-none px-1 ml-1 align-middle">完結</span><p class="text-[11px] text-sub mt-1"><a class="n" href="#">汐見 灯</a> ／ 文芸 ／ 全9話 3.9万字 ／ <span class="text-amber-600">★4.4</span> ／ ブックマーク 2,410 ／ 最終 09/03</p></td>
+              <td class="text-right py-3 pr-3 font-bold hidden sm:table-cell">76,540<span class="block text-[10px] text-sub font-normal">pt</span></td>
+            </tr>
+            <tr class="border-b border-line hover:bg-brand-50/50 align-top">
+              <td class="text-center py-3 text-sub font-bold">9</td>
+              <td class="py-3 pr-2"><a href="#" class="n font-bold text-[14px]">竜と塩の街</a><span class="text-[11px] text-white bg-brand rounded-none px-1 ml-1 align-middle">連載中</span><p class="text-[11px] text-sub mt-1"><a class="n" href="#">安曇 潮</a> ／ ファンタジー ／ 全5話 1.9万字 ／ <span class="text-amber-600">★4.4</span> ／ ブックマーク 1,980 ／ 最終 09/14</p></td>
+              <td class="text-right py-3 pr-3 font-bold hidden sm:table-cell">61,300<span class="block text-[10px] text-sub font-normal">pt</span></td>
+            </tr>
+            <tr class="hover:bg-brand-50/50 align-top">
+              <td class="text-center py-3 text-sub font-bold">10</td>
+              <td class="py-3 pr-2"><a href="#" class="n font-bold text-[14px]">火曜日の喫茶店</a><span class="text-[11px] text-white bg-brand rounded-none px-1 ml-1 align-middle">連載中</span><p class="text-[11px] text-sub mt-1"><a class="n" href="#">遠野 珈琲</a> ／ 現代ドラマ ／ 全3話 8千字 ／ <span class="text-amber-600">★4.3</span> ／ ブックマーク 1,540 ／ 最終 09/14</p></td>
+              <td class="text-right py-3 pr-3 font-bold hidden sm:table-cell">54,880<span class="block text-[10px] text-sub font-normal">pt</span></td>
             </tr>
           </tbody>
         </table>
@@ -119,20 +144,20 @@ tailwind.config = {
     <!-- 新着投稿 (テーブル) -->
     <div>
       <div class="flex items-center justify-between mb-2"><h2 class="font-bold text-[14px]">新着投稿作品</h2><a href="#" class="n text-xs font-medium">新着一覧 →</a></div>
-      <div class="bg-white border border-line rounded">
+      <div class="bg-white border border-line rounded-none">
         <table class="w-full">
           <tbody class="divide-y divide-line">
             <tr class="hover:bg-brand-50/50 align-top">
-              <td class="py-2.5 px-3"><span class="text-[11px] text-white bg-amber-600 rounded px-1 mr-1">NEW</span><a href="#" class="n font-bold">火曜日の喫茶店</a><p class="text-[11px] text-sub mt-0.5"><a class="n" href="#">遠野 珈琲</a> ／ 現代ドラマ ／ 全3話 8千字 ／ 投稿 09/14</p></td>
+              <td class="py-2.5 px-3"><span class="text-[11px] text-white bg-amber-600 rounded-none px-1 mr-1">NEW</span><a href="#" class="n font-bold">火曜日の喫茶店</a><p class="text-[11px] text-sub mt-0.5"><a class="n" href="#">遠野 珈琲</a> ／ 現代ドラマ ／ 全3話 8千字 ／ 投稿 09/14</p></td>
             </tr>
             <tr class="hover:bg-brand-50/50 align-top">
-              <td class="py-2.5 px-3"><span class="text-[11px] text-white bg-amber-600 rounded px-1 mr-1">NEW</span><a href="#" class="n font-bold">竜と塩の街</a><p class="text-[11px] text-sub mt-0.5"><a class="n" href="#">安曇 潮</a> ／ ファンタジー ／ 全5話 1.9万字 ／ 投稿 09/14</p></td>
+              <td class="py-2.5 px-3"><span class="text-[11px] text-white bg-amber-600 rounded-none px-1 mr-1">NEW</span><a href="#" class="n font-bold">竜と塩の街</a><p class="text-[11px] text-sub mt-0.5"><a class="n" href="#">安曇 潮</a> ／ ファンタジー ／ 全5話 1.9万字 ／ 投稿 09/14</p></td>
             </tr>
             <tr class="hover:bg-brand-50/50 align-top">
-              <td class="py-2.5 px-3"><span class="text-[11px] text-white bg-amber-600 rounded px-1 mr-1">NEW</span><a href="#" class="n font-bold">3時14分の空</a><p class="text-[11px] text-sub mt-0.5"><a class="n" href="#">円周 律</a> ／ SF ／ 全2話 6千字 ／ 投稿 09/13</p></td>
+              <td class="py-2.5 px-3"><span class="text-[11px] text-white bg-amber-600 rounded-none px-1 mr-1">NEW</span><a href="#" class="n font-bold">3時14分の空</a><p class="text-[11px] text-sub mt-0.5"><a class="n" href="#">円周 律</a> ／ SF ／ 全2話 6千字 ／ 投稿 09/13</p></td>
             </tr>
             <tr class="hover:bg-brand-50/50 align-top">
-              <td class="py-2.5 px-3"><span class="text-[11px] text-white bg-amber-600 rounded px-1 mr-1">NEW</span><a href="#" class="n font-bold">きみの余白</a><p class="text-[11px] text-sub mt-0.5"><a class="n" href="#">白詰 くさ</a> ／ 恋愛 ／ 全4話 1.2万字 ／ 投稿 09/13</p></td>
+              <td class="py-2.5 px-3"><span class="text-[11px] text-white bg-amber-600 rounded-none px-1 mr-1">NEW</span><a href="#" class="n font-bold">きみの余白</a><p class="text-[11px] text-sub mt-0.5"><a class="n" href="#">白詰 くさ</a> ／ 恋愛 ／ 全4話 1.2万字 ／ 投稿 09/13</p></td>
             </tr>
           </tbody>
         </table>
@@ -142,7 +167,7 @@ tailwind.config = {
     <!-- 更新情報 (時刻付きリスト) -->
     <div>
       <div class="flex items-center justify-between mb-2"><h2 class="font-bold text-[14px]">更新情報</h2><a href="#" class="n text-xs font-medium">更新一覧 →</a></div>
-      <div class="bg-white border border-line rounded divide-y divide-line">
+      <div class="bg-white border border-line rounded-none divide-y divide-line">
         <div class="px-3 py-2 flex items-center gap-3 hover:bg-brand-50/50"><span class="text-[11px] text-sub shrink-0 w-20">09/14 21:03</span><a href="#" class="n font-medium truncate">神は勇者を選ばない</a><span class="text-[11px] text-sub truncate hidden sm:inline">第32話「選ばれざる者の王」</span></div>
         <div class="px-3 py-2 flex items-center gap-3 hover:bg-brand-50/50"><span class="text-[11px] text-sub shrink-0 w-20">09/14 19:40</span><a href="#" class="n font-medium truncate">機械仕掛けの神様</a><span class="text-[11px] text-sub truncate hidden sm:inline">第24話「祈り」</span></div>
         <div class="px-3 py-2 flex items-center gap-3 hover:bg-brand-50/50"><span class="text-[11px] text-sub shrink-0 w-20">09/13 22:50</span><a href="#" class="n font-medium truncate">星の降る夜、君と</a><span class="text-[11px] text-sub truncate hidden sm:inline">第18話「流星群の夜に」</span></div>
@@ -154,16 +179,16 @@ tailwind.config = {
     <div>
       <div class="flex items-center justify-between mb-2"><h2 class="font-bold text-[14px]">編集部ピックアップ</h2><a href="#" class="n text-xs font-medium">もっと →</a></div>
       <div class="grid sm:grid-cols-3 gap-2">
-        <a href="#" class="bg-white border border-line rounded p-3 hover:border-brand"><span class="text-[11px] text-sub bg-slate-100 rounded px-1">完結</span><h3 class="n font-bold mt-1">彼女は毒を綴る</h3><p class="text-[11px] text-sub mt-0.5">七尾 凛 ／ ★4.6</p></a>
-        <a href="#" class="bg-white border border-line rounded p-3 hover:border-brand"><span class="text-[11px] text-white bg-brand rounded px-1">連載中</span><h3 class="n font-bold mt-1">最果ての図書館</h3><p class="text-[11px] text-sub mt-0.5">青柳 water ／ ★4.5</p></a>
-        <a href="#" class="bg-white border border-line rounded p-3 hover:border-brand"><span class="text-[11px] text-sub bg-slate-100 rounded px-1">完結</span><h3 class="n font-bold mt-1">七月の海に沈む</h3><p class="text-[11px] text-sub mt-0.5">凪 あさひ ／ ★4.5</p></a>
+        <a href="#" class="bg-white border border-line rounded-none p-3 hover:border-brand"><span class="text-[11px] text-sub bg-slate-100 rounded-none px-1">完結</span><h3 class="n font-bold mt-1">彼女は毒を綴る</h3><p class="text-[11px] text-sub mt-0.5">七尾 凛 ／ ★4.6</p></a>
+        <a href="#" class="bg-white border border-line rounded-none p-3 hover:border-brand"><span class="text-[11px] text-white bg-brand rounded-none px-1">連載中</span><h3 class="n font-bold mt-1">最果ての図書館</h3><p class="text-[11px] text-sub mt-0.5">青柳 water ／ ★4.5</p></a>
+        <a href="#" class="bg-white border border-line rounded-none p-3 hover:border-brand"><span class="text-[11px] text-sub bg-slate-100 rounded-none px-1">完結</span><h3 class="n font-bold mt-1">七月の海に沈む</h3><p class="text-[11px] text-sub mt-0.5">凪 あさひ ／ ★4.5</p></a>
       </div>
     </div>
   </div>
 
   <!-- サイドバー -->
   <aside class="space-y-4 text-xs">
-    <div class="bg-white border border-line rounded p-3">
+    <div class="bg-white border border-line rounded-none p-3">
       <h2 class="font-bold text-[13px] border-b border-line pb-2 mb-2">ジャンル別ランキング</h2>
       <ul class="grid grid-cols-2 gap-x-3 gap-y-1.5">
         <li><a class="n" href="#">恋愛 ▸</a></li><li><a class="n" href="#">ファンタジー ▸</a></li>
@@ -172,7 +197,7 @@ tailwind.config = {
         <li><a class="n" href="#">歴史・時代 ▸</a></li><li><a class="n" href="#">現代ドラマ ▸</a></li>
       </ul>
     </div>
-    <div class="bg-white border border-line rounded p-3">
+    <div class="bg-white border border-line rounded-none p-3">
       <h2 class="font-bold text-[13px] border-b border-line pb-2 mb-2">ランキング種別</h2>
       <ul class="space-y-1.5">
         <li><a class="n" href="#">日間ランキング</a></li><li><a class="n" href="#">週間ランキング</a></li>
@@ -180,7 +205,7 @@ tailwind.config = {
         <li><a class="n" href="#">完結済ランキング</a></li><li><a class="n" href="#">新着ランキング</a></li>
       </ul>
     </div>
-    <div class="bg-white border border-line rounded p-3">
+    <div class="bg-white border border-line rounded-none p-3">
       <h2 class="font-bold text-[13px] border-b border-line pb-2 mb-2">開催中の企画</h2>
       <ul class="space-y-1.5">
         <li><a class="n" href="#">第1回 ReNovel新人賞</a><p class="text-sub">〜11/30 ・ 応募312</p></li>
@@ -188,17 +213,17 @@ tailwind.config = {
         <li><a class="n" href="#">リレー小説「百物語」</a><p class="text-sub">参加者58人</p></li>
       </ul>
     </div>
-    <div class="bg-white border border-line rounded p-3">
+    <div class="bg-white border border-line rounded-none p-3">
       <h2 class="font-bold text-[13px] border-b border-line pb-2 mb-2">人気タグ</h2>
       <div class="flex flex-wrap gap-1">
-        <a href="#" class="px-2 py-0.5 rounded bg-paper text-sub hover:text-brand-700">異世界転生</a>
-        <a href="#" class="px-2 py-0.5 rounded bg-paper text-sub hover:text-brand-700">ざまぁ</a>
-        <a href="#" class="px-2 py-0.5 rounded bg-paper text-sub hover:text-brand-700">slow-life</a>
-        <a href="#" class="px-2 py-0.5 rounded bg-paper text-sub hover:text-brand-700">切ない</a>
-        <a href="#" class="px-2 py-0.5 rounded bg-paper text-sub hover:text-brand-700">どんでん返し</a>
+        <a href="#" class="px-2 py-0.5 rounded-none bg-paper text-sub hover:text-brand-700">異世界転生</a>
+        <a href="#" class="px-2 py-0.5 rounded-none bg-paper text-sub hover:text-brand-700">ざまぁ</a>
+        <a href="#" class="px-2 py-0.5 rounded-none bg-paper text-sub hover:text-brand-700">slow-life</a>
+        <a href="#" class="px-2 py-0.5 rounded-none bg-paper text-sub hover:text-brand-700">切ない</a>
+        <a href="#" class="px-2 py-0.5 rounded-none bg-paper text-sub hover:text-brand-700">どんでん返し</a>
       </div>
     </div>
-    <div class="bg-white border border-line rounded p-3">
+    <div class="bg-white border border-line rounded-none p-3">
       <h2 class="font-bold text-[13px] border-b border-line pb-2 mb-2">お知らせ</h2>
       <ul class="space-y-1.5 text-sub">
         <li>09/14 第1回新人賞 応募開始</li>

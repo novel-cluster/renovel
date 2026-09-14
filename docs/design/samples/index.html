@@ -6,7 +6,7 @@
 <title>ReNovel — デザイン案 比較</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
-  .frame-wrap{ position:relative; height:440px; overflow:hidden; border-radius:12px; background:#fff; }
+  .frame-wrap{ position:relative; height:440px; overflow:hidden; border-radius:0; background:#fff; }
   .frame-wrap iframe{ width:1280px; height:1600px; border:0; transform:scale(.5); transform-origin:top left; }
 </style>
 </head>
@@ -18,26 +18,26 @@
   <!-- ===== いいとこ取り (カクヨム×なろう) ===== -->
   <div class="mt-10 flex items-center gap-3">
     <h2 class="text-xl font-bold">◎ カクヨム × なろう「いいとこ取り」</h2>
-    <span class="text-xs bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full font-medium">ご要望の方向</span>
+    <span class="text-xs bg-emerald-100 text-emerald-700 px-2 py-1 rounded-none font-medium">ご要望の方向</span>
   </div>
-  <p class="text-sm text-slate-500 mt-1">カクヨムの洗練（余白・タグpill・バッジ・緑アクセント）× なろうの情報密度（表紙なしテキスト・ランキング中心・豊富なメタデータ・ジャンル導線）。</p>
+  <p class="text-sm text-slate-500 mt-1">カクヨムの洗練（緑アクセント・整った情報設計）× なろうの情報密度（表紙なしテキスト・ランキング中心・豊富なメタデータ・ジャンル導線）。<b>角丸をやめた四角基調・高密度</b>に更新。</p>
 
   <div class="mt-5 grid md:grid-cols-3 gap-6">
-    <section class="bg-white rounded-2xl shadow-sm border-2 border-emerald-300 overflow-hidden">
+    <section class="bg-white rounded-none shadow-sm border-2 border-emerald-300 overflow-hidden">
       <div class="frame-wrap"><iframe src="e1-balanced.html" loading="lazy"></iframe></div>
       <div class="p-5">
         <div class="flex items-center justify-between"><h3 class="font-bold">E1 — バランス型</h3><a href="e1-balanced.html" class="text-sm text-emerald-700 font-medium hover:underline">開く →</a></div>
         <p class="mt-2 text-sm text-slate-600">2カラム。ランキングタブ＋密なリスト＋サイドバー（続きから/ジャンル/タグ）。両者を均等に。</p>
       </div>
     </section>
-    <section class="bg-white rounded-2xl shadow-sm border-2 border-emerald-300 overflow-hidden">
+    <section class="bg-white rounded-none shadow-sm border-2 border-emerald-300 overflow-hidden">
       <div class="frame-wrap"><iframe src="e2-kakuyomu-lean.html" loading="lazy"></iframe></div>
       <div class="p-5">
         <div class="flex items-center justify-between"><h3 class="font-bold">E2 — カクヨム寄り</h3><a href="e2-kakuyomu-lean.html" class="text-sm text-emerald-700 font-medium hover:underline">開く →</a></div>
         <p class="mt-2 text-sm text-slate-600">軽やか・特集ヒーロー・カードグリッド・タグ強め。発見体験を重視した今風。</p>
       </div>
     </section>
-    <section class="bg-white rounded-2xl shadow-sm border-2 border-emerald-300 overflow-hidden">
+    <section class="bg-white rounded-none shadow-sm border-2 border-emerald-300 overflow-hidden">
       <div class="frame-wrap"><iframe src="e3-narou-lean.html" loading="lazy"></iframe></div>
       <div class="p-5">
         <div class="flex items-center justify-between"><h3 class="font-bold">E3 — なろう寄り</h3><a href="e3-narou-lean.html" class="text-sm text-emerald-700 font-medium hover:underline">開く →</a></div>
@@ -49,19 +49,19 @@
   <!-- ===== その他の方向性 ===== -->
   <h2 class="text-xl font-bold mt-14">その他の方向性（参考）</h2>
   <div class="mt-5 grid md:grid-cols-2 gap-6">
-    <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+    <section class="bg-white rounded-none shadow-sm border border-slate-200 overflow-hidden">
       <div class="frame-wrap"><iframe src="a-literary.html" loading="lazy"></iframe></div>
       <div class="p-5"><div class="flex items-center justify-between"><h3 class="font-bold">A — 文芸セリフ</h3><a href="a-literary.html" class="text-sm text-amber-700 font-medium hover:underline">開く →</a></div><p class="mt-2 text-sm text-slate-600">明朝・紙色・余白多め。Text First を体現した文芸系。</p></div>
     </section>
-    <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+    <section class="bg-white rounded-none shadow-sm border border-slate-200 overflow-hidden">
       <div class="frame-wrap"><iframe src="b-modern.html" loading="lazy"></iframe></div>
       <div class="p-5"><div class="flex items-center justify-between"><h3 class="font-bold">B — モダンミニマル</h3><a href="b-modern.html" class="text-sm text-cyan-700 font-medium hover:underline">開く →</a></div><p class="mt-2 text-sm text-slate-600">白基調・ゴシック・teal。プロダクト然としたクリーン。</p></div>
     </section>
-    <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+    <section class="bg-white rounded-none shadow-sm border border-slate-200 overflow-hidden">
       <div class="frame-wrap"><iframe src="c-dark.html" loading="lazy"></iframe></div>
       <div class="p-5"><div class="flex items-center justify-between"><h3 class="font-bold">C — ダークフォーカス</h3><a href="c-dark.html" class="text-sm text-cyan-600 font-medium hover:underline">開く →</a></div><p class="mt-2 text-sm text-slate-600">暗色・高コントラスト。夜の読書向け、データ映え。</p></div>
     </section>
-    <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+    <section class="bg-white rounded-none shadow-sm border border-slate-200 overflow-hidden">
       <div class="frame-wrap"><iframe src="d-editorial.html" loading="lazy"></iframe></div>
       <div class="p-5"><div class="flex items-center justify-between"><h3 class="font-bold">D — エディトリアル</h3><a href="d-editorial.html" class="text-sm text-red-700 font-medium hover:underline">開く →</a></div><p class="mt-2 text-sm text-slate-600">明朝ディスプレイ・誌面レイアウト・バーミリオン。存在感。</p></div>
     </section>
