@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="ja" class="scroll-smooth">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ReNovel — note/tales風カード</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Shippori+Mincho:wght@600;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  theme: { extend: {
+    fontFamily: { sans:['"Noto Sans JP"','sans-serif'], mincho:['"Shippori Mincho"','serif'] },
+    colors: { note:{ DEFAULT:'#2cb696', 600:'#25a487', 700:'#1f8d74' }, ink:'#292929', sub:'#767676', line:'#ececec' },
+    borderRadius: { DEFAULT:'6px', md:'6px', lg:'8px' }
+  } }
+}
+</script>
+<style> ruby rt{ font-size:.5em; color:#25a487; } </style>
+</head>
+<body class="bg-neutral-50 text-ink font-sans antialiased">
+
+<!-- ===== Header ===== -->
+<header class="sticky top-0 z-20 bg-white border-b border-line">
+  <div class="mx-auto max-w-5xl px-4 h-14 flex items-center gap-3">
+    <a href="#" class="text-xl font-black tracking-tight shrink-0">ReNovel<span class="text-note"> tales</span></a>
+    <div class="flex-1 max-w-sm hidden sm:block">
+      <div class="relative">
+        <input placeholder="作品・作者・タグを検索" class="w-full bg-neutral-100 rounded-full text-sm pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-note/40">
+        <svg class="w-4 h-4 absolute left-3.5 top-2.5 text-sub" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+      </div>
+    </div>
+    <div class="flex items-center gap-2 ml-auto">
+      <button class="w-9 h-9 rounded-full hover:bg-neutral-100 flex items-center justify-center text-sub" title="通知">🔔</button>
+      <a href="#" class="text-sm font-bold px-4 py-2 rounded-full bg-note text-white hover:bg-note-600">投稿する</a>
+      <span class="w-9 h-9 rounded-full bg-gradient-to-br from-note to-emerald-400 text-white text-xs flex items-center justify-center font-bold">你</span>
+    </div>
+  </div>
+  <div class="mx-auto max-w-5xl px-4">
+    <nav class="flex gap-6 text-sm overflow-x-auto">
+      <a href="#" class="py-3 border-b-2 border-ink font-bold whitespace-nowrap">ランキング</a>
+      <a href="#" class="py-3 border-b-2 border-transparent text-sub hover:text-ink whitespace-nowrap">新着</a>
+      <a href="#" class="py-3 border-b-2 border-transparent text-sub hover:text-ink whitespace-nowrap">ジャンル</a>
+      <a href="#" class="py-3 border-b-2 border-transparent text-sub hover:text-ink whitespace-nowrap">コンテスト</a>
+      <a href="#" class="py-3 border-b-2 border-transparent text-sub hover:text-ink whitespace-nowrap">フォロー中</a>
+    </nav>
+  </div>
+</header>
+
+<div class="mx-auto max-w-5xl px-4 py-6 grid lg:grid-cols-[1fr_280px] gap-6">
+
+  <!-- ===== カードリスト ===== -->
+  <main class="min-w-0 space-y-3" id="feed"></main>
+
+  <!-- ===== 右レール ===== -->
+  <aside class="space-y-5">
+    <section class="bg-white rounded-md border border-line p-4">
+      <h2 class="text-sm font-bold mb-3">週間ランキング</h2>
+      <ol id="rank" class="space-y-3"></ol>
+    </section>
+    <section class="bg-white rounded-md border border-line p-4">
+      <h2 class="text-sm font-bold mb-2">開催中のコンテスト</h2>
+      <a href="#" class="block group">
+        <p class="text-sm font-bold group-hover:text-note-700">第1回 ReNovel新人賞</p>
+        <p class="text-xs text-sub mt-1">大賞100万円・ジャンル不問</p>
+        <p class="text-xs text-sub mt-1">締切まで 42 日 ・ 応募 312</p>
+      </a>
+    </section>
+    <section class="bg-white rounded-md border border-line p-4">
+      <h2 class="text-sm font-bold mb-3">人気のタグ</h2>
+      <div class="flex flex-wrap gap-2">
+        <a href="#" class="text-xs px-3 py-1.5 rounded-full bg-neutral-100 hover:bg-neutral-200">#異世界転生</a>
+        <a href="#" class="text-xs px-3 py-1.5 rounded-full bg-neutral-100 hover:bg-neutral-200">#切ない</a>
+        <a href="#" class="text-xs px-3 py-1.5 rounded-full bg-neutral-100 hover:bg-neutral-200">#どんでん返し</a>
+        <a href="#" class="text-xs px-3 py-1.5 rounded-full bg-neutral-100 hover:bg-neutral-200">#slow-life</a>
+      </div>
+    </section>
+  </aside>
+</div>
+
+<footer class="border-t border-line bg-white">
+  <div class="mx-auto max-w-5xl px-4 py-8 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-sub">
+    <span class="font-black text-ink">ReNovel</span>
+    <a href="#" class="hover:text-ink">ランキング</a><a href="#" class="hover:text-ink">新着</a><a href="#" class="hover:text-ink">タグ</a>
+    <a href="#" class="hover:text-ink">執筆</a><a href="#" class="hover:text-ink">ヘルプ</a><a href="#" class="hover:text-ink">利用規約</a>
+  </div>
+</footer>
+
+<script>
+const jak=['from-rose-100 to-orange-100 text-rose-500','from-sky-100 to-indigo-100 text-sky-600','from-amber-100 to-yellow-100 text-amber-600','from-emerald-100 to-teal-100 text-emerald-600','from-violet-100 to-fuchsia-100 text-violet-500','from-slate-100 to-neutral-200 text-slate-500'];
+const feed=[
+  {t:'神は勇者を選ばない',a:'三日月 灯',ini:'三',d:'選ばれなかった少年が、選ばれた者たちの物語をその手で書き換えていく異世界群像劇。玉座の影で始まる、静かな下剋上。',g:'異世界ファンタジー',n:'32話',like:'1,204',v:'12.4万',date:'連載中・3日前更新',award:'第1回 ReNovel新人賞 大賞'},
+  {t:'星の降る夜、君と',a:'白瀬 みなと',ini:'白',d:'余命一年の彼女と、天文部の最後の夏。言葉にできない距離を描く青春恋愛。',g:'恋愛',n:'18話',like:'982',v:'9.8万',date:'連載中・4日前更新',award:''},
+  {t:'六番目の遺言',a:'灰田 透',ini:'灰',d:'五つの遺言はすべて嘘だった。六番目を書いたのは、死者自身だった——。',g:'ミステリー',n:'24話',like:'711',v:'7.1万',date:'5か月前完結',award:''},
+  {t:'機械仕掛けの神様',a:'藤堂 詩織',ini:'藤',d:'感情を持つよう設計された最後のAIは、なぜ祈ることを覚えたのか。',g:'SF',n:'24話',like:'544',v:'6.2万',date:'連載中・本日更新',award:''},
+  {t:'彼女は毒を綴る',a:'七尾 凛',ini:'七',d:'言葉に毒を込められる少女と、それを浴び続ける代筆屋の静かな記録。往復書簡が辿り着く先。',g:'ローファンタジー',n:'58話',like:'403',v:'5.0万',date:'完結',award:''},
+  {t:'最果ての図書館',a:'青柳 water',ini:'青',d:'世界の終わりで、司書だけが本を守り続けている。最後の来館者が訪れる日まで。',g:'文芸',n:'11話',like:'312',v:'3.1万',date:'連載中・2日前更新',award:''},
+];
+document.getElementById('feed').innerHTML = feed.map((x,i)=>`
+  <article class="bg-white rounded-md border border-line shadow-sm hover:shadow-md transition p-4 sm:p-5">
+    ${x.award?`<div class="inline-flex items-center gap-1 text-xs font-bold text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1 mb-3">🏆 ${x.award}</div>`:''}
+    <div class="flex gap-4">
+      <a href="#" class="shrink-0 w-[84px] h-[112px] rounded bg-gradient-to-br ${jak[i%jak.length]} flex items-center justify-center shadow-inner">
+        <span class="font-mincho text-3xl font-bold">${x.t.slice(0,1)}</span>
+      </a>
+      <div class="flex-1 min-w-0">
+        <h3 class="font-bold text-lg leading-snug line-clamp-2 hover:opacity-80"><a href="#">${x.t}</a></h3>
+        <p class="text-sm text-sub mt-1 leading-relaxed line-clamp-2">${x.d}</p>
+        <div class="flex items-center gap-2 mt-2.5">
+          <span class="w-6 h-6 rounded-full bg-neutral-200 text-[10px] flex items-center justify-center font-bold text-sub shrink-0">${x.ini}</span>
+          <a href="#" class="text-xs font-medium hover:underline">${x.a}</a>
+          <span class="text-xs text-sub">・ ${x.date}</span>
+        </div>
+        <div class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-xs text-sub">
+          <span class="px-2 py-0.5 rounded-full bg-neutral-100">${x.g}</span>
+          <span>${x.n}</span>
+          <span class="inline-flex items-center gap-1">♡ ${x.like}</span>
+          <span class="inline-flex items-center gap-1">👁 ${x.v}</span>
+        </div>
+      </div>
+    </div>
+  </article>`).join('');
+
+const rank=[['神は勇者を選ばない','三日月 灯','異世界FT'],['星の降る夜、君と','白瀬 みなと','恋愛'],['六番目の遺言','灰田 透','ミステリー'],['機械仕掛けの神様','藤堂 詩織','SF'],['彼女は毒を綴る','七尾 凛','FT']];
+document.getElementById('rank').innerHTML = rank.map((x,i)=>`
+  <li><a href="#" class="flex items-start gap-3 group">
+    <span class="font-black text-lg ${i<3?'text-note':'text-neutral-300'} w-5 shrink-0 text-center">${i+1}</span>
+    <div class="min-w-0"><p class="text-sm font-bold leading-snug line-clamp-2 group-hover:opacity-80">${x[0]}</p><p class="text-xs text-sub mt-0.5">${x[1]} ・ ${x[2]}</p></div>
+  </a></li>`).join('');
+</script>
+</body>
+</html>
