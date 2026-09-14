@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="ja" class="scroll-smooth">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ReNovel — N1 なろう型・水色（標準トップ）</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  theme: { extend: {
+    fontFamily: { sans:['"Noto Sans JP"','sans-serif'] },
+    colors: {
+      sky:{ DEFAULT:'#0ea5e9', 50:'#f0f9ff', 100:'#e0f2fe', 600:'#0284c7', 700:'#0369a1', 800:'#075985' },
+      ink:'#1c2530', sub:'#64707c', line:'#d9e1e8', paper:'#f5f8fb'
+    }
+  } }
+}
+</script>
+<style> a.n{ color:#0369a1 } a.n:hover{ text-decoration:underline } </style>
+</head>
+<body class="bg-paper text-ink font-sans antialiased text-[13px] leading-relaxed">
+
+<!-- header -->
+<header class="text-white" style="background:#0369a1">
+  <div class="mx-auto max-w-6xl px-3 h-11 flex items-center gap-4">
+    <a href="#" class="font-black text-base">ReNovel</a>
+    <nav class="hidden md:flex items-center gap-4 text-xs text-white/90">
+      <a href="#" class="hover:underline">総合</a><a href="#" class="hover:underline">日刊</a><a href="#" class="hover:underline">週間</a>
+      <a href="#" class="hover:underline">月間</a><a href="#" class="hover:underline">新着</a><a href="#" class="hover:underline">ジャンル別</a><a href="#" class="hover:underline">PickUp</a>
+    </nav>
+    <div class="ml-auto flex items-center gap-3 text-xs">
+      <a href="#" class="hover:underline">ログイン</a>
+      <a href="#" class="bg-white/15 rounded-none px-2 py-1 hover:bg-white/25">新規登録</a>
+    </div>
+  </div>
+  <div style="background:#0ea5e9">
+    <div class="mx-auto max-w-6xl px-3 h-9 flex items-center gap-3 overflow-x-auto text-xs text-white">
+      <a href="#" class="hover:underline whitespace-nowrap font-bold">恋愛</a><a href="#" class="hover:underline whitespace-nowrap">ファンタジー</a>
+      <a href="#" class="hover:underline whitespace-nowrap">文芸</a><a href="#" class="hover:underline whitespace-nowrap">SF</a>
+      <a href="#" class="hover:underline whitespace-nowrap">ミステリー</a><a href="#" class="hover:underline whitespace-nowrap">ホラー</a>
+      <a href="#" class="hover:underline whitespace-nowrap">歴史・時代</a><a href="#" class="hover:underline whitespace-nowrap">現代ドラマ</a><a href="#" class="hover:underline whitespace-nowrap">その他</a>
+    </div>
+  </div>
+</header>
+
+<!-- 検索 -->
+<div class="bg-white border-b border-line">
+  <div class="mx-auto max-w-6xl px-3 py-2 flex gap-2 items-center">
+    <input placeholder="キーワード" class="flex-1 max-w-md border border-line rounded-none px-2 py-1 text-xs focus:outline-none focus:border-sky">
+    <button class="text-xs text-white rounded-none px-3 py-1 hover:opacity-90" style="background:#0284c7">検索</button>
+    <span class="text-xs text-sub ml-2 hidden sm:inline">絞り込み: <a class="n" href="#">連載中</a>・<a class="n" href="#">完結済</a>・<a class="n" href="#">文字数</a>・<a class="n" href="#">更新日</a></span>
+  </div>
+</div>
+
+<!-- お知らせ帯 -->
+<div class="border-b border-line" style="background:#e0f2fe">
+  <div class="mx-auto max-w-6xl px-3 py-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
+    <span class="font-bold text-sky-800">お知らせ:</span>
+    <a class="n" href="#">第1回 ReNovel新人賞 応募開始（〜11/30）</a>
+    <span class="text-line">|</span>
+    <a class="n" href="#">タグ検索機能を追加しました</a>
+    <a class="n ml-auto font-medium" href="#">一覧 →</a>
+  </div>
+</div>
+
+<main class="mx-auto max-w-6xl px-3 py-4 grid lg:grid-cols-[1fr_250px] gap-4">
+  <div class="min-w-0 space-y-4">
+    <!-- 順位表 -->
+    <div>
+      <div class="flex items-center gap-1 mb-2 text-xs">
+        <button class="px-3 py-1.5 rounded-none bg-white border border-line border-b-white font-bold text-sky-700 -mb-px" style="border-bottom-color:#fff">日刊</button>
+        <button class="px-3 py-1.5 text-sub hover:text-ink">週間</button>
+        <button class="px-3 py-1.5 text-sub hover:text-ink">月間</button>
+        <button class="px-3 py-1.5 text-sub hover:text-ink">四半期</button>
+        <button class="px-3 py-1.5 text-sub hover:text-ink">年間</button>
+        <button class="px-3 py-1.5 text-sub hover:text-ink">累計</button>
+        <span class="ml-auto text-sub">2026/09/14 更新</span>
+      </div>
+      <div class="bg-white border border-line">
+        <table class="w-full">
+          <thead><tr class="text-xs text-sub border-b border-line" style="background:#f0f9ff"><th class="text-center font-medium py-2 w-10">順位</th><th class="text-left font-medium py-2">作品</th><th class="text-right font-medium py-2 pr-3 w-24 hidden sm:table-cell">ポイント</th></tr></thead>
+          <tbody id="rk"></tbody>
+        </table>
+        <div class="text-center py-2.5 border-t border-line"><a href="#" class="n text-xs font-medium">日刊ランキングをもっと見る（〜300位）→</a></div>
+      </div>
+    </div>
+
+    <!-- 新着投稿 -->
+    <div>
+      <div class="flex items-center justify-between mb-2"><h2 class="font-bold text-[14px]">新着投稿</h2><a href="#" class="n text-xs font-medium">新着一覧 →</a></div>
+      <div class="bg-white border border-line divide-y divide-line" id="new"></div>
+    </div>
+
+    <!-- 更新情報 -->
+    <div>
+      <div class="flex items-center justify-between mb-2"><h2 class="font-bold text-[14px]">更新情報</h2><a href="#" class="n text-xs font-medium">更新一覧 →</a></div>
+      <div class="bg-white border border-line divide-y divide-line" id="upd"></div>
+    </div>
+  </div>
+
+  <!-- サイドバー -->
+  <aside class="space-y-3 text-xs">
+    <div class="bg-white border border-line p-3">
+      <h2 class="font-bold text-[13px] border-b border-line pb-2 mb-2">ランキング</h2>
+      <ul class="space-y-1.5">
+        <li><a class="n" href="#">日刊ランキング</a></li><li><a class="n" href="#">週間ランキング</a></li>
+        <li><a class="n" href="#">月間ランキング</a></li><li><a class="n" href="#">四半期ランキング</a></li>
+        <li><a class="n" href="#">年間ランキング</a></li><li><a class="n" href="#">累計ランキング</a></li>
+        <li><a class="n" href="#">完結済ランキング</a></li>
+      </ul>
+    </div>
+    <div class="bg-white border border-line p-3">
+      <h2 class="font-bold text-[13px] border-b border-line pb-2 mb-2">ジャンル別</h2>
+      <ul class="grid grid-cols-2 gap-x-3 gap-y-1.5">
+        <li><a class="n" href="#">恋愛</a></li><li><a class="n" href="#">ファンタジー</a></li>
+        <li><a class="n" href="#">文芸</a></li><li><a class="n" href="#">SF</a></li>
+        <li><a class="n" href="#">ミステリー</a></li><li><a class="n" href="#">ホラー</a></li>
+        <li><a class="n" href="#">歴史・時代</a></li><li><a class="n" href="#">現代ドラマ</a></li>
+        <li><a class="n" href="#">詩・童話</a></li><li><a class="n" href="#">その他</a></li>
+      </ul>
+    </div>
+    <div class="bg-white border border-line p-3">
+      <h2 class="font-bold text-[13px] border-b border-line pb-2 mb-2">開催中の企画</h2>
+      <ul class="space-y-1.5">
+        <li><a class="n" href="#">第1回 ReNovel新人賞</a><p class="text-sub">〜11/30 ・ 応募312</p></li>
+        <li><a class="n" href="#">短編コンテスト「夏」</a><p class="text-sub">〜9/30</p></li>
+      </ul>
+    </div>
+    <div class="bg-white border border-line p-3">
+      <h2 class="font-bold text-[13px] border-b border-line pb-2 mb-2">人気キーワード</h2>
+      <div class="flex flex-wrap gap-1">
+        <a href="#" class="px-2 py-0.5 rounded-none text-sub hover:text-sky-700" style="background:#f0f9ff">異世界転生</a>
+        <a href="#" class="px-2 py-0.5 rounded-none text-sub hover:text-sky-700" style="background:#f0f9ff">ざまぁ</a>
+        <a href="#" class="px-2 py-0.5 rounded-none text-sub hover:text-sky-700" style="background:#f0f9ff">slow-life</a>
+        <a href="#" class="px-2 py-0.5 rounded-none text-sub hover:text-sky-700" style="background:#f0f9ff">切ない</a>
+        <a href="#" class="px-2 py-0.5 rounded-none text-sub hover:text-sky-700" style="background:#f0f9ff">どんでん返し</a>
+      </div>
+    </div>
+  </aside>
+</main>
+
+<footer class="bg-white border-t border-line">
+  <div class="mx-auto max-w-6xl px-3 py-5 flex flex-wrap gap-x-5 gap-y-2 text-xs text-sub">
+    <span class="font-bold text-ink">ReNovel</span>
+    <a class="n" href="#">ランキング</a><a class="n" href="#">新着</a><a class="n" href="#">ジャンル</a><a class="n" href="#">タグ</a><a class="n" href="#">執筆</a><a class="n" href="#">ヘルプ</a><a class="n" href="#">利用規約</a>
+  </div>
+</footer>
+
+<script>
+// サンプルデータで密なリストを生成
+const badge=(s)=> s==='連載中'
+  ? '<span class="text-[11px] text-white rounded-none px-1 ml-1 align-middle" style="background:#0284c7">連載中</span>'
+  : '<span class="text-[11px] text-sub bg-slate-100 rounded-none px-1 ml-1 align-middle">完結</span>';
+const rank=[
+  {t:'神は勇者を選ばない',a:'三日月 灯',g:'異世界〔ファンタジー〕',n:32,c:'28.4万',r:4.8,b:'12,043',u:'09/14',s:'連載中',pt:'184,220'},
+  {t:'星の降る夜、君と',a:'白瀬 みなと',g:'恋愛〔現代〕',n:18,c:'9.2万',r:4.9,b:'9,812',u:'09/13',s:'連載中',pt:'171,540'},
+  {t:'六番目の遺言',a:'灰田 透',g:'ミステリー',n:24,c:'15.6万',r:4.7,b:'7,109',u:'09/10',s:'完結',pt:'150,988'},
+  {t:'機械仕掛けの神様',a:'藤堂 詩織',g:'SF',n:24,c:'9.2万',r:4.7,b:'5,442',u:'09/14',s:'連載中',pt:'132,300'},
+  {t:'彼女は毒を綴る',a:'七尾 凛',g:'ファンタジー',n:58,c:'21.7万',r:4.6,b:'4,003',u:'09/08',s:'完結',pt:'118,760'},
+  {t:'最果ての図書館',a:'青柳 water',g:'文芸',n:11,c:'4.4万',r:4.5,b:'3,120',u:'09/12',s:'連載中',pt:'99,410'},
+  {t:'七月の海に沈む',a:'凪 あさひ',g:'現代ドラマ',n:12,c:'6.8万',r:4.5,b:'2,890',u:'09/05',s:'完結',pt:'88,120'},
+  {t:'灯台守の娘',a:'汐見 灯',g:'文芸',n:9,c:'3.9万',r:4.4,b:'2,410',u:'09/03',s:'完結',pt:'76,540'},
+  {t:'竜と塩の街',a:'安曇 潮',g:'ファンタジー',n:5,c:'1.9万',r:4.4,b:'1,980',u:'09/14',s:'連載中',pt:'61,300'},
+  {t:'火曜日の喫茶店',a:'遠野 珈琲',g:'現代ドラマ',n:3,c:'8千',r:4.3,b:'1,540',u:'09/14',s:'連載中',pt:'54,880'},
+];
+document.getElementById('rk').innerHTML = rank.map((x,i)=>{
+  const rankCell = i<3
+    ? `<span class="inline-block w-6 h-6 leading-6 rounded-none text-white font-bold text-xs" style="background:${['#0284c7','#94a3b8','#d97706'][i]}">${i+1}</span>`
+    : `<span class="text-sub font-bold">${i+1}</span>`;
+  const border = i<rank.length-1 ? 'border-b border-line' : '';
+  return `<tr class="${border} align-top hover:bg-sky-50/60">
+    <td class="text-center py-3">${rankCell}</td>
+    <td class="py-3 pr-2"><a href="#" class="n font-bold text-[14px]">${x.t}</a>${badge(x.s)}
+      <p class="text-[11px] text-sub mt-1"><a class="n" href="#">${x.a}</a> ／ ${x.g} ／ 全${x.n}話 ${x.c}字 ／ <span class="text-amber-600">★${x.r}</span> ／ ブックマーク ${x.b} ／ 最終 ${x.u}</p></td>
+    <td class="text-right py-3 pr-3 font-bold hidden sm:table-cell">${x.pt}<span class="block text-[10px] text-sub font-normal">pt</span></td>
+  </tr>`;
+}).join('');
+
+const news=[
+  {t:'火曜日の喫茶店',a:'遠野 珈琲',g:'現代ドラマ',n:3,c:'8千',d:'09/14'},
+  {t:'竜と塩の街',a:'安曇 潮',g:'ファンタジー',n:5,c:'1.9万',d:'09/14'},
+  {t:'3時14分の空',a:'円周 律',g:'SF',n:2,c:'6千',d:'09/13'},
+  {t:'きみの余白',a:'白詰 くさ',g:'恋愛',n:4,c:'1.2万',d:'09/13'},
+  {t:'塔の上の錬金術師',a:'硝子 ましろ',g:'ファンタジー',n:1,c:'4千',d:'09/12'},
+];
+document.getElementById('new').innerHTML = news.map(x=>`
+  <div class="px-3 py-2.5 hover:bg-sky-50/60"><span class="text-[11px] text-white bg-amber-600 rounded-none px-1 mr-1">NEW</span><a href="#" class="n font-bold">${x.t}</a>
+  <p class="text-[11px] text-sub mt-0.5"><a class="n" href="#">${x.a}</a> ／ ${x.g} ／ 全${x.n}話 ${x.c}字 ／ 投稿 ${x.d}</p></div>`).join('');
+
+const upd=[
+  {t:'神は勇者を選ばない',e:'第32話「選ばれざる者の王」',d:'09/14 21:03'},
+  {t:'機械仕掛けの神様',e:'第24話「祈り」',d:'09/14 19:40'},
+  {t:'星の降る夜、君と',e:'第18話「流星群の夜に」',d:'09/13 22:50'},
+  {t:'最果ての図書館',e:'第11話「最後の来館者」',d:'09/12 08:12'},
+  {t:'竜と塩の街',e:'第5話「塩の代償」',d:'09/12 07:30'},
+];
+document.getElementById('upd').innerHTML = upd.map(x=>`
+  <div class="px-3 py-2 flex items-center gap-3 hover:bg-sky-50/60"><span class="text-[11px] text-sub shrink-0 w-20">${x.d}</span><a href="#" class="n font-medium truncate">${x.t}</a><span class="text-[11px] text-sub truncate hidden sm:inline">${x.e}</span></div>`).join('');
+</script>
+</body>
+</html>

@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="ja" class="scroll-smooth">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ReNovel — N3 なろう型・水色（作品一覧/検索結果）</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  theme: { extend: {
+    fontFamily: { sans:['"Noto Sans JP"','sans-serif'] },
+    colors: {
+      sky:{ DEFAULT:'#0ea5e9', 50:'#f0f9ff', 100:'#e0f2fe', 600:'#0284c7', 700:'#0369a1', 800:'#075985' },
+      ink:'#1c2530', sub:'#64707c', line:'#d9e1e8', paper:'#f5f8fb'
+    }
+  } }
+}
+</script>
+<style> a.n{ color:#0369a1 } a.n:hover{ text-decoration:underline } </style>
+</head>
+<body class="bg-paper text-ink font-sans antialiased text-[13px] leading-relaxed">
+
+<header class="text-white" style="background:#0369a1">
+  <div class="mx-auto max-w-6xl px-3 h-11 flex items-center gap-4">
+    <a href="#" class="font-black text-base">ReNovel</a>
+    <nav class="hidden md:flex items-center gap-4 text-xs text-white/90"><a href="#" class="hover:underline">総合</a><a href="#" class="hover:underline">新着</a><a href="#" class="hover:underline font-bold">検索</a><a href="#" class="hover:underline">ジャンル別</a></nav>
+    <div class="ml-auto flex items-center gap-3 text-xs"><a href="#" class="hover:underline">ログイン</a><a href="#" class="bg-white/15 rounded-none px-2 py-1 hover:bg-white/25">新規登録</a></div>
+  </div>
+  <div style="background:#0ea5e9">
+    <div class="mx-auto max-w-6xl px-3 h-9 flex items-center gap-3 overflow-x-auto text-xs text-white">
+      <a href="#" class="hover:underline whitespace-nowrap font-bold">ファンタジー</a><a href="#" class="hover:underline whitespace-nowrap">恋愛</a>
+      <a href="#" class="hover:underline whitespace-nowrap">文芸</a><a href="#" class="hover:underline whitespace-nowrap">SF</a>
+      <a href="#" class="hover:underline whitespace-nowrap">ミステリー</a><a href="#" class="hover:underline whitespace-nowrap">ホラー</a>
+      <a href="#" class="hover:underline whitespace-nowrap">歴史・時代</a><a href="#" class="hover:underline whitespace-nowrap">現代ドラマ</a><a href="#" class="hover:underline whitespace-nowrap">その他</a>
+    </div>
+  </div>
+</header>
+
+<!-- 絞り込みバー -->
+<div class="bg-white border-b border-line">
+  <div class="mx-auto max-w-6xl px-3 py-2 space-y-2">
+    <div class="flex gap-2 items-center">
+      <input value="ファンタジー" class="flex-1 max-w-md border border-line rounded-none px-2 py-1 text-xs focus:outline-none focus:border-sky">
+      <button class="text-xs text-white rounded-none px-3 py-1" style="background:#0284c7">検索</button>
+    </div>
+    <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
+      <span class="text-sub">状態:</span><a class="n" href="#">すべて</a><a class="font-bold" href="#">連載中</a><a class="n" href="#">完結済</a>
+      <span class="text-line">|</span>
+      <span class="text-sub">文字数:</span><a class="n" href="#">〜5千</a><a class="n" href="#">1万〜</a><a class="n" href="#">10万〜</a>
+      <span class="text-line">|</span>
+      <span class="text-sub">更新:</span><a class="n" href="#">24時間</a><a class="n" href="#">1週間</a><a class="n" href="#">1ヶ月</a>
+    </div>
+  </div>
+</div>
+
+<!-- 結果ヘッダ + 並び替え -->
+<div class="mx-auto max-w-6xl px-3 py-3 flex flex-wrap items-center gap-2">
+  <p class="text-sm"><b>28,510</b> 件中 <b>1〜20</b> 件を表示</p>
+  <div class="ml-auto flex items-center gap-1 text-xs">
+    <span class="text-sub">並び替え:</span>
+    <a class="px-2 py-1 rounded-none text-white" style="background:#0284c7" href="#">ポイント順</a>
+    <a class="n px-2 py-1" href="#">新着順</a><a class="n px-2 py-1" href="#">更新順</a><a class="n px-2 py-1" href="#">評価順</a><a class="n px-2 py-1" href="#">文字数順</a>
+  </div>
+</div>
+
+<!-- 高密度リスト -->
+<main class="mx-auto max-w-6xl px-3 pb-6">
+  <div class="bg-white border border-line divide-y divide-line" id="list"></div>
+
+  <!-- ページャ -->
+  <div class="flex items-center justify-center gap-1 mt-4 text-xs">
+    <a class="px-2.5 py-1.5 border border-line bg-white text-sub hover:border-sky" href="#">前へ</a>
+    <a class="px-3 py-1.5 border border-line text-white" style="background:#0284c7" href="#">1</a>
+    <a class="px-3 py-1.5 border border-line bg-white n" href="#">2</a>
+    <a class="px-3 py-1.5 border border-line bg-white n" href="#">3</a>
+    <a class="px-3 py-1.5 border border-line bg-white n" href="#">4</a>
+    <a class="px-3 py-1.5 border border-line bg-white n" href="#">5</a>
+    <span class="px-2 text-sub">…</span>
+    <a class="px-3 py-1.5 border border-line bg-white n" href="#">1426</a>
+    <a class="px-2.5 py-1.5 border border-line bg-white n" href="#">次へ</a>
+  </div>
+</main>
+
+<footer class="bg-white border-t border-line">
+  <div class="mx-auto max-w-6xl px-3 py-5 flex flex-wrap gap-x-5 gap-y-2 text-xs text-sub">
+    <span class="font-bold text-ink">ReNovel</span>
+    <a class="n" href="#">ランキング</a><a class="n" href="#">検索</a><a class="n" href="#">ジャンル</a><a class="n" href="#">ヘルプ</a><a class="n" href="#">利用規約</a>
+  </div>
+</footer>
+
+<script>
+const works=[
+  {t:'神は勇者を選ばない',a:'三日月 灯',s:'連載中',g:'異世界〔ファンタジー〕',d:'選ばれなかった少年が、選ばれた者たちの物語をその手で書き換えていく異世界群像劇。玉座の影で始まる、静かな下剋上。',tags:['群像劇','下剋上','ざまぁ'],n:32,c:'28.4万',r:'4.8',b:'12,043',u:'2026/09/14 21:03'},
+  {t:'彼女は毒を綴る',a:'七尾 凛',s:'完結',g:'ローファンタジー',d:'言葉に毒を込められる少女と、それを浴び続ける代筆屋。二人の往復書簡が辿り着く先。',tags:['ダーク','切ない','書簡体'],n:58,c:'21.7万',r:'4.6',b:'4,003',u:'2026/09/08 12:20'},
+  {t:'竜と塩の街',a:'安曇 潮',s:'連載中',g:'ハイファンタジー',d:'塩で竜を鎮める街の、最後の塩職人の少女。塩が尽きる日、竜は再び目を覚ます。',tags:['竜','職人','世界観'],n:5,c:'1.9万',r:'4.4',b:'1,980',u:'2026/09/14 07:30'},
+  {t:'塔の上の錬金術師',a:'硝子 ましろ',s:'連載中',g:'異世界〔ファンタジー〕',d:'塔から降りられない錬金術師が、届け物の鳥を通じて世界とつながる。',tags:['錬金術','ほのぼの'],n:1,c:'4千',r:'4.3',b:'820',u:'2026/09/12 18:00'},
+  {t:'精霊は歌わない',a:'森野 くる',s:'連載中',g:'ハイファンタジー',d:'歌を失った精霊と、声を持たない少年。二人だけの手話が世界を動かす。',tags:['精霊','ボーイミーツガール'],n:14,c:'7.1万',r:'4.5',b:'2,640',u:'2026/09/13 09:15'},
+  {t:'辺境伯令嬢の再婚',a:'柊 このみ',s:'連載中',g:'恋愛〔異世界〕',d:'離縁された令嬢が辺境で始める、二度目の結婚と領地経営。',tags:['ざまぁ','領地経営','溺愛'],n:41,c:'19.8万',r:'4.7',b:'8,910',u:'2026/09/14 06:00'},
+  {t:'勇者パーティを追放された調香師',a:'白露 なぎ',s:'連載中',g:'異世界〔ファンタジー〕',d:'役立たずと追放された調香師は、香りひとつで戦況を変える。',tags:['追放','ざまぁ','無自覚チート'],n:27,c:'13.2万',r:'4.6',b:'6,120',u:'2026/09/14 12:40'},
+  {t:'ダンジョンに古本屋を',a:'紙魚 ひもり',s:'連載中',g:'ローファンタジー',d:'最下層に古本屋を開いた元冒険者。魔物も客として本を買いに来る。',tags:['スローライフ','ほのぼの','商業'],n:19,c:'9.6万',r:'4.5',b:'3,410',u:'2026/09/11 20:10'},
+];
+// 20行にするため反復して密度を出す
+const list=[]; for(let i=0;i<20;i++){ list.push(works[i%works.length]); }
+document.getElementById('list').innerHTML = list.map((x,i)=>{
+  const st = x.s==='連載中'
+    ? '<span class="text-[11px] text-white rounded-none px-1" style="background:#0284c7">連載中</span>'
+    : '<span class="text-[11px] text-sub bg-slate-100 rounded-none px-1">完結</span>';
+  return `<div class="px-3 py-3 hover:bg-sky-50/60">
+    <div class="flex items-baseline gap-2 flex-wrap">
+      ${st}<a href="#" class="n font-bold text-[15px]">${x.t}</a>
+      <span class="text-[11px] text-sub">${x.g}</span>
+    </div>
+    <p class="text-sub mt-1 line-clamp-2">${x.d}</p>
+    <div class="flex flex-wrap gap-1 mt-1.5">${x.tags.map(t=>`<a href="#" class="text-[11px] px-1.5 py-0.5 border border-line text-sub hover:border-sky hover:text-sky-700">${t}</a>`).join('')}</div>
+    <div class="flex flex-wrap items-center gap-x-4 gap-y-0.5 mt-1.5 text-[11px] text-sub">
+      <a class="n" href="#">${x.a}</a>
+      <span class="text-amber-600">★${x.r}</span>
+      <span>ブックマーク ${x.b}</span>
+      <span>全${x.n}話 ${x.c}字</span>
+      <span>最終更新 ${x.u}</span>
+    </div>
+  </div>`;
+}).join('');
+</script>
+</body>
+</html>

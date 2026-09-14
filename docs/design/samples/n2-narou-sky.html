@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="ja" class="scroll-smooth">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ReNovel — N2 なろう型・水色（ランキングハブ）</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  theme: { extend: {
+    fontFamily: { sans:['"Noto Sans JP"','sans-serif'] },
+    colors: {
+      sky:{ DEFAULT:'#0ea5e9', 50:'#f0f9ff', 100:'#e0f2fe', 600:'#0284c7', 700:'#0369a1', 800:'#075985' },
+      ink:'#1c2530', sub:'#64707c', line:'#d9e1e8', paper:'#f5f8fb'
+    }
+  } }
+}
+</script>
+<style> a.n{ color:#0369a1 } a.n:hover{ text-decoration:underline } </style>
+</head>
+<body class="bg-paper text-ink font-sans antialiased text-[13px] leading-relaxed">
+
+<header class="text-white" style="background:#0369a1">
+  <div class="mx-auto max-w-6xl px-3 h-11 flex items-center gap-4">
+    <a href="#" class="font-black text-base">ReNovel</a>
+    <nav class="hidden md:flex items-center gap-4 text-xs text-white/90">
+      <a href="#" class="hover:underline font-bold">ランキング</a><a href="#" class="hover:underline">新着</a><a href="#" class="hover:underline">ジャンル別</a><a href="#" class="hover:underline">検索</a><a href="#" class="hover:underline">PickUp</a>
+    </nav>
+    <div class="ml-auto flex items-center gap-3 text-xs"><a href="#" class="hover:underline">ログイン</a><a href="#" class="bg-white/15 rounded-none px-2 py-1 hover:bg-white/25">新規登録</a></div>
+  </div>
+  <div style="background:#0ea5e9">
+    <div class="mx-auto max-w-6xl px-3 h-9 flex items-center gap-3 overflow-x-auto text-xs text-white">
+      <a href="#" class="hover:underline whitespace-nowrap">恋愛</a><a href="#" class="hover:underline whitespace-nowrap">ファンタジー</a>
+      <a href="#" class="hover:underline whitespace-nowrap">文芸</a><a href="#" class="hover:underline whitespace-nowrap">SF</a>
+      <a href="#" class="hover:underline whitespace-nowrap">ミステリー</a><a href="#" class="hover:underline whitespace-nowrap">ホラー</a>
+      <a href="#" class="hover:underline whitespace-nowrap">歴史・時代</a><a href="#" class="hover:underline whitespace-nowrap">現代ドラマ</a><a href="#" class="hover:underline whitespace-nowrap">その他</a>
+    </div>
+  </div>
+</header>
+
+<div class="bg-white border-b border-line">
+  <div class="mx-auto max-w-6xl px-3 py-2 flex gap-2 items-center">
+    <input placeholder="キーワード" class="flex-1 max-w-md border border-line rounded-none px-2 py-1 text-xs focus:outline-none focus:border-sky">
+    <button class="text-xs text-white rounded-none px-3 py-1" style="background:#0284c7">検索</button>
+  </div>
+</div>
+
+<main class="mx-auto max-w-6xl px-3 py-4 space-y-5">
+  <h1 class="text-lg font-bold flex items-center gap-2"><span class="w-1.5 h-5" style="background:#0ea5e9"></span>ランキング</h1>
+
+  <!-- 日刊 / 週間 並列 -->
+  <div class="grid md:grid-cols-2 gap-4">
+    <section class="bg-white border border-line">
+      <div class="flex items-center justify-between px-3 py-2 border-b border-line text-white" style="background:#0284c7"><h2 class="font-bold text-sm">日刊ランキング</h2><a href="#" class="text-xs text-white/90 hover:underline">〜300位 →</a></div>
+      <ol id="daily" class="divide-y divide-line"></ol>
+    </section>
+    <section class="bg-white border border-line">
+      <div class="flex items-center justify-between px-3 py-2 border-b border-line text-white" style="background:#0284c7"><h2 class="font-bold text-sm">週間ランキング</h2><a href="#" class="text-xs text-white/90 hover:underline">〜300位 →</a></div>
+      <ol id="weekly" class="divide-y divide-line"></ol>
+    </section>
+  </div>
+
+  <!-- ジャンル別ランキング グリッド -->
+  <div>
+    <h2 class="text-base font-bold mb-2 flex items-center gap-2"><span class="w-1.5 h-4" style="background:#0ea5e9"></span>ジャンル別ランキング</h2>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3" id="genres"></div>
+  </div>
+
+  <!-- 期間別導線 -->
+  <div class="bg-white border border-line p-3">
+    <div class="flex flex-wrap gap-x-4 gap-y-2 text-xs">
+      <span class="font-bold">期間別:</span>
+      <a class="n" href="#">日刊</a><a class="n" href="#">週間</a><a class="n" href="#">月間</a><a class="n" href="#">四半期</a><a class="n" href="#">年間</a><a class="n" href="#">累計</a>
+      <span class="text-line">|</span>
+      <span class="font-bold">種別:</span>
+      <a class="n" href="#">総合</a><a class="n" href="#">連載中</a><a class="n" href="#">完結済</a><a class="n" href="#">短編</a>
+    </div>
+  </div>
+</main>
+
+<footer class="bg-white border-t border-line">
+  <div class="mx-auto max-w-6xl px-3 py-5 flex flex-wrap gap-x-5 gap-y-2 text-xs text-sub">
+    <span class="font-bold text-ink">ReNovel</span>
+    <a class="n" href="#">ランキング</a><a class="n" href="#">新着</a><a class="n" href="#">ジャンル</a><a class="n" href="#">ヘルプ</a><a class="n" href="#">利用規約</a>
+  </div>
+</footer>
+
+<script>
+const daily=[
+  ['神は勇者を選ばない','三日月 灯','異世界FT','184,220'],['星の降る夜、君と','白瀬 みなと','恋愛','171,540'],
+  ['六番目の遺言','灰田 透','ミステリー','150,988'],['機械仕掛けの神様','藤堂 詩織','SF','132,300'],
+  ['彼女は毒を綴る','七尾 凛','FT','118,760'],['最果ての図書館','青柳 water','文芸','99,410'],
+  ['七月の海に沈む','凪 あさひ','現代','88,120'],['灯台守の娘','汐見 灯','文芸','76,540'],
+  ['竜と塩の街','安曇 潮','FT','61,300'],['火曜日の喫茶店','遠野 珈琲','現代','54,880'],
+];
+const weekly=[
+  ['星の降る夜、君と','白瀬 みなと','恋愛','921,400'],['神は勇者を選ばない','三日月 灯','異世界FT','903,220'],
+  ['機械仕掛けの神様','藤堂 詩織','SF','780,010'],['六番目の遺言','灰田 透','ミステリー','755,300'],
+  ['最果ての図書館','青柳 water','文芸','690,180'],['彼女は毒を綴る','七尾 凛','FT','612,940'],
+  ['灯台守の娘','汐見 灯','文芸','540,220'],['七月の海に沈む','凪 あさひ','現代','498,110'],
+  ['きみの余白','白詰 くさ','恋愛','410,900'],['竜と塩の街','安曇 潮','FT','388,640'],
+];
+const row=(x,i)=>{
+  const rc=i<3?`<span class="inline-block w-5 h-5 leading-5 text-center rounded-none text-white font-bold text-[11px]" style="background:${['#0284c7','#94a3b8','#d97706'][i]}">${i+1}</span>`
+              :`<span class="inline-block w-5 text-center text-sub font-bold">${i+1}</span>`;
+  return `<li class="px-3 py-2 flex items-center gap-2 hover:bg-sky-50/60"><span class="shrink-0">${rc}</span>
+    <a href="#" class="n font-medium truncate flex-1">${x[0]}</a>
+    <span class="text-[11px] text-sub shrink-0 hidden sm:inline">${x[1]} / ${x[2]}</span>
+    <span class="text-[11px] font-bold shrink-0 w-16 text-right">${x[3]}<span class="text-sub font-normal">pt</span></span></li>`;
+};
+document.getElementById('daily').innerHTML = daily.map(row).join('');
+document.getElementById('weekly').innerHTML = weekly.map(row).join('');
+
+const genres={
+  '恋愛':[['星の降る夜、君と','白瀬 みなと'],['きみの余白','白詰 くさ'],['放課後シンフォニー','琴平 なな'],['十年後のラブレター','宵待 あい'],['嘘つきな春','早瀬 ひかり']],
+  'ファンタジー':[['神は勇者を選ばない','三日月 灯'],['彼女は毒を綴る','七尾 凛'],['竜と塩の街','安曇 潮'],['塔の上の錬金術師','硝子 ましろ'],['精霊は歌わない','森野 くる']],
+  'SF':[['機械仕掛けの神様','藤堂 詩織'],['3時14分の空','円周 律'],['最終ログ','衛藤 零'],['火星の図書委員','赤羽 みお'],['記憶販売店','黒井 累']],
+  'ミステリー':[['六番目の遺言','灰田 透'],['硝子の証言','冴島 玲'],['雨夜の密室','梶 真冬'],['七つの嘘','南 詩帆'],['探偵は眠らない','宇佐美 蓮']],
+  '文芸':[['最果ての図書館','青柳 water'],['灯台守の娘','汐見 灯'],['海辺の食卓','小春 日和'],['祖母の万年筆','榛名 いと'],['さよならの練習','千歳 ふゆ']],
+  '現代ドラマ':[['七月の海に沈む','凪 あさひ'],['火曜日の喫茶店','遠野 珈琲'],['退職願は青い封筒で','日下部 蒼'],['隣人観察日記','三雲 はる'],['再就職戦線','大河内 実']],
+};
+document.getElementById('genres').innerHTML = Object.entries(genres).map(([g,list])=>`
+  <div class="bg-white border border-line">
+    <div class="flex items-center justify-between px-3 py-1.5 border-b border-line" style="background:#f0f9ff"><h3 class="font-bold text-[13px] text-sky-800">${g}</h3><a href="#" class="n text-[11px]">一覧 →</a></div>
+    <ol class="divide-y divide-line">
+      ${list.map((x,i)=>`<li class="px-3 py-1.5 flex items-center gap-2 hover:bg-sky-50/60"><span class="w-4 text-center text-[11px] font-bold ${i<3?'text-sky-700':'text-sub'}">${i+1}</span><a href="#" class="n truncate flex-1">${x[0]}</a><span class="text-[11px] text-sub shrink-0 hidden sm:inline">${x[1]}</span></li>`).join('')}
+    </ol>
+  </div>`).join('');
+</script>
+</body>
+</html>
