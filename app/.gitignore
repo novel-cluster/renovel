@@ -1,2 +1,11 @@
 # deps
 node_modules/
+
+# env
+.env
+.env.local
+.env.*.local
+
+# build output
+public/styles.css
+dist/

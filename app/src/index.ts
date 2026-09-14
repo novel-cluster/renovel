@@ -1,9 +1,11 @@
-import { Hono } from 'hono'
+import { env } from '@/config/env'
+import { createApp } from '@/presentation/app'
 
-const app = new Hono()
+const app = createApp()
 
-app.get('/', (c) => {
-  return c.text('Hello Hono!')
-})
+console.log(`ReNovel listening on http://localhost:${env.port} [${env.nodeEnv}]`)
 
-export default app
+export default {
+  port: env.port,
+  fetch: app.fetch,
+}
