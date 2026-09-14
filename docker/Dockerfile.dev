@@ -1,0 +1,17 @@
+# Development image — hot reload via `bun run dev`.
+# Source is bind-mounted by docker-compose.dev.yml; deps live in an anonymous
+# volume so the container keeps its own node_modules.
+FROM oven/bun:1.3-alpine
+
+WORKDIR /app
+
+# Install deps first for layer caching.
+COPY app/package.json app/bun.lock ./
+RUN bun install --frozen-lockfile
+
+# Fallback copy (overlaid by the bind mount in compose).
+COPY app/ .
+
+EXPOSE 3000
+
+CMD ["bun", "run", "dev"]

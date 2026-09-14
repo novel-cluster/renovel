@@ -1,0 +1,38 @@
+# Local development stack: Hono app (hot reload) + PostgreSQL.
+# Run from repo root:  docker compose -f docker/docker-compose.dev.yml up --build
+services:
+  web:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.dev
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: development
+      PORT: "3000"
+      DATABASE_URL: postgres://renovel:renovel@postgres:5432/renovel
+    volumes:
+      - ../app:/app
+      - /app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: renovel
+      POSTGRES_PASSWORD: renovel
+      POSTGRES_DB: renovel
+    ports:
+      - "5432:5432"
+    volumes:
+      - renovel-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U renovel -d renovel"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  renovel-pgdata:
