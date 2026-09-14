@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="ja" class="scroll-smooth">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ReNovel — note/tales風カードグリッド</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Shippori+Mincho:wght@600;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  theme: { extend: {
+    fontFamily: { sans:['"Noto Sans JP"','sans-serif'], mincho:['"Shippori Mincho"','serif'] },
+    colors: { note:{ DEFAULT:'#2cb696', 600:'#25a487', 700:'#1f8d74' }, ink:'#292929', sub:'#767676', line:'#ececec' },
+    borderRadius: { DEFAULT:'6px', md:'6px', lg:'8px' }
+  } }
+}
+</script>
+</head>
+<body class="bg-neutral-50 text-ink font-sans antialiased">
+
+<!-- ===== Header ===== -->
+<header class="sticky top-0 z-20 bg-white border-b border-line">
+  <div class="mx-auto max-w-6xl px-4 h-14 flex items-center gap-3">
+    <a href="#" class="text-xl font-black tracking-tight shrink-0">ReNovel<span class="text-note"> tales</span></a>
+    <div class="flex-1 max-w-sm hidden sm:block">
+      <div class="relative">
+        <input placeholder="作品・作者・タグを検索" class="w-full bg-neutral-100 rounded-full text-sm pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-note/40">
+        <svg class="w-4 h-4 absolute left-3.5 top-2.5 text-sub" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+      </div>
+    </div>
+    <div class="flex items-center gap-2 ml-auto">
+      <button class="w-9 h-9 rounded-full hover:bg-neutral-100 flex items-center justify-center text-sub" title="通知">🔔</button>
+      <a href="#" class="text-sm font-bold px-4 py-2 rounded-full bg-note text-white hover:bg-note-600">投稿する</a>
+      <span class="w-9 h-9 rounded-full bg-gradient-to-br from-note to-emerald-400 text-white text-xs flex items-center justify-center font-bold">你</span>
+    </div>
+  </div>
+  <div class="mx-auto max-w-6xl px-4">
+    <nav class="flex gap-6 text-sm overflow-x-auto">
+      <a href="#" class="py-3 border-b-2 border-ink font-bold whitespace-nowrap">ランキング</a>
+      <a href="#" class="py-3 border-b-2 border-transparent text-sub hover:text-ink whitespace-nowrap">新着</a>
+      <a href="#" class="py-3 border-b-2 border-transparent text-sub hover:text-ink whitespace-nowrap">ジャンル</a>
+      <a href="#" class="py-3 border-b-2 border-transparent text-sub hover:text-ink whitespace-nowrap">コンテスト</a>
+      <a href="#" class="py-3 border-b-2 border-transparent text-sub hover:text-ink whitespace-nowrap">フォロー中</a>
+    </nav>
+  </div>
+</header>
+
+<main class="mx-auto max-w-6xl px-4 py-6 space-y-10">
+
+  <!-- ===== 週間ランキング（カードグリッド）===== -->
+  <section>
+    <div class="flex items-end justify-between mb-4">
+      <h2 class="text-lg font-bold">週間ランキング</h2>
+      <a href="#" class="text-sm text-note-700 font-bold hover:underline">すべて見る →</a>
+    </div>
+    <div id="rank" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-x-4 gap-y-6"></div>
+  </section>
+
+  <!-- ===== 新着作品（カードグリッド）===== -->
+  <section>
+    <div class="flex items-end justify-between mb-4">
+      <h2 class="text-lg font-bold">新着作品</h2>
+      <a href="#" class="text-sm text-note-700 font-bold hover:underline">もっと見る →</a>
+    </div>
+    <div id="new" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-x-4 gap-y-6"></div>
+  </section>
+</main>
+
+<footer class="border-t border-line bg-white">
+  <div class="mx-auto max-w-6xl px-4 py-8 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-sub">
+    <span class="font-black text-ink">ReNovel</span>
+    <a href="#" class="hover:text-ink">ランキング</a><a href="#" class="hover:text-ink">新着</a><a href="#" class="hover:text-ink">タグ</a>
+    <a href="#" class="hover:text-ink">執筆</a><a href="#" class="hover:text-ink">ヘルプ</a><a href="#" class="hover:text-ink">利用規約</a>
+  </div>
+</footer>
+
+<script>
+const jak=['from-rose-100 to-orange-100 text-rose-500','from-sky-100 to-indigo-100 text-sky-600','from-amber-100 to-yellow-100 text-amber-600','from-emerald-100 to-teal-100 text-emerald-600','from-violet-100 to-fuchsia-100 text-violet-500','from-slate-100 to-neutral-200 text-slate-500','from-cyan-100 to-sky-100 text-cyan-600','from-pink-100 to-rose-100 text-pink-500','from-lime-100 to-green-100 text-green-600','from-indigo-100 to-violet-100 text-indigo-500'];
+const data=[
+  {t:'神は勇者を選ばない',a:'三日月 灯',ini:'三',g:'異世界FT',n:'32話',like:'1.2万',s:'連載中'},
+  {t:'星の降る夜、君と',a:'白瀬 みなと',ini:'白',g:'恋愛',n:'18話',like:'9,812',s:'連載中'},
+  {t:'六番目の遺言',a:'灰田 透',ini:'灰',g:'ミステリー',n:'24話',like:'7,109',s:'完結'},
+  {t:'機械仕掛けの神様',a:'藤堂 詩織',ini:'藤',g:'SF',n:'24話',like:'5,442',s:'連載中'},
+  {t:'彼女は毒を綴る',a:'七尾 凛',ini:'七',g:'ローFT',n:'58話',like:'4,003',s:'完結'},
+  {t:'最果ての図書館',a:'青柳 water',ini:'青',g:'文芸',n:'11話',like:'3,120',s:'連載中'},
+  {t:'七月の海に沈む',a:'凪 あさひ',ini:'凪',g:'現代',n:'12話',like:'2,890',s:'完結'},
+  {t:'灯台守の娘',a:'汐見 灯',ini:'汐',g:'文芸',n:'9話',like:'2,410',s:'完結'},
+  {t:'竜と塩の街',a:'安曇 潮',ini:'安',g:'ハイFT',n:'5話',like:'1,980',s:'連載中'},
+  {t:'火曜日の喫茶店',a:'遠野 珈琲',ini:'遠',g:'現代',n:'3話',like:'1,540',s:'連載中'},
+];
+const newer=[
+  {t:'塔の上の錬金術師',a:'硝子 ましろ',ini:'硝',g:'異世界FT',n:'1話',like:'82',s:'連載中'},
+  {t:'きみの余白',a:'白詰 くさ',ini:'白',g:'恋愛',n:'4話',like:'140',s:'連載中'},
+  {t:'3時14分の空',a:'円周 律',ini:'円',g:'SF',n:'2話',like:'96',s:'連載中'},
+  {t:'退職願は青い封筒で',a:'日下部 蒼',ini:'日',g:'現代',n:'6話',like:'210',s:'連載中'},
+  {t:'精霊は歌わない',a:'森野 くる',ini:'森',g:'ハイFT',n:'14話',like:'2,640',s:'連載中'},
+  {t:'雨夜の密室',a:'梶 真冬',ini:'梶',g:'ミステリー',n:'7話',like:'330',s:'連載中'},
+  {t:'海辺の食卓',a:'小春 日和',ini:'小',g:'文芸',n:'8話',like:'180',s:'連載中'},
+  {t:'再就職戦線',a:'大河内 実',ini:'大',g:'現代',n:'5話',like:'120',s:'連載中'},
+  {t:'記憶販売店',a:'黒井 累',ini:'黒',g:'SF',n:'9話',like:'450',s:'連載中'},
+  {t:'放課後シンフォニー',a:'琴平 なな',ini:'琴',g:'恋愛',n:'11話',like:'610',s:'連載中'},
+];
+function card(x,i,rank){
+  const status = x.s==='連載中'
+    ? '<span class="absolute bottom-1.5 left-1.5 text-[10px] font-bold text-white bg-note/90 rounded px-1.5 py-0.5">連載中</span>'
+    : '<span class="absolute bottom-1.5 left-1.5 text-[10px] font-bold text-white bg-neutral-500/90 rounded px-1.5 py-0.5">完結</span>';
+  const rankBadge = rank!=null
+    ? `<span class="absolute top-1.5 left-1.5 w-6 h-6 flex items-center justify-center text-xs font-black text-white rounded ${rank<3?'bg-note':'bg-neutral-700/80'}">${rank+1}</span>`
+    : '';
+  return `<article class="group">
+    <a href="#" class="block relative aspect-[3/4] rounded-md overflow-hidden bg-gradient-to-br ${jak[i%jak.length]} shadow-sm group-hover:shadow-md transition flex items-center justify-center">
+      ${rankBadge}
+      <span class="font-mincho text-4xl font-bold px-2 text-center leading-tight line-clamp-3">${x.t.slice(0,2)}</span>
+      ${status}
+    </a>
+    <h3 class="font-bold text-sm leading-snug mt-2 line-clamp-2 group-hover:text-note-700"><a href="#">${x.t}</a></h3>
+    <div class="flex items-center gap-1.5 mt-1.5">
+      <span class="w-5 h-5 rounded-full bg-neutral-200 text-[9px] flex items-center justify-center font-bold text-sub shrink-0">${x.ini}</span>
+      <a href="#" class="text-xs text-sub truncate hover:underline">${x.a}</a>
+    </div>
+    <div class="flex items-center gap-x-2 gap-y-1 flex-wrap mt-1 text-[11px] text-sub">
+      <span class="px-1.5 py-0.5 rounded-full bg-neutral-100">${x.g}</span>
+      <span>${x.n}</span>
+      <span>♡ ${x.like}</span>
+    </div>
+  </article>`;
+}
+document.getElementById('rank').innerHTML = data.map((x,i)=>card(x,i,i)).join('');
+document.getElementById('new').innerHTML = newer.map((x,i)=>card(x,i,null)).join('');
+</script>
+</body>
+</html>
