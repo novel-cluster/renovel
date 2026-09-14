@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>ReNovel — note/tales風カードグリッド</title>
+<title>ReNovel — note風カードグリッド（表紙なし・テキストカード）</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -49,22 +49,22 @@ tailwind.config = {
 
 <main class="mx-auto max-w-6xl px-4 py-6 space-y-10">
 
-  <!-- ===== 週間ランキング（カードグリッド）===== -->
+  <!-- ===== 週間ランキング（テキストカードのグリッド）===== -->
   <section>
     <div class="flex items-end justify-between mb-4">
       <h2 class="text-lg font-bold">週間ランキング</h2>
       <a href="#" class="text-sm text-note-700 font-bold hover:underline">すべて見る →</a>
     </div>
-    <div id="rank" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-x-4 gap-y-6"></div>
+    <div id="rank" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
   </section>
 
-  <!-- ===== 新着作品（カードグリッド）===== -->
+  <!-- ===== 新着作品（テキストカードのグリッド）===== -->
   <section>
     <div class="flex items-end justify-between mb-4">
       <h2 class="text-lg font-bold">新着作品</h2>
       <a href="#" class="text-sm text-note-700 font-bold hover:underline">もっと見る →</a>
     </div>
-    <div id="new" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-x-4 gap-y-6"></div>
+    <div id="new" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
   </section>
 </main>
 
@@ -77,58 +77,49 @@ tailwind.config = {
 </footer>
 
 <script>
-const jak=['from-rose-100 to-orange-100 text-rose-500','from-sky-100 to-indigo-100 text-sky-600','from-amber-100 to-yellow-100 text-amber-600','from-emerald-100 to-teal-100 text-emerald-600','from-violet-100 to-fuchsia-100 text-violet-500','from-slate-100 to-neutral-200 text-slate-500','from-cyan-100 to-sky-100 text-cyan-600','from-pink-100 to-rose-100 text-pink-500','from-lime-100 to-green-100 text-green-600','from-indigo-100 to-violet-100 text-indigo-500'];
+// 表紙画像は持たない。タイトル・キャッチコピー・本文を主役にしたテキストカード。
 const data=[
-  {t:'神は勇者を選ばない',a:'三日月 灯',ini:'三',g:'異世界FT',n:'32話',like:'1.2万',s:'連載中'},
-  {t:'星の降る夜、君と',a:'白瀬 みなと',ini:'白',g:'恋愛',n:'18話',like:'9,812',s:'連載中'},
-  {t:'六番目の遺言',a:'灰田 透',ini:'灰',g:'ミステリー',n:'24話',like:'7,109',s:'完結'},
-  {t:'機械仕掛けの神様',a:'藤堂 詩織',ini:'藤',g:'SF',n:'24話',like:'5,442',s:'連載中'},
-  {t:'彼女は毒を綴る',a:'七尾 凛',ini:'七',g:'ローFT',n:'58話',like:'4,003',s:'完結'},
-  {t:'最果ての図書館',a:'青柳 water',ini:'青',g:'文芸',n:'11話',like:'3,120',s:'連載中'},
-  {t:'七月の海に沈む',a:'凪 あさひ',ini:'凪',g:'現代',n:'12話',like:'2,890',s:'完結'},
-  {t:'灯台守の娘',a:'汐見 灯',ini:'汐',g:'文芸',n:'9話',like:'2,410',s:'完結'},
-  {t:'竜と塩の街',a:'安曇 潮',ini:'安',g:'ハイFT',n:'5話',like:'1,980',s:'連載中'},
-  {t:'火曜日の喫茶店',a:'遠野 珈琲',ini:'遠',g:'現代',n:'3話',like:'1,540',s:'連載中'},
+  {t:'神は勇者を選ばない',cp:'選ばれなかった少年の、静かな下剋上。',a:'三日月 灯',ini:'三',g:'異世界FT',tags:['#群像劇','#下剋上'],n:'32話',like:'1.2万',s:'連載中'},
+  {t:'星の降る夜、君と',cp:'余命一年の彼女と、天文部の最後の夏。',a:'白瀬 みなと',ini:'白',g:'恋愛',tags:['#青春','#切ない'],n:'18話',like:'9,812',s:'連載中'},
+  {t:'六番目の遺言',cp:'遺言はすべて嘘だった。書いたのは死者自身。',a:'灰田 透',ini:'灰',g:'ミステリー',tags:['#どんでん返し'],n:'24話',like:'7,109',s:'完結'},
+  {t:'機械仕掛けの神様',cp:'祈ることを覚えた、最後のAIの物語。',a:'藤堂 詩織',ini:'藤',g:'SF',tags:['#AI','#静謐'],n:'24話',like:'5,442',s:'連載中'},
+  {t:'彼女は毒を綴る',cp:'言葉に毒を込める少女と、代筆屋の記録。',a:'七尾 凛',ini:'七',g:'ローFT',tags:['#書簡体','#ダーク'],n:'58話',like:'4,003',s:'完結'},
+  {t:'最果ての図書館',cp:'世界の終わりで、司書だけが本を守っている。',a:'青柳 water',ini:'青',g:'文芸',tags:['#静謐'],n:'11話',like:'3,120',s:'連載中'},
 ];
 const newer=[
-  {t:'塔の上の錬金術師',a:'硝子 ましろ',ini:'硝',g:'異世界FT',n:'1話',like:'82',s:'連載中'},
-  {t:'きみの余白',a:'白詰 くさ',ini:'白',g:'恋愛',n:'4話',like:'140',s:'連載中'},
-  {t:'3時14分の空',a:'円周 律',ini:'円',g:'SF',n:'2話',like:'96',s:'連載中'},
-  {t:'退職願は青い封筒で',a:'日下部 蒼',ini:'日',g:'現代',n:'6話',like:'210',s:'連載中'},
-  {t:'精霊は歌わない',a:'森野 くる',ini:'森',g:'ハイFT',n:'14話',like:'2,640',s:'連載中'},
-  {t:'雨夜の密室',a:'梶 真冬',ini:'梶',g:'ミステリー',n:'7話',like:'330',s:'連載中'},
-  {t:'海辺の食卓',a:'小春 日和',ini:'小',g:'文芸',n:'8話',like:'180',s:'連載中'},
-  {t:'再就職戦線',a:'大河内 実',ini:'大',g:'現代',n:'5話',like:'120',s:'連載中'},
-  {t:'記憶販売店',a:'黒井 累',ini:'黒',g:'SF',n:'9話',like:'450',s:'連載中'},
-  {t:'放課後シンフォニー',a:'琴平 なな',ini:'琴',g:'恋愛',n:'11話',like:'610',s:'連載中'},
+  {t:'塔の上の錬金術師',cp:'塔から降りられない錬金術師と、届け物の鳥。',a:'硝子 ましろ',ini:'硝',g:'異世界FT',tags:['#ほのぼの'],n:'1話',like:'82',s:'連載中'},
+  {t:'きみの余白',cp:'ノートの余白で交わす、名も知らぬ誰かとの文通。',a:'白詰 くさ',ini:'白',g:'恋愛',tags:['#文通','#青春'],n:'4話',like:'140',s:'連載中'},
+  {t:'3時14分の空',cp:'1日が3時14分で巻き戻る世界で、彼だけが気づく。',a:'円周 律',ini:'円',g:'SF',tags:['#ループ'],n:'2話',like:'96',s:'連載中'},
+  {t:'火曜日の喫茶店',cp:'毎週火曜だけ現れる、閉店間際の客の話。',a:'遠野 珈琲',ini:'遠',g:'現代',tags:['#日常'],n:'3話',like:'1,540',s:'連載中'},
+  {t:'雨夜の密室',cp:'鍵は内側。窓は塞がれ、証人は雨だけ。',a:'梶 真冬',ini:'梶',g:'ミステリー',tags:['#本格'],n:'7話',like:'330',s:'連載中'},
+  {t:'海辺の食卓',cp:'祖母の家で始まる、ひと夏の再生の物語。',a:'小春 日和',ini:'小',g:'文芸',tags:['#家族'],n:'8話',like:'180',s:'連載中'},
 ];
-function card(x,i,rank){
+function card(x,rank){
   const status = x.s==='連載中'
-    ? '<span class="absolute bottom-1.5 left-1.5 text-[10px] font-bold text-white bg-note/90 rounded px-1.5 py-0.5">連載中</span>'
-    : '<span class="absolute bottom-1.5 left-1.5 text-[10px] font-bold text-white bg-neutral-500/90 rounded px-1.5 py-0.5">完結</span>';
-  const rankBadge = rank!=null
-    ? `<span class="absolute top-1.5 left-1.5 w-6 h-6 flex items-center justify-center text-xs font-black text-white rounded ${rank<3?'bg-note':'bg-neutral-700/80'}">${rank+1}</span>`
+    ? '<span class="text-[11px] font-bold text-note-700 bg-note/10 rounded px-1.5 py-0.5">連載中</span>'
+    : '<span class="text-[11px] font-bold text-sub bg-neutral-100 rounded px-1.5 py-0.5">完結</span>';
+  const rankChip = rank!=null
+    ? `<span class="w-6 h-6 flex items-center justify-center text-xs font-black text-white rounded ${rank<3?'bg-note':'bg-neutral-400'}">${rank+1}</span>`
     : '';
-  return `<article class="group">
-    <a href="#" class="block relative aspect-[3/4] rounded-md overflow-hidden bg-gradient-to-br ${jak[i%jak.length]} shadow-sm group-hover:shadow-md transition flex items-center justify-center">
-      ${rankBadge}
-      <span class="font-mincho text-4xl font-bold px-2 text-center leading-tight line-clamp-3">${x.t.slice(0,2)}</span>
-      ${status}
-    </a>
-    <h3 class="font-bold text-sm leading-snug mt-2 line-clamp-2 group-hover:text-note-700"><a href="#">${x.t}</a></h3>
-    <div class="flex items-center gap-1.5 mt-1.5">
-      <span class="w-5 h-5 rounded-full bg-neutral-200 text-[9px] flex items-center justify-center font-bold text-sub shrink-0">${x.ini}</span>
-      <a href="#" class="text-xs text-sub truncate hover:underline">${x.a}</a>
+  return `<article class="bg-white rounded-md border border-line shadow-sm hover:shadow-md hover:border-note/40 transition p-4 flex flex-col">
+    <div class="flex items-center gap-2 mb-2">
+      ${rankChip}${status}
+      <span class="text-[11px] text-sub ml-auto px-1.5 py-0.5 rounded-full bg-neutral-100">${x.g}</span>
     </div>
-    <div class="flex items-center gap-x-2 gap-y-1 flex-wrap mt-1 text-[11px] text-sub">
-      <span class="px-1.5 py-0.5 rounded-full bg-neutral-100">${x.g}</span>
-      <span>${x.n}</span>
-      <span>♡ ${x.like}</span>
+    <h3 class="font-mincho font-bold text-lg leading-snug line-clamp-2 hover:text-note-700"><a href="#">${x.t}</a></h3>
+    <p class="text-[13px] text-note-700 mt-1.5 leading-snug line-clamp-2">${x.cp}</p>
+    <div class="flex flex-wrap gap-1.5 mt-2 flex-1">
+      ${x.tags.map(t=>`<a href="#" class="text-[11px] text-sub hover:text-note-700">${t}</a>`).join('')}
+    </div>
+    <div class="mt-3 pt-3 border-t border-line flex items-center gap-2">
+      <span class="w-6 h-6 rounded-full bg-neutral-200 text-[10px] flex items-center justify-center font-bold text-sub shrink-0">${x.ini}</span>
+      <a href="#" class="text-xs text-sub truncate hover:underline">${x.a}</a>
+      <span class="ml-auto text-xs text-sub shrink-0">${x.n} ・ ♡ ${x.like}</span>
     </div>
   </article>`;
 }
-document.getElementById('rank').innerHTML = data.map((x,i)=>card(x,i,i)).join('');
-document.getElementById('new').innerHTML = newer.map((x,i)=>card(x,i,null)).join('');
+document.getElementById('rank').innerHTML = data.map((x,i)=>card(x,i)).join('');
+document.getElementById('new').innerHTML = newer.map((x)=>card(x,null)).join('');
 </script>
 </body>
 </html>
