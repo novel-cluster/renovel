@@ -36,12 +36,13 @@ ReNovel 1.0（[PRD §60 Definition of Done](./PRD.md)）に向けた開発ロー
 
 **設計:** [auth.md](./docs/design/foundation/auth.md)（認証・認可・権限マトリクス） / [data-model.md](./docs/design/foundation/data-model.md)（users/sessions/oauth_accounts） / [routing.md](./docs/design/foundation/routing.md)（`/@{handle}`・`/studio`）
 
-- [ ] User / Handle / Profile ドメイン（`/@{handle}`）
-- [ ] Session 認証 + OAuth（Provider 決定、PRD §52）、認証コンテキストを `c.get("user")` に載せる
-- [ ] 認可の基盤（サーバ側で必ずチェック、PRD §59）
-- [ ] プロフィール表示・編集（Display Name / Icon / Bio / External Links）
+- [x] User / Handle / Profile ドメイン（`/@{handle}`）
+- [~] Session 認証 + OAuth（認証コンテキストを `c.get("user")` に載せる）— **Session + パスワード(Argon2id)完了**。OAuth は未着手（Provider 未決, PRD §52）
+- [x] 認可の基盤（`requireAuth` / セッション middleware / 401·403·404 マッピング）。Role×Visibility の Policy 本体は作品が出る Phase 2/7 で追加
+- [x] プロフィール表示・編集（Display Name / Bio / External Links 表示 / 編集）— Icon アップロードと handle 変更は後続
 
 **完了条件:** ログインしてプロフィールを持てる。以降の全機能が「誰が」を判定できる。
+→ **達成(パスワード認証で)**: signup→session cookie→`/@handle`→プロフィール編集→logout→login を実 DB で E2E 確認済み。OAuth と Icon アップロードは後続 PR。
 
 ---
 
