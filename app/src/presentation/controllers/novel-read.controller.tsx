@@ -29,6 +29,7 @@ export async function getNovelPage(c: Context<AppEnv>) {
     : null
   const social = await container.novelSocialQuery.execute(view.novel.id, viewer?.id ?? null)
   const tags = await container.tagRepository.listNovelTags(view.novel.id)
+  const attribution = await container.forkRepository.attributionFor(view.novel.id)
 
   // Fire-and-forget analytics (PRD §55). Only for publicly readable novels.
   if (view.novel.visibility === 'public') {
@@ -56,6 +57,7 @@ export async function getNovelPage(c: Context<AppEnv>) {
       libraryState={libraryState}
       social={social}
       tags={tags}
+      attribution={attribution}
     />,
   )
 }

@@ -1,6 +1,11 @@
 import { Hono } from 'hono'
 import { getNovelAnalytics } from '@/presentation/controllers/analytics.controller'
 import {
+  getCollaborators,
+  postInviteCollaborator,
+  postRemoveCollaborator,
+} from '@/presentation/controllers/collaboration.controller'
+import {
   getEditor,
   postPublishEpisode,
   postSaveEpisode,
@@ -26,6 +31,9 @@ studioRoutes.post('/novels', postCreateNovel)
 studioRoutes.get('/novels/:novelId', getNovelDashboard)
 studioRoutes.post('/novels/:novelId', postUpdateNovel)
 studioRoutes.get('/novels/:novelId/analytics', getNovelAnalytics)
+studioRoutes.get('/novels/:novelId/collaborators', getCollaborators)
+studioRoutes.post('/novels/:novelId/collaborators', postInviteCollaborator)
+studioRoutes.post('/novels/:novelId/collaborators/remove', postRemoveCollaborator)
 studioRoutes.post('/novels/:novelId/episodes', postCreateEpisode)
 studioRoutes.get('/novels/:novelId/episodes/:episodeId', getEditor)
 studioRoutes.post('/novels/:novelId/episodes/:episodeId', postSaveEpisode)

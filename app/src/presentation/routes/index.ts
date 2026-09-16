@@ -1,10 +1,15 @@
 import type { Hono } from 'hono'
 import { postAnalyticsEvent } from '@/presentation/controllers/analytics.controller'
+import {
+  postFork,
+  postRespondInvitation,
+} from '@/presentation/controllers/collaboration.controller'
 import { getRanking, getSearch } from '@/presentation/controllers/discovery.controller'
 import { getHome } from '@/presentation/controllers/home.controller'
 import { getEpisodePage, getNovelPage } from '@/presentation/controllers/novel-read.controller'
 import { getProfile } from '@/presentation/controllers/profile.controller'
 import type { AppEnv } from '@/presentation/env'
+import { requireAuth } from '@/presentation/middleware/require-auth'
 import { authRoutes } from './auth.route'
 import { healthRoutes } from './health.route'
 import { libraryRoutes } from './library.route'
@@ -31,10 +36,12 @@ export function registerRoutes(app: Hono<AppEnv>) {
   app.route('/library', libraryRoutes)
   app.route('/notifications', notificationsRoutes)
   app.route('/', socialRoutes)
+  app.post('/invitations/:invitationId/respond', requireAuth, postRespondInvitation)
 
   // Public reading. Hono only recognizes a param at a segment start, so the whole
   // `@{handle}` segment is one regex param; controllers strip the `@`.
   app.get(`/:handle{${HANDLE}}`, getProfile)
   app.get(`/:handle{${HANDLE}}/:slug`, getNovelPage)
+  app.post(`/:handle{${HANDLE}}/:slug/fork`, requireAuth, postFork)
   app.get(`/:handle{${HANDLE}}/:slug/episodes/:episodeNo{[0-9]+}`, getEpisodePage)
 }
