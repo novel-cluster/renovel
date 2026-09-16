@@ -40,12 +40,8 @@ export class SignupService {
     RawPassword.create(input.password)
     const displayName = input.displayName.trim() || handle.value
 
-    if (await this.users.handleExists(handle.value)) {
-      throw new ConflictError('このハンドルは既に使われています')
-    }
-    if (await this.users.emailExists(email.value)) {
-      throw new ConflictError('このメールアドレスは既に登録されています')
-    }
+    if (await this.users.handleExists(handle.value)) throw new ConflictError('このハンドルは既に使われています')
+    if (await this.users.emailExists(email.value)) throw new ConflictError('このメールアドレスは既に登録されています')
 
     const passwordHash = await this.hasher.hash(input.password)
     const user = await this.users.create({
