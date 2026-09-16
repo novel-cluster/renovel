@@ -49,10 +49,12 @@ export class ReadNovelQuery {
     ) {
       throw new NotFoundError('作品が見つかりません')
     }
-    const author = await this.authorRef(novel.authorId)
-    const episodes = isOwner
-      ? await this.episodes.listByNovel(novel.id)
-      : await this.episodes.listPublishedByNovel(novel.id)
+    const [author, episodes] = await Promise.allSettled([
+      this.authorRef(novel.authorId),
+      isOwner
+        ? this.episodes.listByNovel(novel.id)
+        : this.episodes.listPublishedByNovel(novel.id)
+    ])
     return { novel, author, episodes, isOwner }
   }
 
