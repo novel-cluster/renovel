@@ -1,8 +1,8 @@
 # Collaboration & Fork Design / 共同制作・Fork 設計
 
 > 対象: Collaboration（共同制作・Role・招待）と Fork / Change Proposal（GitHub-Fork 型の派生作品）。ReNovel の看板差別化機能（PRD §5 "Collaboration Is Native"）。
-> 正典は PRD §5, §13, §14, §15, §16。テーブル定義の正典は [data-model.md](./data-model.md)（`collaborators` / `collaboration_invitations` / `forks` / `change_proposals` / `change_proposal_comments`）。Role 権限マトリクスの正典は [auth.md](./auth.md) §3.1（本書はそれを前提にコラボレーション固有のフロー・状態遷移を補う。マトリクス自体は再定義しない）。
-> Revision の保存方式・Episode ライフサイクルは [writing-revision.md](./writing-revision.md) を正典とし、本書はそこに Collaboration/Fork 固有の紐付けを追加する。ルート一覧は [routing.md](./routing.md) §3.3 を正とし、本書は該当ルートを引用する。
+> 正典は PRD §5, §13, §14, §15, §16。テーブル定義の正典は [data-model.md](../foundation/data-model.md)（`collaborators` / `collaboration_invitations` / `forks` / `change_proposals` / `change_proposal_comments`）。Role 権限マトリクスの正典は [auth.md](../foundation/auth.md) §3.1（本書はそれを前提にコラボレーション固有のフロー・状態遷移を補う。マトリクス自体は再定義しない）。
+> Revision の保存方式・Episode ライフサイクルは [writing-revision.md](./writing-revision.md) を正典とし、本書はそこに Collaboration/Fork 固有の紐付けを追加する。ルート一覧は [routing.md](../foundation/routing.md) §3.3 を正とし、本書は該当ルートを引用する。
 > 現状は scaffold（Phase 0 完了）。本書は「これから作る目標形」を示す。
 
 ## サマリー
@@ -10,7 +10,7 @@
 - **招待は `collaboration_invitations` を経由する非同期フロー**とし、招待中は `collaborators` 行を作らない（承諾して初めて Role が確定する）。二重招待は部分 UNIQUE index で防止し、招待の状態遷移（pending → accepted/declined/revoked/expired）を明確化する。
 - **Owner 移譲は「新 Owner 昇格 → 旧 Owner 降格」の順で必ず 2 段トランザクションで行う**。部分 UNIQUE index（`role='owner'` は Novel あたり1行）を瞬間的にも破らないよう、降格を先に実行してから昇格させる。
 - **Fork の帰属表示は DB に「編集可能なテキスト」として保存しない。** `forks.source_novel_id` を辿って毎回動的生成し、`forks` テーブルは DB トリガで UPDATE/DELETE を拒否する append-only とする。Novel 設定更新 API のリクエストスキーマは allow-list 方式で帰属関連フィールドを一切受け付けないため、UI 経由でもサーバ経由でも削除不可能にする（DB 制約 + サーバ側検証の二重化）。
-- **Fork Policy が `approval_required` の場合、`forks` に直接書かず新設の `fork_requests` テーブル（本書提案、[data-model.md](./data-model.md) への追記が必要）で承認待ちを表現する。** `collaboration_invitations` と対称的なパターンにし、承認された時点で初めて `forks` 行と新 Novel が生成される。
+- **Fork Policy が `approval_required` の場合、`forks` に直接書かず新設の `fork_requests` テーブル（本書提案、[data-model.md](../foundation/data-model.md) への追記が必要）で承認待ちを表現する。** `collaboration_invitations` と対称的なパターンにし、承認された時点で初めて `forks` 行と新 Novel が生成される。
 - **Change Proposal の Accept は「新しい `episode_revisions` を1件追記する」操作として `writing-revision.md` の Revision 体系に統合する。** 誰の版かを明確にするため `editor_id = 提案者`、かつ出自を追跡する `episode_revisions.source_proposal_id`（本書提案、新規列）を追加し、Restore（`restored_from_id`）と対称に扱う。これは writing-revision.md §5 未決事項5を本書で確定するものである。
 - **Change Proposal の提案元は「Fork 由来」（`source_novel_id` あり）と「共同制作内」（`source_novel_id` NULL）の2パターンがあり、後者は Viewer ロールにも開放する** — 編集権限を持たない Collaborator（ベータリーダー的な立場）が直接編集せずに変更を提案できるようにするための設計判断。
 
@@ -20,19 +20,19 @@
 
 ### 1.1 前提: Role と権限
 
-Role（`collaborator_role`: `owner`/`admin`/`writer`/`editor`/`viewer`）ごとの操作可否は [auth.md](./auth.md) §3.1 の権限マトリクスを正典とする。本書では重複記載せず、コラボレーション運用上の要点のみ再掲する。
+Role（`collaborator_role`: `owner`/`admin`/`writer`/`editor`/`viewer`）ごとの操作可否は [auth.md](../foundation/auth.md) §3.1 の権限マトリクスを正典とする。本書では重複記載せず、コラボレーション運用上の要点のみ再掲する。
 
 | Role | 一言で | Revision との関係 |
 |---|---|---|
 | Owner | 全権限・Novel の責任者。`novels.author_id` と一致 | 自身の保存操作は `editor_id=自分` の Revision を残す |
 | Admin | 設定変更・Collaborator 管理・Publish 可 | 同上 |
 | Writer | Episode 作成・編集・Draft 保存可 | 同上 |
-| Editor | 既存 Episode の校正・編集のみ（新規 Draft 作成不可、[auth.md](./auth.md) §3.1 脚注） | 校正結果が Revision の `editor_id` に残る |
+| Editor | 既存 Episode の校正・編集のみ（新規 Draft 作成不可、[auth.md](../foundation/auth.md) §3.1 脚注） | 校正結果が Revision の `editor_id` に残る |
 | Viewer | Private Novel / Draft Episode の閲覧のみ | Revision を作れない。Change Proposal（§3.2）でのみ変更を提案可能 |
 
 ### 1.2 招待の状態遷移
 
-招待は `collaboration_invitations`（[data-model.md](./data-model.md)）の `invitation_status` enum で管理する。
+招待は `collaboration_invitations`（[data-model.md](../foundation/data-model.md)）の `invitation_status` enum で管理する。
 
 ```text
                     ┌────────────┐
@@ -51,10 +51,10 @@ Role（`collaborator_role`: `owner`/`admin`/`writer`/`editor`/`viewer`）ごと�
   （novel_id, user_id=invitee_id, role, invited_by=inviter_id）
 ```
 
-- **pending → accepted/declined**: 招待対象本人のみが遷移させられる（`POST /api/invitations/{invitationId}/accept` / `decline`、[routing.md](./routing.md) §3.3）。`responded_at` を記録。
+- **pending → accepted/declined**: 招待対象本人のみが遷移させられる（`POST /api/invitations/{invitationId}/accept` / `decline`、[routing.md](../foundation/routing.md) §3.3）。`responded_at` を記録。
 - **pending → revoked**: 招待した側（Owner/Admin）がまだ pending の招待を取り消す。招待対象が既に accepted 後は取り消せない（Collaborator 削除は別操作、§1.1 の権限で `DELETE /api/studio/collaborators/{collaboratorId}`）。
 - **pending → expired**: 招待発行から一定期間（既定 14 日、未決事項）応答がない場合に期限切れとする。実装は [writing-revision.md](./writing-revision.md) の Scheduled Publish と同じ due ポーリング worker パターンを流用可能（軽量なので当面はリクエスト時 lazy 評価でも可）。
-- **一意性**: 同一 Novel × 同一 invitee に対する pending 招待は同時に1件のみ（`UNIQUE(novel_id, invitee_id) WHERE status='pending'`、[data-model.md](./data-model.md)）。過去に declined/revoked/expired になった招待は再招待可能（新しい行を作る。append-only ではなく通常の状態更新表）。
+- **一意性**: 同一 Novel × 同一 invitee に対する pending 招待は同時に1件のみ（`UNIQUE(novel_id, invitee_id) WHERE status='pending'`、[data-model.md](../foundation/data-model.md)）。過去に declined/revoked/expired になった招待は再招待可能（新しい行を作る。append-only ではなく通常の状態更新表）。
 - **accepted は取り消し不能**: 一度 accepted になった `collaboration_invitations` 行はステータスを戻さない。Collaborator を外す操作は `collaborators` 行の DELETE として別途行う（招待履歴と現在の在籍状態を分離する）。
 
 ### 1.3 招待〜参加のシーケンス
@@ -112,20 +112,20 @@ Owner/Admin                     System                          Invitee
 |---|---|
 | Writer A が Draft を保存 | `editor_id = A` の Revision が刻まれる（手動保存時のみ、Autosave では刻まれない） |
 | Editor B が A の原稿を校正して保存 | `editor_id = B`。A の元原稿は過去 Revision として残るため「誰が何を書いたか」が Revision 履歴から追跡できる |
-| A が Role を剥奪され Collaborator から外れた後 | 過去に A が刻んだ Revision の `editor_id=A` は変更しない（`ON DELETE RESTRICT` により `users` 物理削除時も破棄されない、[data-model.md](./data-model.md) §1.4）。Revision History UI 上は「元 Collaborator」等の注記を付けて表示する（UI詳細は [frontend.md](./frontend.md) 側） |
+| A が Role を剥奪され Collaborator から外れた後 | 過去に A が刻んだ Revision の `editor_id=A` は変更しない（`ON DELETE RESTRICT` により `users` 物理削除時も破棄されない、[data-model.md](../foundation/data-model.md) §1.4）。Revision History UI 上は「元 Collaborator」等の注記を付けて表示する（UI詳細は [frontend.md](../overview/frontend.md) 側） |
 | Role が Viewer に降格された Collaborator が過去に持っていた Revision | そのまま保持。降格は将来の保存権限のみに影響し、過去の履歴的事実は変えない |
 
 - **決定 / 理由 / 代替案**: Revision の帰属は「保存操作した本人」を常に正とする（提案の取り込み時のみ例外、§3.5 で別途規定）。理由は Revision History が「実際に誰の手でその文面になったか」という編集監査ログとしての役割を持つため（共同制作の透明性、PRD §5 "Collaboration Is Native"）。代替案として「Owner 名義に統一する」案は監査価値を失うため不採用。
 
 ### 1.5 Owner 移譲
 
-Owner は 1 Novel に必ず 1 名（`collaborators` の部分 UNIQUE index `WHERE role='owner'`、[data-model.md](./data-model.md)）。Owner 不在の瞬間を作らずに移譲するため、**2段階トランザクション**を採用する。
+Owner は 1 Novel に必ず 1 名（`collaborators` の部分 UNIQUE index `WHERE role='owner'`、[data-model.md](../foundation/data-model.md)）。Owner 不在の瞬間を作らずに移譲するため、**2段階トランザクション**を採用する。
 
 ```
 POST /api/studio/novels/{novelId}/transfer-owner
 Body: { newOwnerUserId }
 ```
-（新規ルート提案。[routing.md](./routing.md) の Collaboration 節に追記が必要）
+（新規ルート提案。[routing.md](../foundation/routing.md) の Collaboration 節に追記が必要）
 
 **決定 / 理由 / 代替案**
 
@@ -159,7 +159,7 @@ export class TransferOwnerService {
 }
 ```
 
-- Fork Policy の変更権限は Owner のみ（[auth.md](./auth.md) §3.1 補足）なので、移譲直後から新 Owner がその権限を持つ。旧 Owner は Admin として Novel 削除以外の権限を保持し続ける。
+- Fork Policy の変更権限は Owner のみ（[auth.md](../foundation/auth.md) §3.1 補足）なので、移譲直後から新 Owner がその権限を持つ。旧 Owner は Admin として Novel 削除以外の権限を保持し続ける。
 
 ---
 
@@ -167,7 +167,7 @@ export class TransferOwnerService {
 
 ### 2.1 系譜モデル（source / forked / root）
 
-`forks`（[data-model.md](./data-model.md)）が系譜の正典。
+`forks`（[data-model.md](../foundation/data-model.md)）が系譜の正典。
 
 | 列 | 意味 |
 |---|---|
@@ -203,7 +203,7 @@ root_novel_id(newFork) =
            root_novel_id   = A   ← 系譜のルートは常に A
 ```
 
-- Novel C の閲覧画面には「Forked from: 勇者を選ばなかった神（さらにその原作: 神は勇者を選ばない）」のように**直接の親のみ既定表示**し、深い系譜は折りたたみ表示にする（UI詳細は [frontend.md](./frontend.md) 側の検討事項）。**直接の親の帰属だけは常に必須表示**とし、ルートまでの完全な系譜表示は補足情報という扱いにする（PRD §14 の例示「Forked from: 「神は勇者を選ばない」」は直接の親を指すため）。
+- Novel C の閲覧画面には「Forked from: 勇者を選ばなかった神（さらにその原作: 神は勇者を選ばない）」のように**直接の親のみ既定表示**し、深い系譜は折りたたみ表示にする（UI詳細は [frontend.md](../overview/frontend.md) 側の検討事項）。**直接の親の帰属だけは常に必須表示**とし、ルートまでの完全な系譜表示は補足情報という扱いにする（PRD §14 の例示「Forked from: 「神は勇者を選ばない」」は直接の親を指すため）。
 - 原作側 Novel A の「Fork 一覧」（PRD §14「原作側でもFork一覧を確認可能」）は `source_novel_id = A` の直接の子のみを列挙する（孫以降は含めない。孫まで見たい場合は各子ページから辿る設計とし、無限ツリー描画をページ内に持ち込まない）。
 
 ### 2.3 Fork 実行フロー（コピー範囲・初期状態）
@@ -211,7 +211,7 @@ root_novel_id(newFork) =
 ```
 POST /@{handle}/{slug}/fork
 ```
-（[routing.md](./routing.md) §3.3。SSR フォーム送信、成功後は新 Novel の Studio 編集画面へリダイレクト）
+（[routing.md](../foundation/routing.md) §3.3。SSR フォーム送信、成功後は新 Novel の Studio 編集画面へリダイレクト）
 
 **コピーする/しないものの決定**
 
@@ -232,7 +232,7 @@ POST /@{handle}/{slug}/fork
 
 ### 2.4 Fork Policy（Disabled / Approval Required / Allowed）
 
-`novels.fork_policy`（enum `fork_policy`、[data-model.md](./data-model.md)）。**設定・変更は Owner のみ**（[auth.md](./auth.md) §3.1 補足、PRD §15）。
+`novels.fork_policy`（enum `fork_policy`、[data-model.md](../foundation/data-model.md)）。**設定・変更は Owner のみ**（[auth.md](../foundation/auth.md) §3.1 補足、PRD §15）。
 
 | Policy | Fork ボタンの表示 | `POST .../fork` の挙動 |
 |---|---|---|
@@ -264,7 +264,7 @@ CLAUDE.md「Forked works cannot remove attribution to the original」と PRD §1
 
 **① DB 制約 — `forks` テーブルを物理的に不変にする**
 
-- `forks.source_novel_id` は `ON DELETE RESTRICT`（[data-model.md](./data-model.md)）— 原作 Novel はそもそも物理削除できない（Soft Delete のみ）ため、帰属先の消滅による「表示できなくなる」事態を防ぐ。
+- `forks.source_novel_id` は `ON DELETE RESTRICT`（[data-model.md](../foundation/data-model.md)）— 原作 Novel はそもそも物理削除できない（Soft Delete のみ）ため、帰属先の消滅による「表示できなくなる」事態を防ぐ。
 - `forks` テーブル自体に **BEFORE UPDATE/DELETE トリガ**を追加し、アプリ層のバグや誤操作、あるいは Repository 実装ミスがあっても DB レベルで確実に拒否する。
 
 ```sql
@@ -284,7 +284,7 @@ CREATE TRIGGER forks_immutable
 
 **② サーバ側検証 — 帰属表示を「消せる余地のあるデータ」として持たない**
 
-- 帰属バナー（「Forked from: 〜」）は `novels` テーブルに**保存しない**。表示の都度 `forks.source_novel_id` を辿って動的生成する（[data-model.md](./data-model.md) 既定方針）。つまり「削除できる帰属テキスト」というフィールドがそもそも存在しない。
+- 帰属バナー（「Forked from: 〜」）は `novels` テーブルに**保存しない**。表示の都度 `forks.source_novel_id` を辿って動的生成する（[data-model.md](../foundation/data-model.md) 既定方針）。つまり「削除できる帰属テキスト」というフィールドがそもそも存在しない。
 - Novel 設定更新 API（`PATCH /api/studio/novels/{novelId}` → `UpdateNovelMetadataService`）のリクエスト DTO は **allow-list 方式**で更新可能フィールドを明示列挙する（`title`/`catchphrase`/`description`/`genre`/`visibility`/`publication_status`/`content_warnings`）。帰属表示の抑制に使えるようなフィールド（例: `hideForkBanner` 的なフラグ）は allow-list に存在しないため、Application Service 側でリクエストボディに余分なキーがあっても無視される（型レベルで受け付けない。Zod/Valibot 等の Parse-don't-validate スキーマで未定義キーは黙って弾く）。
 - `NovelDetailView`（SSR）は、Novel が fork 由来かどうかを**毎リクエスト** `ForkRepository.findBySourceNovelId` / `findByForkedNovelId` に問い合わせて決定し、View テンプレート側に「表示しない」分岐を作らない（フラグで on/off できる作りにしない）。これにより Controller/View レベルでの実装ミスによる非表示化も構造的に起こりにくくする。
 - **決定 / 理由 / 代替案**: 帰属を「Novel の可変フィールド」として持たせない設計を採用。代替案（`novels.forked_from_label` のようなテキスト列を持たせ、削除を業務ロジックで禁止する）は、禁止ロジックのバグや将来の一括更新スクリプトで書き換えられるリスクが残るため不採用。データとして「削除可能な形」で存在させないことが最も堅牢。
@@ -295,7 +295,7 @@ CREATE TRIGGER forks_immutable
 
 `forks` は append-only の確定記録専用（§2.5）であるため、「承認待ち」という中間状態を `forks` に混ぜ込まない。`collaboration_invitations` と対称的な新テーブルを提案する。
 
-> **注記**: `fork_requests` は本書で新規提案するテーブルであり、現時点の [data-model.md](./data-model.md) には未記載。data-model.md 更新時に転記すること（[auth.md](./auth.md) が `password_reset_tokens` について行ったのと同じ扱い）。
+> **注記**: `fork_requests` は本書で新規提案するテーブルであり、現時点の [data-model.md](../foundation/data-model.md) には未記載。data-model.md 更新時に転記すること（[auth.md](../foundation/auth.md) が `password_reset_tokens` について行ったのと同じ扱い）。
 
 #### `fork_requests`（提案）
 
@@ -334,7 +334,7 @@ CREATE TRIGGER forks_immutable
 - 承認（`approved`）は**Fork の実行トリガ**であり、承認処理と Fork 実行（新 Novel 作成・`forks` INSERT）を同一トランザクションにする。
 - 却下・取り下げでは新 Novel も `forks` 行も一切作られない。
 - Application Service: `RequestForkService`（pending 作成）/ `ApproveForkRequestService`（承認 + Fork 実行）/ `RejectForkRequestService` / `CancelForkRequestService`。
-- ルート（新規提案、[routing.md](./routing.md) への追記が必要）:
+- ルート（新規提案、[routing.md](../foundation/routing.md) への追記が必要）:
 
 ```
 POST   /@{handle}/{slug}/fork-requests            … リクエスト作成（ログインユーザー）
@@ -352,7 +352,7 @@ POST   /api/fork-requests/{forkRequestId}/cancel   … 取り下げ（requester 
 
 ### 3.1 データモデルと base/head
 
-`change_proposals` / `change_proposal_comments`（[data-model.md](./data-model.md)）が正典。
+`change_proposals` / `change_proposal_comments`（[data-model.md](../foundation/data-model.md)）が正典。
 
 | 列 | 役割 |
 |---|---|
@@ -431,7 +431,7 @@ Comment はどの状態でも追加可能（open中の議論が主用途だが�
 accepted/rejected 後の経緯コメントも許容し履歴として残す）。
 ```
 
-- Accept/Reject の権限: **`target_novel_id` に対する Owner/Admin**（[auth.md](./auth.md) §3.1 の `proposal.decide` アクション、PRD §16「Ownerまたは権限を持つCollaboratorが」）。
+- Accept/Reject の権限: **`target_novel_id` に対する Owner/Admin**（[auth.md](../foundation/auth.md) §3.1 の `proposal.decide` アクション、PRD §16「Ownerまたは権限を持つCollaboratorが」）。
 - Withdraw: **提案者本人のみ**（`proposer_id` 一致）。Accept/Reject 後は withdraw 不可（既に確定した状態のため）。
 - Comment 権限: 提案者本人 + `target_novel_id` の Collaborator（Viewer 以上）。Fork 由来提案の場合は加えて `source_novel_id` の Collaborator も閲覧・コメント可（自分たちが送った提案の行方を追えるようにする、未決事項として一般公開コメントの可否は§5参照）。
 
@@ -465,7 +465,7 @@ Accept は「Change Proposal の内容を target Episode に取り込み、新�
 
 - **`editor_id` は提案者（`change_proposals.proposer_id`）を設定する。** 理由: Revision History は「誰が書いたか」の記録であり、実際に文章を書いたのは提案者であって Accept ボタンを押した Owner/Admin ではない（GitHub の "Co-authored-by" に近い発想。ただし ReNovel は単一 `editor_id` 列のため、取り込み実行者は `source_proposal_id → change_proposals.decided_by` を辿れば分かる形にする）。
 - **Accept 処理手順**:
-  1. Role 検証: `decided_by` が `target_novel_id` の Owner/Admin か（`CollaboratorPolicy.can(role, "proposal.decide")`、[auth.md](./auth.md) §4.1）。
+  1. Role 検証: `decided_by` が `target_novel_id` の Owner/Admin か（`CollaboratorPolicy.can(role, "proposal.decide")`、[auth.md](../foundation/auth.md) §4.1）。
   2. `base_revision_id` と target Episode の現在の最新 Revision を比較。**一致しない場合（他の変更が割り込んで進んでいる場合）は警告を提示**するが、1.0 では強制ブロックはせず「competing change あり」の確認フラグ付きで Accept を続行可能にする（真の3-wayマージは行わない、未決事項）。
   3. 新しい `episode_revisions` を追記: `body = head_body`、`editor_id = proposer_id`、`source_proposal_id = change_proposals.id`、`change_note = "Change Proposal #{id} accepted by {decided_by}"`。
   4. `episodes.body` / `char_count` / `updated_at` を新 Revision の内容で更新。
@@ -500,7 +500,7 @@ export class AcceptProposalService {
 
 ### 3.6 Comment
 
-- `change_proposal_comments`（[data-model.md](./data-model.md)）に平坦なコメント列として追記（返信ネストなし。`comments` テーブルの1段返信とは異なり、PR的な議論はスレッド不要のタイムライン表示で十分と判断）。
+- `change_proposal_comments`（[data-model.md](../foundation/data-model.md)）に平坦なコメント列として追記（返信ネストなし。`comments` テーブルの1段返信とは異なり、PR的な議論はスレッド不要のタイムライン表示で十分と判断）。
 - Soft Delete は持たない（`change_proposals` 自体が append-only 志向のドメインであり、コメント削除が必要になった場合はモデレーション観点で `moderation.md` 側の Hide 機構を再利用する方針、未決事項）。
 
 ---
@@ -517,7 +517,7 @@ Bob --POST /api/invitations/{id}/accept-->
    collaborators に (novel, Bob, admin) 追加
 結果: Bob は次リクエストから Studio で Admin 操作（設定変更・Publish等）が可能
 ```
-根拠: [auth.md](./auth.md) §3.1 マトリクス「Collaborator招待・削除・Role変更」= Owner/Admin。招待自体は Owner が実行し、承諾操作は Bob 本人のみ実行可能（§1.3）。
+根拠: [auth.md](../foundation/auth.md) §3.1 マトリクス「Collaborator招待・削除・Role変更」= Owner/Admin。招待自体は Owner が実行し、承諾操作は Bob 本人のみ実行可能（§1.3）。
 
 ### ケース2: Fork Policy = Approval Required の Novel を第三者が Fork したい
 
@@ -547,7 +547,7 @@ Alice --POST /api/proposals/{id}/accept-->
      新 episode_revisions { editor_id=Bob, source_proposal_id=proposal.id } 追記
      原作 Episode 3 の本文が更新される
 ```
-根拠: Accept権限は target Novel(原作)の Owner/Admin（§3.3, [auth.md](./auth.md) `proposal.decide`）。Revision の帰属は Bob（提案者、§3.5）。
+根拠: Accept権限は target Novel(原作)の Owner/Admin（§3.3, [auth.md](../foundation/auth.md) `proposal.decide`）。Revision の帰属は Bob（提案者、§3.5）。
 
 ### ケース4: Viewer が帰属表示バナーを消そうとする（拒否されるケース）
 
@@ -580,7 +580,7 @@ Alice(owner) --POST /api/studio/novels/{id}/transfer-owner { newOwnerUserId: Bob
 
 ## 5. data-model.md への追加提案（本書からの差分まとめ）
 
-本書の設計を確定させるにあたり、[data-model.md](./data-model.md) に以下の追記が必要（本書はこれらを前提として記述している）。
+本書の設計を確定させるにあたり、[data-model.md](../foundation/data-model.md) に以下の追記が必要（本書はこれらを前提として記述している）。
 
 | 追加対象 | 内容 |
 |---|---|
@@ -599,18 +599,18 @@ Alice(owner) --POST /api/studio/novels/{id}/transfer-owner { newOwnerUserId: Bob
 4. **Change Proposal のコメント公開範囲**: Fork 由来提案の `source_novel_id` 側 Collaborator にもコメントを許可すると記載したが（§3.3）、原作の非公開議論が Fork 側に漏れる懸念とのバランスは未検証。
 5. **Change Proposal コメントの削除・モデレーション**: `change_proposal_comments` に Soft Delete を持たせるかは [moderation.md](./moderation.md) 側との整合待ち。
 6. **共同制作内 Change Proposal を Viewer に開放する設計（§3.2）の是非**: PRD の Role 定義（Viewer=閲覧のみ）とは厳密には緊張関係にある拡張解釈のため、プロダクト判断としての最終確認が必要。
-7. **Fork のコピー範囲の詳細**: 表紙相当の情報を持たない ReNovel では影響が小さいが、将来 Novel にメディア添付が増えた場合のコピー方針（ストレージ上のファイル複製 or 参照共有）は [infrastructure.md](./infrastructure.md) 側との調整が必要。
-8. **多段 Fork の表示 UI**（系譜の折りたたみ表示、孫 Fork 一覧への導線）は [frontend.md](./frontend.md) 側で別途検討。
+7. **Fork のコピー範囲の詳細**: 表紙相当の情報を持たない ReNovel では影響が小さいが、将来 Novel にメディア添付が増えた場合のコピー方針（ストレージ上のファイル複製 or 参照共有）は [infrastructure.md](../overview/infrastructure.md) 側との調整が必要。
+8. **多段 Fork の表示 UI**（系譜の折りたたみ表示、孫 Fork 一覧への導線）は [frontend.md](../overview/frontend.md) 側で別途検討。
 9. **`fork_requests`/`episode_revisions.source_proposal_id` の data-model.md への正式転記時期**: 本書は先行提案として記述しているため、実装着手前に data-model.md 側の更新レビューを挟むこと。
 
 ---
 
 ## 関連ドキュメント
 
-- [data-model.md](./data-model.md) — `collaborators`/`collaboration_invitations`/`forks`/`change_proposals`/`change_proposal_comments` のスキーマ正典、本書提案分の転記先
-- [auth.md](./auth.md) §3.1, §4.1 — Collaborator Role 権限マトリクス、Policy オブジェクトの実装配置
+- [data-model.md](../foundation/data-model.md) — `collaborators`/`collaboration_invitations`/`forks`/`change_proposals`/`change_proposal_comments` のスキーマ正典、本書提案分の転記先
+- [auth.md](../foundation/auth.md) §3.1, §4.1 — Collaborator Role 権限マトリクス、Policy オブジェクトの実装配置
 - [writing-revision.md](./writing-revision.md) — Episode ライフサイクル・Revision 保存方式・Diff アルゴリズムの正典
-- [routing.md](./routing.md) §3.3 — Collaboration/Fork/Change Proposal の既存ルート一覧、本書提案ルートの追記先
-- [architecture.md](./architecture.md) §4 — `collaboration`/`fork` ドメインの責務境界
+- [routing.md](../foundation/routing.md) §3.3 — Collaboration/Fork/Change Proposal の既存ルート一覧、本書提案ルートの追記先
+- [architecture.md](../overview/architecture.md) §4 — `collaboration`/`fork` ドメインの責務境界
 - [social-notification.md](./social-notification.md) — 招待・Fork・Change Proposal 通知の配信詳細
 - [moderation.md](./moderation.md) — コメント・提案のモデレーション方針

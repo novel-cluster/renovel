@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Status
 
-ReNovel is a web-novel publishing platform (reader-first, with strong author analytics, native collaboration, and GitHub-Fork-style derivative works). **The repo is currently a scaffold** — `app/src/index.ts` is a Hono "Hello" stub and the intended architecture below does not yet exist in code. `PRD.md` (~1500 lines, Japanese) is the authoritative product and architecture spec. Implementation-level design lives in `docs/design/` (see [Design Documents](#design-documents-docsdesign) below) — and **`docs/design/data-model.md` is the source of truth for the DB schema**. Before building a feature, read both the relevant PRD section and the matching design doc(s). The runnable app lives entirely under `app/`.
+ReNovel is a web-novel publishing platform (reader-first, with strong author analytics, native collaboration, and GitHub-Fork-style derivative works). **The repo is currently a scaffold** — `app/src/index.ts` is a Hono "Hello" stub and the intended architecture below does not yet exist in code. `PRD.md` (~1500 lines, Japanese) is the authoritative product and architecture spec. Implementation-level design lives in `docs/design/` (see [Design Documents](#design-documents-docsdesign) below) — and **`docs/design/foundation/data-model.md` is the source of truth for the DB schema**. Before building a feature, read both the relevant PRD section and the matching design doc(s). The runnable app lives entirely under `app/`.
 
 ## Design Documents (`docs/design/`)
 
@@ -47,7 +47,7 @@ podman compose -f docker/docker-compose.dev.yml up --build   # web + postgres
 
 - **Runtime:** Bun · **Framework:** Hono (the app is Hono-centric; avoid pulling in an SPA framework)
 - **SSR:** `hono/jsx` · **Client interactivity:** `hono/jsx/dom`, used *only* for genuinely interactive islands (editor autosave, reader settings, analytics graphs, notifications, search filters, realtime). Do not client-render whole pages.
-- **DB:** PostgreSQL · **ORM:** Drizzle (`drizzle-orm/postgres-js`; config in `app/drizzle.config.ts`, schema barrel in `src/infrastructure/database/schema/`). The schema must follow `docs/design/data-model.md` (canonical table/column/enum names).
+- **DB:** PostgreSQL · **ORM:** Drizzle (`drizzle-orm/postgres-js`; config in `app/drizzle.config.ts`, schema barrel in `src/infrastructure/database/schema/`). The schema must follow `docs/design/foundation/data-model.md` (canonical table/column/enum names).
 - **UI:** Kiwa UI (`app/src/kiwa-ui.json`), a shadcn-style component registry; components are added into `@/components`, styled with Tailwind v4 (`src/styles/globals.css`). Use the `cn()` helper in `src/lib/utils.ts` for class merging.
 - **Lint/format:** Biome (`app/biome.json`). CSS files and generated dirs are excluded from Biome.
 - **Infra:** Compose (run via **Podman**, see above), self-hosted, exposed via Cloudflare Tunnel (no direct port-forwarding). `docker/` holds `Dockerfile.dev`/`Dockerfile.prod` + `docker-compose.dev.yml`.

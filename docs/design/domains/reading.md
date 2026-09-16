@@ -1,6 +1,6 @@
 # Reading / 読書ドメイン設計
 
-読書体験を支える永続データ（Reading Progress・Library）と、Reader Settings の同期方式・プライバシー方針を定義する。UI/CSS の詳細（フォント・行間・縦書き等の見た目）は [frontend.md](./frontend.md) §4 が担当し、本書はデータモデル・更新ロジック・同期・プライバシーに専念する。テーブル定義の正典は [data-model.md](./data-model.md)。
+読書体験を支える永続データ（Reading Progress・Library）と、Reader Settings の同期方式・プライバシー方針を定義する。UI/CSS の詳細（フォント・行間・縦書き等の見た目）は [frontend.md](../overview/frontend.md) §4 が担当し、本書はデータモデル・更新ロジック・同期・プライバシーに専念する。テーブル定義の正典は [data-model.md](../foundation/data-model.md)。
 
 ## サマリー
 
@@ -17,7 +17,7 @@
 
 ### 1.1 記録項目とテーブル
 
-正典は [data-model.md](./data-model.md) `reading_progress`。再掲:
+正典は [data-model.md](../foundation/data-model.md) `reading_progress`。再掲:
 
 | カラム | 型 | 意味 |
 |---|---|---|
@@ -50,7 +50,7 @@
 
 ### 1.3 「続きから読む」解決ロジック
 
-`GET /@{handle}/{slug}/continue`（[routing.md](./routing.md) §3.2）の解決アルゴリズム:
+`GET /@{handle}/{slug}/continue`（[routing.md](../foundation/routing.md) §3.2）の解決アルゴリズム:
 
 ```text
 ResumeReadingService.resolve(userId, novelId):
@@ -69,7 +69,7 @@ ResumeReadingService.resolve(userId, novelId):
        → 直近で閲覧可能な最新 Episode にフォールバック、無ければ Novel トップへ
 ```
 
-- 認可: 本人の `reading_progress` のみ参照（[routing.md](./routing.md) 3.2 に準拠）。他ユーザーの進捗からは解決しない。
+- 認可: 本人の `reading_progress` のみ参照（[routing.md](../foundation/routing.md) 3.2 に準拠）。他ユーザーの進捗からは解決しない。
 - 未ログイン時、`/continue` へのアクセスは Novel トップ（`/@{handle}/{slug}`）へリダイレクト（要ログイン扱い、routing.md 通り）。
 
 ### 1.4 更新頻度と Analytics との連携（非ブロッキング）
@@ -92,7 +92,7 @@ Reading Progress の永続化と Analytics イベント送信は**目的も送�
 
 **決定**: 未ログインユーザーの読書進捗は **サーバに一切記録しない**。
 
-- 理由: `reading_progress` は `user_id NOT NULL`（[data-model.md](./data-model.md)）であり、匿名 ID を発行して記録することは PRD §58 のプライバシー原則（不必要な個人追跡をしない）に反する。Cookie ベースの匿名トラッキングは追跡コストの割に価値が低い（ログインしてこそ「続きから読む」の価値が出る）。
+- 理由: `reading_progress` は `user_id NOT NULL`（[data-model.md](../foundation/data-model.md)）であり、匿名 ID を発行して記録することは PRD §58 のプライバシー原則（不必要な個人追跡をしない）に反する。Cookie ベースの匿名トラッキングは追跡コストの割に価値が低い（ログインしてこそ「続きから読む」の価値が出る）。
 - ゲスト向け代替: フロントの reading island が **localStorage** に `{novelId: {episodeId, position, updatedAt}}` を保存し、同一ブラウザでの「前回の続きへ」リンクをクライアント側でのみ表示する（サーバ SSR には出さない、hydration 後に island が描画）。ログインを促す導線として使う。
 - ログイン時の引き継ぎ: ログイン直後、localStorage に該当 Novel のエントリがあり、かつサーバ側 `reading_progress` が存在しない/より古い場合に限り、1回だけ `POST /api/episodes/{episodeId}/reading-progress` でサーバへ反映してよい（任意実装、必須ではない。詳細は未決事項）。
 - Analytics イベント（`episode_view` 等）はゲストでも匿名集計目的で送信されうるが、これは `analytics_events` 側の方針（[analytics.md](./analytics.md)）に従い、個人特定情報を含めない。Reading Progress とは独立に扱う。
@@ -103,7 +103,7 @@ Reading Progress の永続化と Analytics イベント送信は**目的も送�
 
 ### 2.1 状態定義
 
-`library_entries.state`（enum `library_state`、[data-model.md](./data-model.md)）:
+`library_entries.state`（enum `library_state`、[data-model.md](../foundation/data-model.md)）:
 
 | 状態 | 意味 |
 |---|---|
@@ -127,7 +127,7 @@ completed    --明示操作--> reading | read_later | favorite | (削除)
 favorite     --明示操作--> reading | read_later | completed | (削除)
 ```
 
-- 全遷移はユーザーの明示操作（`POST /api/novels/{novelId}/library` で state を指定、[routing.md](./routing.md)）。
+- 全遷移はユーザーの明示操作（`POST /api/novels/{novelId}/library` で state を指定、[routing.md](../foundation/routing.md)）。
 - **自動遷移は行わない（決定）**: 「Episode 読了で自動的に Library の state を `completed` にする」という連動は**実装しない**。
   - 理由: (1) `reading_progress.is_completed` は Episode 単位、Library の `completed` は Novel 単位（全 Episode 読了 or 最終話読了の判定が曖昧）。(2) ユーザーが「読了したが Favorite のままにしたい」ケースを勝手に上書きしてしまう。(3) PRD §19 は自動遷移に触れておらず、明示操作を既定とするほうが安全。
   - 妥協案として、Novel 詳細画面に「最終話まで読み終えました。Library を Completed にしますか？」という**提案 UI**（ワンクリック確定）は許容する（自動確定ではない）。
@@ -135,7 +135,7 @@ favorite     --明示操作--> reading | read_later | completed | (削除)
 
 ### 2.3 一覧取得（Query 層）
 
-`GET /library`（要ログイン、本人のみ、[routing.md](./routing.md)）は Application 層の Read Model として実装する。
+`GET /library`（要ログイン、本人のみ、[routing.md](../foundation/routing.md)）は Application 層の Read Model として実装する。
 
 ```text
 GetMyLibraryQuery(userId, state?, page, pageSize):
@@ -153,14 +153,14 @@ GetMyLibraryQuery(userId, state?, page, pageSize):
   ORDER BY (rp.last_read_at, le.id) DESC NULLS LAST
 ```
 
-- Novel が Private/削除済みで本人が閲覧権限を失った場合（Collaborator 降格等）でも Library エントリ自体は残す（記録は削除しない）が、一覧描画時に「閲覧不可」バッジを出し詳細への遷移は 403/404 に委ねる（Novel 側の Visibility チェックに従う、[routing.md](./routing.md) §3.2 の認可列）。
-- インデックスは `idx(user_id, state)`（[data-model.md](./data-model.md)）でカバー。
+- Novel が Private/削除済みで本人が閲覧権限を失った場合（Collaborator 降格等）でも Library エントリ自体は残す（記録は削除しない）が、一覧描画時に「閲覧不可」バッジを出し詳細への遷移は 403/404 に委ねる（Novel 側の Visibility チェックに従う、[routing.md](../foundation/routing.md) §3.2 の認可列）。
+- インデックスは `idx(user_id, state)`（[data-model.md](../foundation/data-model.md)）でカバー。
 
 ---
 
 ## 3. Reader Settings の永続化（PRD §17）
 
-UI/CSS 変数の詳細は [frontend.md](./frontend.md) §4.1 を参照。本節はデータの保存形・同期方式のみを扱う。
+UI/CSS 変数の詳細は [frontend.md](../overview/frontend.md) §4.1 を参照。本節はデータの保存形・同期方式のみを扱う。
 
 ### 3.1 保存階層
 
@@ -175,7 +175,7 @@ Priority: cookie(SSR初期反映) → localStorage(クライアント正) → se
 | **server**（ログイン時のみ） | 端末をまたいだ同期のためのバックアップ。ログイン中のみ非同期で読み書き | ログインユーザーのみ |
 
 - **決定**: localStorage を正とし、cookie は「初回描画のちらつき防止用の read-only ミラー」に限定する。理由: Reader Settings は見た目の設定でありプライバシー影響がなく、サーバ往復を必須にすると設定変更の体感速度が落ちる（PRD §55 パフォーマンス方針、frontend.md も同様の考え方）。
-- cookie 書き込みは island が `document.cookie` に対して行う（サーバセッションと独立、非 HttpOnly。認証情報を含まないため XSS 影響は限定的だが、CSP 方針は [architecture.md](./architecture.md)/PRD §59 に準拠）。
+- cookie 書き込みは island が `document.cookie` に対して行う（サーバセッションと独立、非 HttpOnly。認証情報を含まないため XSS 影響は限定的だが、CSP 方針は [architecture.md](../overview/architecture.md)/PRD §59 に準拠）。
 
 ### 3.2 保存形（JSON スキーマ）
 
@@ -206,9 +206,9 @@ localStorage キー `renovel:reader-settings`、cookie キー `reader_settings`�
 
 ### 3.3 ログイン時のサーバ同期
 
-`PATCH /api/me/reader-settings`（[routing.md](./routing.md) 3.2）:
+`PATCH /api/me/reader-settings`（[routing.md](../foundation/routing.md) 3.2）:
 
-- **保存先**: 専用テーブルを新設せず、`users` テーブルに `reader_settings jsonb NULL` カラムを追加する形を既定案とする（1ユーザー1設定で正規化するメリットが薄いため）。テーブル追加が必要になった場合は [data-model.md](./data-model.md) 側の変更として扱う（本書では未確定、§未決事項に記載）。
+- **保存先**: 専用テーブルを新設せず、`users` テーブルに `reader_settings jsonb NULL` カラムを追加する形を既定案とする（1ユーザー1設定で正規化するメリットが薄いため）。テーブル追加が必要になった場合は [data-model.md](../foundation/data-model.md) 側の変更として扱う（本書では未確定、§未決事項に記載）。
 - **同期方向**: ログイン中は「localStorage → サーバ」への一方向バックアップを基本とする（設定変更のたびに debounce して PATCH）。ログイン直後・別端末での初回表示時のみ「サーバ → localStorage」の取り込みを行う（`server.updated_at` 相当は持たず、単純に「localStorage が空 or デフォルトのままならサーバ値で初期化」という弱い同期で十分。1.0 では最終更新端末優先の厳密な競合解決は行わない）。
 - **非ブロッキング**: 設定変更の反映（CSS 変数書き換え）は常にローカルで即時に行い、サーバ PATCH は fire-and-forget（失敗しても UI をブロックしない、リトライは次回変更時に任せる）。
 - **ゲスト**: サーバ保存なし。localStorage + cookie のみで完結する（routing.md 「認証不要（未ログインは cookie のみ）」の通り）。
@@ -229,12 +229,12 @@ localStorage キー `renovel:reader-settings`、cookie キー `reader_settings`�
 
 ## 5. 関連ドキュメント
 
-- [data-model.md](./data-model.md) — `reading_progress` / `library_entries` テーブル定義の正典
-- [frontend.md](./frontend.md) §4 — Reader UI・CSS 変数・レイアウトシフト対策
-- [routing.md](./routing.md) §3.2 — Reading 系ルート表・認可列
+- [data-model.md](../foundation/data-model.md) — `reading_progress` / `library_entries` テーブル定義の正典
+- [frontend.md](../overview/frontend.md) §4 — Reader UI・CSS 変数・レイアウトシフト対策
+- [routing.md](../foundation/routing.md) §3.2 — Reading 系ルート表・認可列
 - [analytics.md](./analytics.md) — 進捗系 Analytics イベントと集計方針（プライバシー境界）
 - [text-notation.md](./text-notation.md) — 段落分割・ルビ/傍点変換（`position` の段落 index が前提とする構造）
-- [architecture.md](./architecture.md) §7 — Analytics/非ブロッキング送信方針
+- [architecture.md](../overview/architecture.md) §7 — Analytics/非ブロッキング送信方針
 
 ---
 

@@ -1,7 +1,7 @@
 # Glossary / 用語集（ユビキタス言語）
 
 > 対象: PRD 全体で使われる概念のユビキタス言語定義。用語の対応ドメイン・テーブル、紛らわしい語の区別、英日 UI 表記対応。
-> 正典は PRD 全体（特に §6,7,8,9,13,14,20,21）。テーブル名・カラム名は [data-model.md](./data-model.md) を正典として参照し、本書は用語の意味の正典とする（命名が食い違った場合は data-model.md を先に更新する）。
+> 正典は PRD 全体（特に §6,7,8,9,13,14,20,21）。テーブル名・カラム名は [data-model.md](../foundation/data-model.md) を正典として参照し、本書は用語の意味の正典とする（命名が食い違った場合は data-model.md を先に更新する）。
 > 現状は scaffold（Phase 0 完了）。本書は「これから作る目標形」の語彙を示す。
 
 ## サマリー
@@ -21,8 +21,8 @@
 |---|---|
 | 用語 | ユビキタス言語（PRD/コード識別子として使う英語名） |
 | 定義 | ドメイン上の意味 |
-| 対応ドメイン | [architecture.md](./architecture.md) §3 のドメイン境界（`identity, novel, writing, collaboration, fork, reading, social, discovery, analytics, notification, moderation`） |
-| 対応テーブル | [data-model.md](./data-model.md) 上のテーブル名 |
+| 対応ドメイン | [architecture.md](../overview/architecture.md) §3 のドメイン境界（`identity, novel, writing, collaboration, fork, reading, social, discovery, analytics, notification, moderation`） |
+| 対応テーブル | [data-model.md](../foundation/data-model.md) 上のテーブル名 |
 | 混同注意 | 紛らわしい語との違い |
 
 ---
@@ -36,7 +36,7 @@
 | **User** | ReNovel の登録アカウント。読者・作者アカウントを分離しない（PRD §6）。読む・投稿する・フォローする・評価する・コメントする・共同制作に参加する、すべてを同一アカウントが行う。 | identity | `users` | 「Author」「Reader」は User の**役割上の呼び方**であり別エンティティではない。ある Novel に対して Owner/Collaborator であれば「作者」、そうでなければ「読者」として振る舞うだけ |
 | **Handle** | User を一意に識別する公開 ID。`^[a-z0-9_]{3,30}$`、大小無視。URL は `/@{handle}`（PRD §6）。 | identity | `users.handle` | **User ID（内部 UUID）とは別物**。Handle は変更可能性を将来検討する余地があるが（未決）、UUID の `id` は不変の内部識別子 |
 | **Display Name** | プロフィール上の表示名。Handle と異なり一意制約なし、自由な文字列。 | identity | `users.display_name` | Handle（一意・URL用）と混同しない |
-| **Session** | 認証済み状態を表すサーバ側レコード。Cookie にはハッシュ化前の opaque token を持たせる（詳細 [auth.md](./auth.md)）。 | identity | `sessions` | Hono Context 上の `c.get("session")` はこの DB レコードに対応する実行時オブジェクト |
+| **Session** | 認証済み状態を表すサーバ側レコード。Cookie にはハッシュ化前の opaque token を持たせる（詳細 [auth.md](../foundation/auth.md)）。 | identity | `sessions` | Hono Context 上の `c.get("session")` はこの DB レコードに対応する実行時オブジェクト |
 
 ### 2.2 novel（作品構造・PRD §7,8,9,10）
 
@@ -45,7 +45,7 @@
 | **Novel** | 作品そのもの。1 作品 = 1 Novel。`Novel → (任意)Chapter → Episode` という木構造のルート（PRD §7.1）。 | novel | `novels` | 「Story」「Work」等の同義語は使わず常に **Novel** と呼ぶ |
 | **Chapter** | Novel 内の任意の章区分。使わない作品では Episode を Novel 直下に配置する（PRD §7.1）。 | novel | `chapters` | Chapter を持たない Novel は「短編」ではなく単に「Chapter 未使用の Novel」。短編は「Episode を 1 つだけ持つ Novel」（下記 Episode 参照） |
 | **Episode** | 実際に読者が読む本文の単位（「話」）。Chapter 配下または Novel 直下に配置される。短編は Episode 1 件のみの Novel として扱う（PRD §7.1）。 | novel / writing | `episodes` | **Chapter とは別の階層**。Episode は必ず `novel_id` を持ち、`chapter_id` は NULL 可（data-model.md §3 novel/episodes 参照） |
-| **Revision（EpisodeRevision）** | Episode 本文の変更履歴の 1 スナップショット。Episode ごとに append-only で連番管理し、上書きされない（PRD §12）。 | writing | `episode_revisions` | **Episode.body（現在の確定本文）とは別物**。「最新の Revision」が常に `episodes.body` と一致するように運用される（詳細 [writing-revision.md](./writing-revision.md)） |
+| **Revision（EpisodeRevision）** | Episode 本文の変更履歴の 1 スナップショット。Episode ごとに append-only で連番管理し、上書きされない（PRD §12）。 | writing | `episode_revisions` | **Episode.body（現在の確定本文）とは別物**。「最新の Revision」が常に `episodes.body` と一致するように運用される（詳細 [writing-revision.md](../domains/writing-revision.md)） |
 | **Draft** | Episode が「未公開＝執筆中で読者に見えない」状態を指す言葉。**Novel レベルでは Status ではなく Visibility 側の概念として語られる**が、Episode レベルでは `episode_status = draft`（PRD §8, §11.4）という独立した公開前段階を表す。 | writing | `episodes.status`（enum `episode_status`） | §3.1「Draft をめぐる混同」参照。**Draft は Publication Status の値ではない**（`publication_status` の値は Ongoing/Completed/Hiatus のみ） |
 | **Visibility（公開範囲）** | Novel（および個別上書き可能な Episode）の**誰に見えるか**を決める軸。Public / Unlisted / Private（PRD §9）。 | novel | `novels.visibility`, `episodes.visibility` | Publication Status と直交（§3.1）。「Draft」という値はこの enum にも存在しない — PRD の文章表現上「Draft 相当」は Private や「未公開 Episode」で表現される |
 | **Publication Status（進行状態）** | Novel の**執筆の進行度**を表す軸。Ongoing / Completed / Hiatus（PRD §8）。 | novel | `novels.publication_status` | Visibility とは独立。「連載中の Private 作品」「完結した Unlisted 作品」等、あらゆる組み合わせが有効 |
@@ -57,17 +57,17 @@
 
 | 用語 | 定義 | 対応ドメイン | 対応テーブル | 混同注意 |
 |---|---|---|---|---|
-| **Ruby（ルビ記法）** | `｜文章《ルビ》` という独自プレーンテキスト記法。表示時 `<ruby>文章<rt>ルビ</rt></ruby>` に変換（PRD §11.2）。 | writing | （`episodes.body`/`episode_revisions.body` 内の記法。専用テーブルなし） | Markdown ではない。詳細 [text-notation.md](./text-notation.md) |
-| **Emphasis（傍点）** | `《《文章》》` という独自記法。傍点表示に変換（PRD §11.3）。 | writing | 同上 | Ruby の `《...》` と字面が似るが構文が異なる（外側 `｜...《...》` vs `《《...》》`）。詳細 [text-notation.md](./text-notation.md) |
+| **Ruby（ルビ記法）** | `｜文章《ルビ》` という独自プレーンテキスト記法。表示時 `<ruby>文章<rt>ルビ</rt></ruby>` に変換（PRD §11.2）。 | writing | （`episodes.body`/`episode_revisions.body` 内の記法。専用テーブルなし） | Markdown ではない。詳細 [text-notation.md](../domains/text-notation.md) |
+| **Emphasis（傍点）** | `《《文章》》` という独自記法。傍点表示に変換（PRD §11.3）。 | writing | 同上 | Ruby の `《...》` と字面が似るが構文が異なる（外側 `｜...《...》` vs `《《...》》`）。詳細 [text-notation.md](../domains/text-notation.md) |
 | **Scheduled Publish（公開予約）** | 指定日時に Episode を自動公開する仕組み（PRD §11.4）。 | writing | `scheduled_publishes` | Publish（即時手動公開、`episodes.status='published'` への遷移）とは別のオペレーション。予約は実行されて初めて Publish が起きる |
-| **Restore（復元）** | 過去 Revision の内容で新しい Revision を追記し、Episode の現在本文を差し戻す操作（PRD §12）。 | writing | `episode_revisions.restored_from_id` | 「過去の行を上書きする」のではなく**新しい Revision を作る**（追記専用の原則、[writing-revision.md](./writing-revision.md)） |
+| **Restore（復元）** | 過去 Revision の内容で新しい Revision を追記し、Episode の現在本文を差し戻す操作（PRD §12）。 | writing | `episode_revisions.restored_from_id` | 「過去の行を上書きする」のではなく**新しい Revision を作る**（追記専用の原則、[writing-revision.md](../domains/writing-revision.md)） |
 
 ### 2.4 collaboration / fork（PRD §13,14,15,16）
 
 | 用語 | 定義 | 対応ドメイン | 対応テーブル | 混同注意 |
 |---|---|---|---|---|
 | **Collaborator** | Novel に対してロールを持つ User（Owner 自身も Collaborator の一種として `role='owner'` で保持）。 | collaboration | `collaborators` | Owner（`novels.author_id`）は「原作者・作成者」を指す別属性としても保持されるが、通常は owner Collaborator と一致する（data-model.md `novels` 備考） |
-| **Role（Collaborator Role）** | Collaborator に付与される権限区分。Owner / Admin / Writer / Editor / Viewer の 5 段階（PRD §13）。 | collaboration | `collaborators.role`, `collaboration_invitations.role`（enum `collaborator_role`） | 権限マトリクスの詳細は [auth.md](./auth.md) / [collaboration-fork.md](./collaboration-fork.md) |
+| **Role（Collaborator Role）** | Collaborator に付与される権限区分。Owner / Admin / Writer / Editor / Viewer の 5 段階（PRD §13）。 | collaboration | `collaborators.role`, `collaboration_invitations.role`（enum `collaborator_role`） | 権限マトリクスの詳細は [auth.md](../foundation/auth.md) / [collaboration-fork.md](../domains/collaboration-fork.md) |
 | **Collaboration Invitation** | User を Collaborator として招待する未確定状態のレコード。承諾されると `collaborators` 行が作られる（PRD §13）。 | collaboration | `collaboration_invitations` | Collaborator（確定した参加者）とは別テーブル。ステータス（pending/accepted/…）を持つのは Invitation のみ |
 | **Fork** | 許可された Novel から派生作品（別 Novel）を作る操作、およびその派生関係を記録するレコード（PRD §14）。派生元（Source Novel）への帰属表示は削除できない（PRD §15）。 | fork | `forks` | Change Proposal（変更提案）とは別機能。Fork は「作品まるごとの複製・派生」、Change Proposal は「既存 Novel への差分提案」 |
 | **Fork Policy** | Owner が Novel ごとに設定する Fork 許可方針。Disabled / Approval Required / Allowed（PRD §15）。 | fork | `novels.fork_policy` | Visibility とは別軸（Public でも Fork Disabled はあり得る） |
@@ -80,7 +80,7 @@
 |---|---|---|---|---|
 | **Reading Progress** | User が Episode をどこまで読んだかの本人専用記録（最後に読んだ Episode・位置・読了フラグ・最終閲覧日時、PRD §18）。 | reading | `reading_progress` | **本人閲覧専用**で作者や他者には見せない（PRD §58）。Analytics の集計値（誰が読んだかは含まない）とは別物 |
 | **Library** | User が Novel を分類保存する仕組み。Reading / Read Later / Completed / Favorite（PRD §19）。 | reading | `library_entries` | Reading Progress（Episode 単位の閲覧位置）とは別概念。Library は Novel 単位の「本棚」的分類 |
-| **Reader Settings** | 読書表示のカスタマイズ設定（Font Size・Line Height・Content Width・Font・Writing Direction・Theme、PRD §17）。 | reading（Presentation island） | （専用テーブルなし。クライアント永続化が基本、[frontend.md](./frontend.md)） | Reading Progress とは無関係。表示設定であり、進捗データではない |
+| **Reader Settings** | 読書表示のカスタマイズ設定（Font Size・Line Height・Content Width・Font・Writing Direction・Theme、PRD §17）。 | reading（Presentation island） | （専用テーブルなし。クライアント永続化が基本、[frontend.md](../overview/frontend.md)） | Reading Progress とは無関係。表示設定であり、進捗データではない |
 
 ### 2.6 social（PRD §20,21）
 
@@ -97,9 +97,9 @@
 
 | 用語 | 定義 | 対応ドメイン | 対応テーブル | 混同注意 |
 |---|---|---|---|---|
-| **Ranking** | 一定期間・軸（daily/weekly/monthly/new/completed）で Novel を順位付けした集計結果（PRD §26）。 | discovery | `ranking_snapshots` | リアルタイム動的計算ではなく、定期ジョブで固定したスナップショット（詳細 [discovery.md](./discovery.md)） |
-| **Notification** | User 宛てのアプリ内通知。フォロー・Like・Star・Review・Comment・作品更新・招待・Fork・変更提案などが種別として存在（PRD §22）。 | notification | `notifications` | Analytics Event（内部計測用の生ログ）とは異なり、Notification は**受信者に見える UI 要素**。詳細 [social-notification.md](./social-notification.md) |
-| **Analytics Event** | 読者行動・Acquisition 等を記録する内部計測用の生イベント（PRD §36）。append-only で個人特定情報を最小化して記録する。 | analytics | `analytics.analytics_events` | **Notification とは無関係**（読者には見えない）。**Reading Progress（本人用の進捗）とも別物**（作者向けの匿名集計にのみ使われる、PRD §58）。集計は `analytics_hourly`/`analytics_daily` にロールアップ（詳細 [analytics.md](./analytics.md)） |
+| **Ranking** | 一定期間・軸（daily/weekly/monthly/new/completed）で Novel を順位付けした集計結果（PRD §26）。 | discovery | `ranking_snapshots` | リアルタイム動的計算ではなく、定期ジョブで固定したスナップショット（詳細 [discovery.md](../domains/discovery.md)） |
+| **Notification** | User 宛てのアプリ内通知。フォロー・Like・Star・Review・Comment・作品更新・招待・Fork・変更提案などが種別として存在（PRD §22）。 | notification | `notifications` | Analytics Event（内部計測用の生ログ）とは異なり、Notification は**受信者に見える UI 要素**。詳細 [social-notification.md](../domains/social-notification.md) |
+| **Analytics Event** | 読者行動・Acquisition 等を記録する内部計測用の生イベント（PRD §36）。append-only で個人特定情報を最小化して記録する。 | analytics | `analytics.analytics_events` | **Notification とは無関係**（読者には見えない）。**Reading Progress（本人用の進捗）とも別物**（作者向けの匿名集計にのみ使われる、PRD §58）。集計は `analytics_hourly`/`analytics_daily` にロールアップ（詳細 [analytics.md](../domains/analytics.md)） |
 | **Report（通報）** | User/Novel/Episode/Comment/Review を対象とするモデレーション通報（PRD §37）。 | moderation | `reports` | Notification（本人への肯定的な通知）とは目的が逆。Report は管理者向けキューに入る |
 | **Block / Mute** | User 間の相互作用制御。Block は双方向的な遮断、Mute は自分側の表示抑制のみ（PRD §37）。 | moderation | `blocks` / `mutes` | Block は相手にも影響する（コメント・フォロー等の可否）、Mute は自分の画面表示にのみ影響し相手には作用しない |
 
@@ -115,7 +115,7 @@ PRD §8「Draft は作品状態ではなく Visibility によって表現する�
 |---|---|---|---|---|
 | **誰が見られるか** | Visibility | `public` / `unlisted` / `private` | 公開範囲。検索・ランキング・おすすめへの露出可否を決める（PRD §9） | `novels.visibility`, `episodes.visibility` |
 | **どこまで書けているか** | Publication Status | `ongoing` / `completed` / `hiatus` | 執筆の進行状態（PRD §8） | `novels.publication_status` |
-| **Episode が読者に出せる状態か** | Episode Status | `draft` / `published` | 個別 Episode の公開前後の別軸（[data-model.md](./data-model.md) `episodes.status` 備考） | `episodes.status` |
+| **Episode が読者に出せる状態か** | Episode Status | `draft` / `published` | 個別 Episode の公開前後の別軸（[data-model.md](../foundation/data-model.md) `episodes.status` 備考） | `episodes.status` |
 
 - **「Draft」という語自体は enum の値としては 2 箇所の異なる意味で使われる**:
   1. Novel を語るときの「Draft 状態の作品」＝ 口語表現で、実体は **Visibility=Private かつ published_at が NULL** に近い状態を指す（PRD の Draft は Publication Status の選択肢に含まれない = enum 値としては存在しない）。
@@ -141,7 +141,7 @@ Like は「読んでいる最中の反応」、Star は「読み終えて/通し
 |---|---|---|
 | フォロー対象 | User（作者・他読者） | Novel（特定作品） |
 | テーブル | `user_follows`（`follower_id`/`followee_id`） | `novel_follows`（`user_id`/`novel_id`） |
-| 主な用途 | 新着作品・活動のタイムライン表示（[discovery.md](./discovery.md)） | 更新通知（`notification_type='novel_update'`）の配信対象抽出（PRD §21,22） |
+| 主な用途 | 新着作品・活動のタイムライン表示（[discovery.md](../domains/discovery.md)） | 更新通知（`notification_type='novel_update'`）の配信対象抽出（PRD §21,22） |
 | カウンタ | User 側に集計列なし（必要なら将来追加） | `novels.follow_count` |
 
 同じ「フォロー」という言葉でも対象・通知トリガ・カウンタ先が異なるため、コード上は `UserFollow` / `NovelFollow` を独立した集約として扱う。
@@ -157,7 +157,7 @@ Like は「読んでいる最中の反応」、Star は「読み終えて/通し
 | 想定タイミング | 作品を通して読んだ後の総評 | Episode 読了後の感想（都度） |
 | 削除 | Soft Delete（モデレーション対象） | Soft Delete（モデレーション対象、"削除されたコメント"表示） |
 
-**Review の Stars（`reviews.stars`）と単独 Star（`stars.value`）は別テーブル・別ライフサイクルで独立管理**する（PRD が別項目として定義しているため）。両者を自動同期するかは [data-model.md](./data-model.md) §6 未決事項・[social-notification.md](./social-notification.md) に委ねる。
+**Review の Stars（`reviews.stars`）と単独 Star（`stars.value`）は別テーブル・別ライフサイクルで独立管理**する（PRD が別項目として定義しているため）。両者を自動同期するかは [data-model.md](../foundation/data-model.md) §6 未決事項・[social-notification.md](../domains/social-notification.md) に委ねる。
 
 ### 3.5 Fork と Change Proposal
 
@@ -228,8 +228,8 @@ UI 上の表記ゆれを防ぐための対応表。実装・デザイン・コ�
 
 ## 5. 未決事項
 
-1. **Handle の変更可否**: PRD は Handle を User の識別子として定義するのみで、変更可能性・変更頻度制限には触れていない。URL (`/@{handle}`) の恒久性要件と合わせて [auth.md](./auth.md) で決定する。
-2. **「Author」という呼称の正式な扱い**: 本書では User の役割上の呼び方（Owner/Collaborator である状態）として整理したが、UI 文言・PRD §60 Definition of Done での「作者」との対応関係を [frontend.md](./frontend.md) 側で最終確定する。
-3. **Review と Star の自動同期方針**: §3.4 の通り現状は独立管理。UI 上「レビューを書くと自動で Star も付く」ように見せるかは [social-notification.md](./social-notification.md) の未決事項と連動して決める。
+1. **Handle の変更可否**: PRD は Handle を User の識別子として定義するのみで、変更可能性・変更頻度制限には触れていない。URL (`/@{handle}`) の恒久性要件と合わせて [auth.md](../foundation/auth.md) で決定する。
+2. **「Author」という呼称の正式な扱い**: 本書では User の役割上の呼び方（Owner/Collaborator である状態）として整理したが、UI 文言・PRD §60 Definition of Done での「作者」との対応関係を [frontend.md](../overview/frontend.md) 側で最終確定する。
+3. **Review と Star の自動同期方針**: §3.4 の通り現状は独立管理。UI 上「レビューを書くと自動で Star も付く」ように見せるかは [social-notification.md](../domains/social-notification.md) の未決事項と連動して決める。
 4. **Paragraph Comment 導入時の Comment 定義拡張**: PRD §20.4 の将来機能。導入時は本書 §2.6 Comment の定義・§3.4 の比較表を改訂する。
 5. **Custom Collection（Library の将来拡張）の呼称**: PRD §19 の将来機能。`collections`/`collection_entries` 追加時に「Library」との用語上の親子関係（Library ⊃ Collection か、独立概念か）を確定する。

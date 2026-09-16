@@ -11,7 +11,7 @@
 - **認可の中核は 2 軸のマトリクス**: (a) Novel 単位の **Collaborator Role**（Owner/Admin/Writer/Editor/Viewer）× 操作、(b) **Visibility × Publication Status × 閲覧者種別** のアクセス判定。両方を Application Service 内の **Policy オブジェクト**で判定し、Controller や View に業務ロジックを漏らさない。
 - **Private Novel・未公開 Episode は権限がない場合 404 を返し、存在を秘匿する。** ログイン必須の操作で未ログインの場合のみ 403 相当（実際はログイン誘導のリダイレクト/401）を返す。この使い分けを本書で確定する。
 - **Cookie は `HttpOnly` + `Secure` + `SameSite=Lax`** を既定にし、状態変更リクエストは Origin/Referer 検証によるダブルサブミット不要の CSRF 対策を取る（詳細 §5）。
-- **Rate Limiting はログイン・パスワードリセット・OAuth コールバックなど攻撃対象になりやすい経路に重点適用**し、初期はアプリ内 in-memory + Postgres、スケール時に Redis へ移行する（[infrastructure.md](./infrastructure.md) §3.2 と歩調を合わせる）。
+- **Rate Limiting はログイン・パスワードリセット・OAuth コールバックなど攻撃対象になりやすい経路に重点適用**し、初期はアプリ内 in-memory + Postgres、スケール時に Redis へ移行する（[infrastructure.md](../overview/infrastructure.md) §3.2 と歩調を合わせる）。
 
 ---
 
@@ -69,7 +69,7 @@
 |---|---|---|
 | 名前 | `__Host-renovel_session`（本番）/ `renovel_session`（dev, HTTP のため `__Host-` prefix 不可） | `__Host-` prefix は `Secure` + `Path=/` + `Domain` 属性なしを強制し、サブドメイン越境攻撃を軽減 |
 | `HttpOnly` | 常に true | JS からの読み取り不可、XSS 経由のトークン窃取を防止（PRD §59 XSS 対策） |
-| `Secure` | 本番: true / dev(HTTP): false | Cloudflare Tunnel 経由の本番は常時 HTTPS（[infrastructure.md](./infrastructure.md)） |
+| `Secure` | 本番: true / dev(HTTP): false | Cloudflare Tunnel 経由の本番は常時 HTTPS（[infrastructure.md](../overview/infrastructure.md)） |
 | `SameSite` | `Lax` | OAuth コールバック（外部 → 自サイトへの top-level navigation, GET）は `Lax` でも Cookie が送られる。`Strict` はコールバック直後にセッション未確立になりログイン UX を壊すため不採用 |
 | `Path` | `/` | |
 | `Max-Age` | `sessions.expires_at` と同期 | |
@@ -194,8 +194,8 @@ Visibility（`public`/`unlisted`/`private`）と Publication Status（`ongoing`/
 | **Unlisted** | URL 直知なら閲覧可・一覧非表示 | URL 直知なら閲覧可・一覧非表示 | 閲覧可 | 非対象（PRD §9） |
 | **Private** | **404**（存在秘匿） | **404**（Collaborator でなければ） | 閲覧可 | 非対象 |
 
-- **Unlisted の実装**: 「URLを知っていれば閲覧可」は認可というより「一覧・検索・推薦のクエリに含めない」制御。Controller 側でアクセス自体は許可しつつ、Discovery 側の Query（[discovery.md](./discovery.md)）で `visibility = 'public'` のみを対象にする。
-- **content_state = 'hidden'**（モデレーションによる Hide、PRD §37）は Visibility に関わらず**一般閲覧者には 404**。Owner/Collaborator と Moderator（管理者）には警告バナー付きで閲覧可能とする（未決事項: Moderator ロールの認可設計は [moderation.md](./moderation.md) に委譲）。
+- **Unlisted の実装**: 「URLを知っていれば閲覧可」は認可というより「一覧・検索・推薦のクエリに含めない」制御。Controller 側でアクセス自体は許可しつつ、Discovery 側の Query（[discovery.md](../domains/discovery.md)）で `visibility = 'public'` のみを対象にする。
+- **content_state = 'hidden'**（モデレーションによる Hide、PRD §37）は Visibility に関わらず**一般閲覧者には 404**。Owner/Collaborator と Moderator（管理者）には警告バナー付きで閲覧可能とする（未決事項: Moderator ロールの認可設計は [moderation.md](../domains/moderation.md) に委譲）。
 
 #### Episode 単位の判定（PRD §8, §12, `episodes.status`/`episodes.visibility`）
 
@@ -306,13 +306,13 @@ Collaborator Role の解決・Visibility 判定は **Application Service（ま�
 | **理由** | Session Cookie 方式は CSRF の主対象になる（PRD §59 明記）。`SameSite=Lax` は GET のトップレベル遷移では Cookie を送るため単体では不十分（クロスサイト POST は `Lax` でもブロックされるが、防御は多層化が望ましい）。Synchronizer Token（隠しフィールドにトークン埋め込み）は SSR フォームには適用しやすいが、hono/jsx の island から叩く JSON API では配布・検証の手間が増える。Origin 検証は実装コストが低く、SSR/API 両方に一律適用できる。 |
 | **代替案** | (a) 二重送信 Cookie（Double Submit Token）— 追加の Cookie とヘッダ照合が必要で実装コストが上がる。将来 Origin 検証だけでは不十分と判明した場合に追加する（未決事項）。(b) Synchronizer Token をフォーム毎に発行 — SSR ページ（Novel 設定変更等）には有効なので、**高リスク操作（Collaborator 削除、Novel 削除、パスワード変更）に限り追加のトークン確認を将来的に重ねる**余地を残す。 |
 
-- **CSP（PRD §59）** も CSRF/XSS の縦深防御として設定する: `default-src 'self'`、インライン script は原則禁止（island のバンドルは外部ファイル化）、詳細は [architecture.md](./architecture.md) §9 に集約。
+- **CSP（PRD §59）** も CSRF/XSS の縦深防御として設定する: `default-src 'self'`、インライン script は原則禁止（island のバンドルは外部ファイル化）、詳細は [architecture.md](../overview/architecture.md) §9 に集約。
 
 ---
 
 ## 6. Rate Limiting / Brute-force 対策
 
-一般方針は [architecture.md](./architecture.md) §9（横断的関心事）を参照。本書では認証特有のしきい値を定義する。
+一般方針は [architecture.md](../overview/architecture.md) §9（横断的関心事）を参照。本書では認証特有のしきい値を定義する。
 
 | 経路 | キー | 上限（目安） | 超過時の挙動 |
 |---|---|---|---|
@@ -322,8 +322,8 @@ Collaborator Role の解決・Visibility 判定は **Application Service（ま�
 | サインアップ | IP | 10 回 / 時間 | 429（bot 登録対策） |
 | セッション検証自体 | — | 制限なし | 通常のページ閲覧を阻害しない |
 
-- **実装配置**: `presentation/middleware/rate-limit.ts`。初期実装（1.0, Redis 未導入時点）はアプリプロセス内 in-memory カウンタ + Postgres フォールバック（`login_attempts` 等の簡易テーブル、複数インスタンス運用に入ったら不正確になる点は許容）。**スケール時に `redis` を Compose に追加**し、共有カウンタへ移行する（[infrastructure.md](./infrastructure.md) §3.2 の想定と一致）。
-- Cloudflare 経由のためエッジ側 WAF/レート制御も併用（[infrastructure.md](./infrastructure.md) の Cloudflare Tunnel 節）。アプリ側の Rate Limiting はエッジをすり抜けた/内部由来のケースへの縦深防御。
+- **実装配置**: `presentation/middleware/rate-limit.ts`。初期実装（1.0, Redis 未導入時点）はアプリプロセス内 in-memory カウンタ + Postgres フォールバック（`login_attempts` 等の簡易テーブル、複数インスタンス運用に入ったら不正確になる点は許容）。**スケール時に `redis` を Compose に追加**し、共有カウンタへ移行する（[infrastructure.md](../overview/infrastructure.md) §3.2 の想定と一致）。
+- Cloudflare 経由のためエッジ側 WAF/レート制御も併用（[infrastructure.md](../overview/infrastructure.md) の Cloudflare Tunnel 節）。アプリ側の Rate Limiting はエッジをすり抜けた/内部由来のケースへの縦深防御。
 - パスワード検証は**タイミング攻撃対策**として、ユーザーが存在しない場合もダミーハッシュに対して Argon2id 検証を実行し応答時間を均す。
 
 ---
@@ -364,8 +364,8 @@ export class PublishEpisodeService {
 1. **OAuth Provider の最終決定**（PRD §52「別途決定」）。候補: Google（読者層優先）, GitHub（技術系作者に強い）, X。複数同時サポートか 1.0 は 1 provider に絞るかも未決。
 2. **パスワード認証を 1.0 スコープに含めるか**: 本書は data-model.md のスキーマ（`password_hash` 列の存在）を根拠に「含める」前提で書いたが、プロダクト判断として OAuth のみへ絞る可能性は残る。絞る場合は `password_reset_tokens` 節・§1.2 を削除。
 3. **Editor Role の Draft 保存可否**（§3.1 の脚注）。PRD 記述が薄く、実運用でのフィードバック待ち。
-4. **Moderator/Admin（運営側）の認可モデル**: 本書は Collaborator Role のみを扱う。運営管理者アカウントの権限体系（`users` に `is_admin` を持たせるか別テーブルか）は [moderation.md](./moderation.md) 側で定義し、本書からリンクする。
-5. **Content Warning 閲覧前確認の実装**: 認可（見えるか）ではなく UX 上の確認モーダルだが、未ログイン時に確認状態をどう永続化するか（Cookie か localStorage か）は [reading.md](./reading.md) 側で検討。
+4. **Moderator/Admin（運営側）の認可モデル**: 本書は Collaborator Role のみを扱う。運営管理者アカウントの権限体系（`users` に `is_admin` を持たせるか別テーブルか）は [moderation.md](../domains/moderation.md) 側で定義し、本書からリンクする。
+5. **Content Warning 閲覧前確認の実装**: 認可（見えるか）ではなく UX 上の確認モーダルだが、未ログイン時に確認状態をどう永続化するか（Cookie か localStorage か）は [reading.md](../domains/reading.md) 側で検討。
 6. **二段階認証（2FA）**: PRD に明記なし。Collaborator 権限が強い Owner アカウント向けに将来追加候補（`users` に `totp_secret` 等）。1.0 スコープ外と仮置き。
 7. **Double Submit Cookie の追加要否**（§5 代替案 (a)）: Origin 検証のみで十分か、実装後にセキュリティレビューで判断。
 8. **同一ユーザーの複数 OAuth Provider 連携 UI**: `oauth_accounts` は複数行を許容するスキーマだが、アカウント設定画面での連携/解除フローは未設計。
@@ -376,8 +376,8 @@ export class PublishEpisodeService {
 ## 関連ドキュメント
 
 - [data-model.md](./data-model.md) — `users`/`sessions`/`oauth_accounts`/`collaborators`/`novels`/`episodes` のスキーマ正典
-- [architecture.md](./architecture.md) §6, §9 — 認証・認可の全体配置、横断的関心事（CSP/Rate Limiting 一般方針）
-- [collaboration-fork.md](./collaboration-fork.md) — Collaborator 招待フロー、Fork Policy の詳細
-- [writing-revision.md](./writing-revision.md) — Draft/Publish/Scheduled Publish の状態遷移
-- [moderation.md](./moderation.md) — Report/Hide/Suspend/Ban の運営フローと Moderator 権限
-- [infrastructure.md](./infrastructure.md) — Redis 導入時期、Cloudflare 側のレート制御・TLS
+- [architecture.md](../overview/architecture.md) §6, §9 — 認証・認可の全体配置、横断的関心事（CSP/Rate Limiting 一般方針）
+- [collaboration-fork.md](../domains/collaboration-fork.md) — Collaborator 招待フロー、Fork Policy の詳細
+- [writing-revision.md](../domains/writing-revision.md) — Draft/Publish/Scheduled Publish の状態遷移
+- [moderation.md](../domains/moderation.md) — Report/Hide/Suspend/Ban の運営フローと Moderator 権限
+- [infrastructure.md](../overview/infrastructure.md) — Redis 導入時期、Cloudflare 側のレート制御・TLS

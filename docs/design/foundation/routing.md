@@ -1,7 +1,7 @@
 # Routing / URL・API 設計
 
 > 対象: 全ページの URL 設計、slug/handle のルール、ルート表（カテゴリ別）、SSR ページと island 用 JSON API・Analytics fire-and-forget エンドポイントの区分、canonical/noindex、REST 規約。
-> 正典は PRD §7, §17, §23, §56。テーブル名・カラム名は [data-model.md](./data-model.md) を正典として厳密一致させる。レイヤ構成は [architecture.md](./architecture.md)、レンダリング方針は [frontend.md](./frontend.md) を参照。
+> 正典は PRD §7, §17, §23, §56。テーブル名・カラム名は [data-model.md](./data-model.md) を正典として厳密一致させる。レイヤ構成は [architecture.md](../overview/architecture.md)、レンダリング方針は [frontend.md](../overview/frontend.md) を参照。
 > 現状は scaffold（Phase 0 完了）。本書は「これから作る目標形」を示す。
 
 ## サマリー
@@ -88,7 +88,7 @@
 | GET | `/@{handle}/{slug}/episodes/{episodeNo}` | 不要 | 上記に加え Episode が `draft` の場合は Owner/Collaborator のみ、それ以外 404 | `EpisodeReadController` → `GetEpisodeForReadingService` | SSR |
 | GET | `/@{handle}/{slug}/continue` | 要（未ログインは `/@{handle}/{slug}` へ） | 本人の `reading_progress` のみ参照 | `NovelController` → `ResumeReadingService` | Redirect → 最終既読 Episode |
 | POST | `/api/episodes/{episodeId}/reading-progress` | 要 | 本人 | `ReadingController` → `UpdateReadingProgressService` | API（読書中 island が随時 PATCH 相当で叩く） |
-| PATCH | `/api/me/reader-settings` | 不要（未ログインは cookie のみ／要ログインなら `users` 拡張設定に将来保存） | 本人 | `ReaderSettingsController` | API（Reader Settings island。§4.1 [frontend.md](./frontend.md)） |
+| PATCH | `/api/me/reader-settings` | 不要（未ログインは cookie のみ／要ログインなら `users` 拡張設定に将来保存） | 本人 | `ReaderSettingsController` | API（Reader Settings island。§4.1 [frontend.md](../overview/frontend.md)） |
 | POST | `/api/novels/{novelId}/library` | 要 | 本人 | `LibraryController` → `AddToLibraryService` | API |
 | DELETE | `/api/novels/{novelId}/library` | 要 | 本人 | `LibraryController` | API |
 | POST | `/api/episodes/{episodeId}/like` | 要 | 本人・Episode閲覧可であること | `SocialController` → `LikeEpisodeService` | API |
@@ -105,7 +105,7 @@
 
 ### 3.3 Writing（PRD §11–16）— `/studio/*`、ID ベース
 
-Studio 配下は全ルートで **要ログイン**。認可列は「対象 `novelId` に対する `collaborator_role`」を指す（詳細ロールマトリクスは [auth.md](./auth.md) / [collaboration-fork.md](./collaboration-fork.md)）。無資格アクセスは **403**。
+Studio 配下は全ルートで **要ログイン**。認可列は「対象 `novelId` に対する `collaborator_role`」を指す（詳細ロールマトリクスは [auth.md](./auth.md) / [collaboration-fork.md](../domains/collaboration-fork.md)）。無資格アクセスは **403**。
 
 | Method | Path | 認可（最低ロール） | Controller/Service | 種別 |
 |---|---|---|---|---|
@@ -127,7 +127,7 @@ Studio 配下は全ルートで **要ログイン**。認可列は「対象 `nov
 | POST | `/api/studio/episodes/{episodeId}/publish` | Owner/Admin/Writer | `StudioEpisodeController` → `PublishEpisodeService` | API |
 | POST | `/api/studio/episodes/{episodeId}/schedule` | Owner/Admin/Writer | `StudioEpisodeController` → `SchedulePublishService` | API |
 | DELETE | `/api/studio/episodes/{episodeId}/schedule` | 同上 | `StudioEpisodeController`（予約取消） | API |
-| GET | `/studio/novels/{novelId}/episodes/{episodeId}/revisions` | Owner/Admin/Writer/Editor/Viewer | `RevisionController` → `ListRevisionsQuery` | SSR（[writing-revision.md](./writing-revision.md)） |
+| GET | `/studio/novels/{novelId}/episodes/{episodeId}/revisions` | Owner/Admin/Writer/Editor/Viewer | `RevisionController` → `ListRevisionsQuery` | SSR（[writing-revision.md](../domains/writing-revision.md)） |
 | GET | `/api/studio/episodes/{episodeId}/revisions/{revisionId}/diff` | 同上 | `RevisionController` → `DiffRevisionsQuery` | API |
 | POST | `/api/studio/episodes/{episodeId}/revisions/{revisionId}/restore` | Owner/Admin/Writer | `RevisionController` → `RestoreRevisionService` | API |
 | GET | `/studio/novels/{novelId}/collaborators` | Owner/Admin | `CollaboratorController` → `ListCollaboratorsQuery` | SSR |
@@ -137,7 +137,7 @@ Studio 配下は全ルートで **要ログイン**。認可列は「対象 `nov
 | GET | `/me/invitations` | ログインユーザー（自分宛て） | `InvitationController` → `ListMyInvitationsQuery` | SSR |
 | POST | `/api/invitations/{invitationId}/accept` | 招待対象本人 | `InvitationController` → `RespondInvitationService` | API |
 | POST | `/api/invitations/{invitationId}/decline` | 招待対象本人 | `InvitationController` | API |
-| POST | `/@{handle}/{slug}/fork` | ログインユーザー（`fork_policy` に従う） | `ForkController` → `ForkNovelService`（[collaboration-fork.md](./collaboration-fork.md)） | SSR フォーム送信（作成後 Studio 新 Novel へリダイレクト） |
+| POST | `/@{handle}/{slug}/fork` | ログインユーザー（`fork_policy` に従う） | `ForkController` → `ForkNovelService`（[collaboration-fork.md](../domains/collaboration-fork.md)） | SSR フォーム送信（作成後 Studio 新 Novel へリダイレクト） |
 | GET | `/@{handle}/{slug}/proposals` | 不要 | Visibility 準拠（Public/Unlisted 閲覧可） | `ChangeProposalController` → `ListProposalsQuery` | SSR |
 | POST | `/api/novels/{novelId}/proposals` | ログインユーザー | `ChangeProposalController` → `CreateProposalService` | API |
 | GET | `/@{handle}/{slug}/proposals/{proposalId}` | 不要 | 同上 | `ChangeProposalController` | SSR |
@@ -163,7 +163,7 @@ Studio 配下は全ルートで **要ログイン**。認可列は「対象 `nov
 
 | Method | Path | 認証 | 認可 | Controller/Service | 種別 |
 |---|---|---|---|---|---|
-| POST | `/api/analytics/events` | 不要（匿名 session_id 可、ログイン時は user_id 併記） | – | `AnalyticsIngestController` → `RecordEventService` | **Analytics（fire-and-forget）**。読書操作をブロックしない（PRD §55, [architecture.md](./architecture.md) §7） |
+| POST | `/api/analytics/events` | 不要（匿名 session_id 可、ログイン時は user_id 併記） | – | `AnalyticsIngestController` → `RecordEventService` | **Analytics（fire-and-forget）**。読書操作をブロックしない（PRD §55, [architecture.md](../overview/architecture.md) §7） |
 | GET | `/studio/novels/{novelId}/analytics` | Owner/Admin/Writer | 同左 | `AnalyticsDashboardController` → `GetAnalyticsOverviewQuery` | SSR |
 | GET | `/studio/novels/{novelId}/analytics/episodes/{episodeId}` | 同上 | `AnalyticsDashboardController` → `GetEpisodeAnalyticsQuery` | SSR |
 | GET | `/studio/novels/{novelId}/analytics/funnel` | 同上 | `AnalyticsDashboardController` → `GetReadingFunnelQuery` | SSR |
@@ -188,7 +188,7 @@ Studio 配下は全ルートで **要ログイン**。認可列は「対象 `nov
 | POST | `/api/me/password` | 要 | 本人 | `AccountSettingsController` → `ChangePasswordService` | API |
 | DELETE | `/api/me` | 要 | 本人（要再認証） | `AccountSettingsController` → `DeleteAccountService` | API |
 
-### 3.7 Moderation / Admin（PRD §37。詳細は [moderation.md](./moderation.md)）
+### 3.7 Moderation / Admin（PRD §37。詳細は [moderation.md](../domains/moderation.md)）
 
 | Method | Path | 認証 | 認可 | Controller/Service | 種別 |
 |---|---|---|---|---|---|
@@ -210,9 +210,9 @@ Studio 配下は全ルートで **要ログイン**。認可列は「対象 `nov
 
 | 種別 | URL 空間 | 特徴 | 例 |
 |---|---|---|---|
-| **SSR ページ** | `/`, `/@{handle}/...`, `/studio/...`, `/notifications` 等（`/api` を含まない全パス） | `hono/jsx` で HTML を返す。ページ全体を返却し、必要な island だけ埋め込む（[frontend.md](./frontend.md) §1）。認可失敗時の挙動は §6。 | `GET /@{handle}/{slug}` |
-| **island 用 JSON API** | `/api/**`（Analytics 以外） | 認証セッションは Cookie 経由で共有。レスポンスは JSON。CSRF 対策必須（[architecture.md](./architecture.md) §9）。Editor autosave・Reader Settings・Search Filter・Notification・Analytics Graph・Realtime の各 island が叩く。 | `PATCH /api/studio/episodes/{episodeId}` |
-| **Analytics fire-and-forget** | `POST /api/analytics/events` の一本のみ | 呼び出し元（読書画面等）の操作を**ブロックしない**（`navigator.sendBeacon` 等を想定）。認証は任意（匿名可）。バリデーション失敗も 202 相当で握りつぶし、UX に影響を与えない（PRD §55, [architecture.md](./architecture.md) §7）。 | `POST /api/analytics/events` |
+| **SSR ページ** | `/`, `/@{handle}/...`, `/studio/...`, `/notifications` 等（`/api` を含まない全パス） | `hono/jsx` で HTML を返す。ページ全体を返却し、必要な island だけ埋め込む（[frontend.md](../overview/frontend.md) §1）。認可失敗時の挙動は §6。 | `GET /@{handle}/{slug}` |
+| **island 用 JSON API** | `/api/**`（Analytics 以外） | 認証セッションは Cookie 経由で共有。レスポンスは JSON。CSRF 対策必須（[architecture.md](../overview/architecture.md) §9）。Editor autosave・Reader Settings・Search Filter・Notification・Analytics Graph・Realtime の各 island が叩く。 | `PATCH /api/studio/episodes/{episodeId}` |
+| **Analytics fire-and-forget** | `POST /api/analytics/events` の一本のみ | 呼び出し元（読書画面等）の操作を**ブロックしない**（`navigator.sendBeacon` 等を想定）。認証は任意（匿名可）。バリデーション失敗も 202 相当で握りつぶし、UX に影響を与えない（PRD §55, [architecture.md](../overview/architecture.md) §7）。 | `POST /api/analytics/events` |
 
 - **Controller 分離の指針**: `/api/**` 配下は Presentation 内で SSR Controller と物理的に別ファイル/別ディレクトリ（`presentation/controllers/api/` 等）に置き、認可・レスポンス形式（JSON vs HTML）の混在を避ける。ただし Application Service は SSR/API で共用する（Controller だけが薄く分かれる）。
 
@@ -220,7 +220,7 @@ Studio 配下は全ルートで **要ログイン**。認可列は「対象 `nov
 
 ## 5. canonical / noindex の決定ルール
 
-[frontend.md](./frontend.md) §7・PRD §56 と整合。
+[frontend.md](../overview/frontend.md) §7・PRD §56 と整合。
 
 | 条件 | canonical | robots meta | 備考 |
 |---|---|---|---|
@@ -232,7 +232,7 @@ Studio 配下は全ルートで **要ログイン**。認可列は「対象 `nov
 | `/studio/**`, `/admin/**`, `/api/**`, `/notifications`, `/library`, `/settings/**` | – | `noindex, nofollow` | 個人化・非公開ページは一律 noindex |
 | `/search`, `/rankings/:period`, `/tags/:tag`, `/genres/:genre` | 自ページ（クエリパラメータ付き検索結果は canonical をクエリなしの一覧ページに正規化） | `index, follow`（一覧トップのみ） | フィルタ組み合わせページの重複 index を避けるため、絞り込みクエリ付き URL は canonical をベースパスに向ける |
 
-- meta 生成は SSR View 側（Presentation）で一元化し、`visibility`/`content_state` を Application Service のレスポンス DTO に含めて View へ渡す（Domain が HTTP/SEO の関心を持たない、[architecture.md](./architecture.md) の依存方向を維持）。
+- meta 生成は SSR View 側（Presentation）で一元化し、`visibility`/`content_state` を Application Service のレスポンス DTO に含めて View へ渡す（Domain が HTTP/SEO の関心を持たない、[architecture.md](../overview/architecture.md) の依存方向を維持）。
 
 ---
 
@@ -260,7 +260,7 @@ Studio 配下は全ルートで **要ログイン**。認可列は「対象 `nov
 - **命名**: リソースは複数形（`episodes`, `collaborators`, `reviews`）。単一リソースの子アクションは動詞サブリソース化する（`.../publish`, `.../follow`, `.../accept`）— PATCH の意味が曖昧になる操作（公開・招待承諾など状態遷移）は POST + 動詞パスを許容する（RPC 的だが Use Case 単位で意味が明確になるため採用。純粋 REST の `PATCH {status: "published"}` は状態遷移の副作用（通知発火・Revision 追記等）を隠してしまい可読性が落ちるため不採用）。
 - **ネスト深さは最大2階層**: `/api/studio/novels/{novelId}/collaborators/invitations` のように3階層以上になる場合は、末尾のコレクションを独立リソースとして `invitationId` で以降のアクセスをフラット化する（`/api/invitations/{invitationId}/accept` のように）。
 - **SSR は slug/handle、API は ID**: 人間が触れる URL（ナビゲーション・共有）は slug/handle、island やシステム間連携は UUID の `novelId`/`episodeId` を使う。これにより slug 変更が API クライアント（island の JS）に影響しない。
-- **Controller はドメイン集約単位**で分割する（`NovelController` / `EpisodeController` / `CollaboratorController` / `ChangeProposalController` / `ReviewController` / `CommentController` / `FollowController` / `NotificationController` / `AnalyticsDashboardController` / `AdminReportController` 等）。1 Controller = 1 Application Service 呼び出しが原則（[architecture.md](./architecture.md) §5.1「Controller に業務ロジックを書かない」）。
+- **Controller はドメイン集約単位**で分割する（`NovelController` / `EpisodeController` / `CollaboratorController` / `ChangeProposalController` / `ReviewController` / `CommentController` / `FollowController` / `NotificationController` / `AnalyticsDashboardController` / `AdminReportController` 等）。1 Controller = 1 Application Service 呼び出しが原則（[architecture.md](../overview/architecture.md) §5.1「Controller に業務ロジックを書かない」）。
 - **SSR 用と API 用で Controller を分ける**: 同じ Novel リソースでも `NovelController`（SSR, 公開閲覧）と `StudioNovelController`（SSR, 著者管理）と API ルート群は別クラスにし、認可要件・レスポンス形式の混在を避ける。Application Service（`GetNovelDetailService` 等）は共有してよい。
 - **バージョニング**: 現時点で `/api/v1/` のような明示バージョニングは導入しない（外部公開 API ではなく自社 island 専用のため）。将来外部公開 API を出す場合に `/api/v1/` を切る（未決事項）。
 
@@ -270,7 +270,7 @@ Studio 配下は全ルートで **要ログイン**。認可列は「対象 `nov
 
 1. **slug 変更時の 301 リダイレクト**: 本書では旧 slug への恒久リダイレクトを実装せず、`/novels/{slug}` パーマリンクのみで恒久性を担保する設計とした。旧 slug 保存が必要になった場合 `novel_slug_history(novel_id, old_slug, created_at)` を [data-model.md](./data-model.md) に追加する必要がある。
 2. **handle 変更時の旧 URL 救済**: 現状は旧 handle 配下 URL を即 404 とする設計。ユーザー体験上リダイレクトを残したい場合は `user_handle_history` テーブルの追加要否を検討（[data-model.md](./data-model.md) 未決事項と合わせて要調整）。
-3. **Moderator/Admin ロールの実装位置**: `collaborators.role`（Novel スコープ）とは別に、プラットフォーム全体の Moderator/Admin ロールをどのテーブル/フラグで表現するか（`users` への追加列か別表か）は [auth.md](./auth.md) / [moderation.md](./moderation.md) で確定させる。本書はルート表上で「Moderator/Admin ロール」とだけ仮置きしている。
-4. **検索結果 URL のクエリパラメータ設計**（`?q=`, `?genre=`, `?sort=` 等の正式なパラメータ名・複数値の表現）は [discovery.md](./discovery.md) で確定し、本書は参照のみに留める。
-5. **Reader Settings のサーバ永続化要否**: 現状 localStorage 主体（[frontend.md](./frontend.md)）。ログインユーザーへのクロスデバイス同期が必要になった場合、`PATCH /api/me/reader-settings` の永続化先（`users` 拡張 or 専用表）を [data-model.md](./data-model.md) 側で確定する必要がある。
+3. **Moderator/Admin ロールの実装位置**: `collaborators.role`（Novel スコープ）とは別に、プラットフォーム全体の Moderator/Admin ロールをどのテーブル/フラグで表現するか（`users` への追加列か別表か）は [auth.md](./auth.md) / [moderation.md](../domains/moderation.md) で確定させる。本書はルート表上で「Moderator/Admin ロール」とだけ仮置きしている。
+4. **検索結果 URL のクエリパラメータ設計**（`?q=`, `?genre=`, `?sort=` 等の正式なパラメータ名・複数値の表現）は [discovery.md](../domains/discovery.md) で確定し、本書は参照のみに留める。
+5. **Reader Settings のサーバ永続化要否**: 現状 localStorage 主体（[frontend.md](../overview/frontend.md)）。ログインユーザーへのクロスデバイス同期が必要になった場合、`PATCH /api/me/reader-settings` の永続化先（`users` 拡張 or 専用表）を [data-model.md](./data-model.md) 側で確定する必要がある。
 6. **外部公開 API のバージョニング要否**（§7）は将来のサードパーティ連携要件次第。

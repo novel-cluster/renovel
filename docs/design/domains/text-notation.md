@@ -1,7 +1,7 @@
 # Text Notation / 独自記法パーサ仕様
 
 > 対象: Editor のプレーンテキスト本文をどう HTML に変換するか（ルビ・傍点記法のパーサ仕様、セキュリティ、実装配置）。
-> 正典は PRD §11。[frontend.md](./frontend.md) §4.2 の詳細版。データは [data-model.md](./data-model.md) `episodes.body` / `episode_revisions.body`（プレーンテキストの確定内容・スナップショット）を前提とする。
+> 正典は PRD §11。[frontend.md](../overview/frontend.md) §4.2 の詳細版。データは [data-model.md](../foundation/data-model.md) `episodes.body` / `episode_revisions.body`（プレーンテキストの確定内容・スナップショット）を前提とする。
 
 ## サマリー
 
@@ -16,7 +16,7 @@
 ## 1. スコープと前提
 
 - 対象は Episode 本文（`episodes.body` / `episode_revisions.body`）。タイトル・あらすじ等のメタ文言には適用しない（PRD §11 は Editor 本文の記法として定義されているため）。
-- Editor は **Markdown ではなくプレーンテキスト**（PRD §11.1, [frontend.md](./frontend.md) §5）。ユーザーが直接入力するのは以下 2 種の記法のみ。
+- Editor は **Markdown ではなくプレーンテキスト**（PRD §11.1, [frontend.md](../overview/frontend.md) §5）。ユーザーが直接入力するのは以下 2 種の記法のみ。
 - 変換は「表示時（Read Path）」に行う。保存する `body` は常に生のプレーンテキストであり、HTML 化した結果を DB に保存しない（Revision 復元・再エクスポート・記法仕様変更時の再レンダリングを容易にするため）。
 
 ---
@@ -68,7 +68,7 @@ CSS 側（`app/src/styles/globals.css` に追加想定）:
 
 ### 2.3 縦書き時の考慮
 
-- 縦書き（`writing-mode: vertical-rl`、[frontend.md](./frontend.md) §4.1）でも `<ruby><rt>` はブラウザの縦書きルビレンダリングにネイティブ対応しており、追加のマークアップ変更は不要。
+- 縦書き（`writing-mode: vertical-rl`、[frontend.md](../overview/frontend.md) §4.1）でも `<ruby><rt>` はブラウザの縦書きルビレンダリングにネイティブ対応しており、追加のマークアップ変更は不要。
 - `text-emphasis-position` は横書きでは `over`、縦書きでは `right` が慣例（日本語の圏点は縦書きで右側に打つ）。CSS で `:where([data-writing-mode="vertical"]) .emphasis-dots { text-emphasis-position: right; }` のように、テキスト側の HTML 生成とは独立に、Reader Settings の書字方向クラスと連動させる（本書では HTML 生成までを扱い、書字方向依存の CSS 分岐は frontend 側の責務とする）。
 
 ---
@@ -227,8 +227,8 @@ app/src/shared/text-notation/
 ```
 
 - 配置は `domain/writing/` ではなく `shared/` を採用する。
-  - 決定 / 理由 / 代替案: 記法変換は「文字列 → 文字列（HTML）」の純粋な表示ロジックであり、Episode・Revision 等のドメインエンティティや Repository に依存しない。Reader（本文表示）・Writing（Editor Preview）の**両ドメインの Presentation 層から使われる**ため、特定ドメインの配下に置くと循環参照や不要な依存が生まれる。`shared/` に置くことで [architecture.md](./architecture.md) のレイヤ図における Domain 非依存のユーティリティとして扱える。
-  - 代替案: `domain/writing/services/` に置き reading 側から import する案は、reading→writing への依存が生まれ「一方向依存」の原則（[architecture.md](./architecture.md) §2）を崩すため不採用。
+  - 決定 / 理由 / 代替案: 記法変換は「文字列 → 文字列（HTML）」の純粋な表示ロジックであり、Episode・Revision 等のドメインエンティティや Repository に依存しない。Reader（本文表示）・Writing（Editor Preview）の**両ドメインの Presentation 層から使われる**ため、特定ドメインの配下に置くと循環参照や不要な依存が生まれる。`shared/` に置くことで [architecture.md](../overview/architecture.md) のレイヤ図における Domain 非依存のユーティリティとして扱える。
+  - 代替案: `domain/writing/services/` に置き reading 側から import する案は、reading→writing への依存が生まれ「一方向依存」の原則（[architecture.md](../overview/architecture.md) §2）を崩すため不採用。
 
 ### 7.2 公開 API（入出力の型）
 

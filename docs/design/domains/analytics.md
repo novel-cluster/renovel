@@ -1,14 +1,14 @@
 # Analytics Design / 分析ドメイン詳細設計
 
 > 対象: Analytics ドメイン（イベント収集 → 集計 → 作者向けダッシュボード）。ReNovel の差別化の核＝**「作者向け Google Analytics」**（PRD §29）。
-> 正典は PRD §29–36, §51, §55, §58。本書は [architecture.md](./architecture.md) §7 の概要を実装粒度まで詳細化する。
-> テーブル名／カラム名の正典は [data-model.md](./data-model.md)（`analytics` スキーマ）。本書はそこに定義された名前を厳密に踏襲し、再定義しない。
-> ルート表は [routing.md](./routing.md) §3.5、集計ワーカーの配置は [infrastructure.md](./infrastructure.md)。現状は scaffold（Phase 0 完了）で、本書は目標形。
+> 正典は PRD §29–36, §51, §55, §58。本書は [architecture.md](../overview/architecture.md) §7 の概要を実装粒度まで詳細化する。
+> テーブル名／カラム名の正典は [data-model.md](../foundation/data-model.md)（`analytics` スキーマ）。本書はそこに定義された名前を厳密に踏襲し、再定義しない。
+> ルート表は [routing.md](../foundation/routing.md) §3.5、集計ワーカーの配置は [infrastructure.md](../overview/infrastructure.md)。現状は scaffold（Phase 0 完了）で、本書は目標形。
 
 ## サマリー
 
 - **収集は fire-and-forget の一本道** `POST /api/analytics/events`。読書操作を一切ブロックせず（`navigator.sendBeacon` 前提）、バリデーション失敗も `202` 相当で握りつぶす（PRD §55）。生イベントは `analytics.analytics_events` へ append-only で積む。
-- **二段集計パイプライン** `analytics_events → analytics_hourly → analytics_daily` を `analytics-worker`（[infrastructure.md](./infrastructure.md)）が定期実行。**冪等な UPSERT（`ON CONFLICT`）** で再集計・重複投入に耐え、遅延イベントは所属バケットへ後追い加算する。
+- **二段集計パイプライン** `analytics_events → analytics_hourly → analytics_daily` を `analytics-worker`（[infrastructure.md](../overview/infrastructure.md)）が定期実行。**冪等な UPSERT（`ON CONFLICT`）** で再集計・重複投入に耐え、遅延イベントは所属バケットへ後追い加算する。
 - **Unique Readers は `session_id`（匿名 visitor）× バケット単位の distinct** で近似する。個人特定はしない。bot 除外・重複排除・進捗イベントの単調化（25→50→75→complete）を収集/集計の両段で担保。
 - **6 ダッシュボードの算出式を確定**: Overview（§30）・Episode（§31）・Reading Funnel（§32）・Acquisition（§33）・Realtime（§34）・Retention（§35）。各指標に「元イベント / 集計元テーブル / 粒度 / 式」を表で対応付けた。
 - **プライバシー保証（PRD §58）**: 作者へ返すのは集計値のみ。個人単位の「誰がいつどこまで読んだか」は API・画面のいずれからも露出しない。**最小母数 k（既定 5）未満のセルはマスク**し、`user_id` は集計にのみ使い作者へ返さない。
@@ -22,13 +22,13 @@ Analytics ドメインの責務は「**読者行動イベントを集め、作�
 
 | 関心 | 本書 | 他書 |
 |---|---|---|
-| イベントの器（テーブル定義） | 参照のみ | [data-model.md](./data-model.md) `analytics` スキーマ |
+| イベントの器（テーブル定義） | 参照のみ | [data-model.md](../foundation/data-model.md) `analytics` スキーマ |
 | 収集/集計/ダッシュボード算出 | **本書** | — |
-| 送信エンドポイントの URL 規約 | 詳細ロジック | [routing.md](./routing.md) §3.5 |
-| worker コンテナ・スケジュール実行基盤 | ジョブ設計 | [infrastructure.md](./infrastructure.md) |
-| 読書画面からのイベント発火（island） | 発火契機の定義 | [reading.md](./reading.md), [frontend.md](./frontend.md) §4.3 |
+| 送信エンドポイントの URL 規約 | 詳細ロジック | [routing.md](../foundation/routing.md) §3.5 |
+| worker コンテナ・スケジュール実行基盤 | ジョブ設計 | [infrastructure.md](../overview/infrastructure.md) |
+| 読書画面からのイベント発火（island） | 発火契機の定義 | [reading.md](./reading.md), [frontend.md](../overview/frontend.md) §4.3 |
 | Ranking への素データ供給 | 供給契約 | [discovery.md](./discovery.md) |
-| 認可（誰がダッシュボードを見れるか） | 要件のみ | [auth.md](./auth.md) |
+| 認可（誰がダッシュボードを見れるか） | 要件のみ | [auth.md](../foundation/auth.md) |
 
 ### 1.1 DDD レイヤ上の配置
 
@@ -54,7 +54,7 @@ infrastructure/
   jobs/HourlyRollupJob.ts / DailyRollupJob.ts / RetentionRollupJob.ts   … analytics-worker が実行
 ```
 
-- **Domain は Hono `Context`・Drizzle に依存しない**（[architecture.md](./architecture.md) §2）。イベントの器への書き込みは `AnalyticsEventSink` interface 越し。
+- **Domain は Hono `Context`・Drizzle に依存しない**（[architecture.md](../overview/architecture.md) §2）。イベントの器への書き込みは `AnalyticsEventSink` interface 越し。
 - ダッシュボードは **Read Query（CQRS の read 側）** に寄せ、集計表を読むだけにする。Query は Domain Entity を組み立てず DTO を直接返してよい（読み取り専用のため N+1 回避を優先、PRD §55）。
 
 ---
@@ -83,7 +83,7 @@ POST /api/analytics/events
 常に 202 Accepted（body 空）を即返す。
 ```
 
-**fire-and-forget 契約**（[routing.md](./routing.md) §4）:
+**fire-and-forget 契約**（[routing.md](../foundation/routing.md) §4）:
 
 - クライアントは **`navigator.sendBeacon('/api/analytics/events', blob)`** を第一手段とする。ページ遷移・タブ離脱時も送信が保証され、レスポンスを待たない。sendBeacon 非対応/失敗時は `fetch(url, { keepalive: true })` にフォールバック。
 - サーバは **入力を最小検証し、何があっても `202` を返す**。未知 `event_type`・欠損フィールド・JSON 破損・rate 超過はすべて**黙って破棄**して 202（＝計測は best-effort、UX を守る）。エラーを client へ返さない。
@@ -91,7 +91,7 @@ POST /api/analytics/events
 - **CSRF 免除**: このエンドポイントは副作用が append-only の観測ログのみで、CSRF トークン必須にすると sendBeacon が使えなくなるため免除する。代わりに **`Origin`/`Referer` 検証**と rate limit（§3.6）で保護。書き込み先は分離スキーマで transactional を汚さない。
 - **バッチ送信可**: body は単一イベント or イベント配列（最大 20 件）。読書中に溜めた進捗イベントを離脱時にまとめて 1 beacon で送れる。
 
-> なぜ Controller で処理を完結せず Service を挟むか: bot 判定・進捗単調化・props 最小化という**ドメインロジック**があるため。Controller は「パースして 202」だけ、正規化は `RecordEventService` + `EventNormalizer`（domain service）に置く（[architecture.md](./architecture.md) §5.1）。
+> なぜ Controller で処理を完結せず Service を挟むか: bot 判定・進捗単調化・props 最小化という**ドメインロジック**があるため。Controller は「パースして 202」だけ、正規化は `RecordEventService` + `EventNormalizer`（domain service）に置く（[architecture.md](../overview/architecture.md) §5.1）。
 
 ### 3.2 送信ペイロード
 
@@ -154,7 +154,7 @@ POST /api/analytics/events
 
 - **`novel_id` は全集計の主軸**。episode 系イベントでも `novel_id` を必ず埋める（クライアントが送るか、サーバが `target_id`=episode_id から解決）。集計・ダッシュボード認可（作品所有者判定）がすべて `novel_id` 起点のため。
 - `target_type`/`target_id` は polymorphic な緩い参照（FK なし）。`novel`/`episode`/`user` を取る。
-- **`novel_id` 解決の N+1 回避**: episode→novel の対応はキャッシュ（redis, [infrastructure.md](./infrastructure.md)）に載せ、収集ホットパスで毎回 DB を引かない。未解決なら `novel_id=null` のまま受け、後段 rollup で補完してもよい（best-effort）。
+- **`novel_id` 解決の N+1 回避**: episode→novel の対応はキャッシュ（redis, [infrastructure.md](../overview/infrastructure.md)）に載せ、収集ホットパスで毎回 DB を引かない。未解決なら `novel_id=null` のまま受け、後段 rollup で補完してもよい（best-effort）。
 
 ### 3.5 visitor / session の識別（PRD §58 準拠）
 
@@ -163,7 +163,7 @@ Unique Readers を**ログイン不要**で数えつつ**個人特定しない**
 | 識別子 | 実体 | 用途 | 寿命 |
 |---|---|---|---|
 | **visitor / `session_id`** | 匿名 Cookie `rnv_vid`（UUIDv4, HttpOnly, SameSite=Lax, Secure） | Unique Readers 近似・Retention の cohort キー | 既定 **180 日**ローリング。認証 session とは別物 |
-| `user_id` | 認証済みユーザー（[auth.md](./auth.md)）| 集計内部の重複統合にのみ使用。**作者へは返さない** | 認証 session に従う |
+| `user_id` | 認証済みユーザー（[auth.md](../foundation/auth.md)）| 集計内部の重複統合にのみ使用。**作者へは返さない** | 認証 session に従う |
 
 - **`rnv_vid` は認証 session（`sessions.token_hash`）とは完全に別 Cookie**。ログアウトしても visitor は継続し、ログイン前後で同一読者を（ベストエフォートで）つなげる。名前は分析専用と分かる `rnv_vid`。
 - `analytics_events.session_id` にはこの `rnv_vid` を格納する（列名は data-model 準拠。意味は「匿名 visitor」）。**個人を指すものではない**とコメントで明示（data-model.md L603）。
@@ -177,7 +177,7 @@ Unique Readers を**ログイン不要**で数えつつ**個人特定しない**
 1. **UA ヒューリスティック**: 既知 crawler（`bot`, `spider`, `crawl`, `slurp`, `preview`, `HeadlessChrome` 等）の UA は `EventNormalizer` が drop。
 2. **`Sec-Fetch-*` / prefetch**: `Sec-Purpose: prefetch` や `Purpose: prefetch` を持つプリフェッチは view として数えない。
 3. **無 Cookie の連打**: `rnv_vid` を保持しない（Cookie を返さない）client からの高頻度 view は bot 疑いとして rate limit で抑制。
-4. **rate limit**: visitor あたり `POST /api/analytics/events` を **60 req/min**（redis, [infrastructure.md](./infrastructure.md)）。超過分は 202 のまま破棄。
+4. **rate limit**: visitor あたり `POST /api/analytics/events` を **60 req/min**（redis, [infrastructure.md](../overview/infrastructure.md)）。超過分は 202 のまま破棄。
 
 > bot 判定に使う UA/IP は**その場限り**。`analytics_events` に残さない。誤判定しても view が減るだけで UX に影響しない（fire-and-forget）。
 
@@ -212,7 +212,7 @@ analytics.analytics_daily         (bucket_date, novel_id, episode_id, metric, va
 Dashboard Read Queries            (集計表のみ読む・個人単位を返さない)
 ```
 
-- 実行主体は **`analytics-worker`** コンテナ（[infrastructure.md](./infrastructure.md) §依存サービス）。web プロセスとは分離し、集計負荷が読書 SSR を圧迫しない。将来はこの worker ごと別サービスへ（PRD §51, §54）。
+- 実行主体は **`analytics-worker`** コンテナ（[infrastructure.md](../overview/infrastructure.md) §依存サービス）。web プロセスとは分離し、集計負荷が読書 SSR を圧迫しない。将来はこの worker ごと別サービスへ（PRD §51, §54）。
 - スケジュールは worker 内の cron（or `worker` 共有のジョブランナー）。**hourly は毎時、daily は日次、retention は日次**。
 - **Realtime（§6.5）は集計表を経由せず** `analytics_events` の直近数分窓を直接クエリ（後述）。
 
@@ -234,7 +234,7 @@ Dashboard Read Queries            (集計表のみ読む・個人単位を返さ
 | `reviews/follows/library_adds` | 各アクション数 | 対応イベント | count | novel |
 | `acq_<src>` | 流入元別セッション数 | `*_view`+referrer/utm 分類 | count(distinct visitor) per source | novel |
 
-> **注意**: `likes/stars/...` の metric は**分析上の観測数**であり、Like/Star の現在値そのものではない（取り消しがある）。Overview に「現在の総 Like 数」を出す場合は social ドメインの正カウンタ（[data-model.md](./data-model.md) social）を参照し、時系列推移だけ本 metric を使う。ダッシュボードでの使い分けは §6.1 に明記。
+> **注意**: `likes/stars/...` の metric は**分析上の観測数**であり、Like/Star の現在値そのものではない（取り消しがある）。Overview に「現在の総 Like 数」を出す場合は social ドメインの正カウンタ（[data-model.md](../foundation/data-model.md) social）を参照し、時系列推移だけ本 metric を使う。ダッシュボードでの使い分けは §6.1 に明記。
 
 ### 4.3 Hourly Rollup ジョブ
 
@@ -254,7 +254,7 @@ HourlyRollupJob（毎時 :05 実行、対象 = 直近 2 時間分のバケット
 
 - **置換（re-compute）方式**を採る。`DO UPDATE SET value = EXCLUDED.value`。理由: 遅延イベント・重複配送があっても、対象バケットを**まるごと数え直す**ことで常に正しい値へ収束する（冪等）。加算方式（`value = value + delta`）は二重実行で壊れるため不採用。
 - **重ね塗りウィンドウ = 直近 2〜3 時間**。beacon の遅延・時計ずれで前バケットに属すイベントが後から来ても、次回実行が拾い直す。より古い遅延は §4.6 のバックフィルで対応。
-- **distinct 系（unique/progress/completes）の再計算コスト**: `visitor_key` の distinct を毎時全走査すると重い。対策として `analytics_events` を `occurred_at` の **BRIN index**＋（将来）**月次パーティション**（[data-model.md](./data-model.md) L613）で走査範囲を絞る。unique はバケット内 distinct なのでバケット単位に閉じて計算できる。
+- **distinct 系（unique/progress/completes）の再計算コスト**: `visitor_key` の distinct を毎時全走査すると重い。対策として `analytics_events` を `occurred_at` の **BRIN index**＋（将来）**月次パーティション**（[data-model.md](../foundation/data-model.md) L613）で走査範囲を絞る。unique はバケット内 distinct なのでバケット単位に閉じて計算できる。
 - **一意制約は `COALESCE` 式 unique index**（`novel_id`/`episode_id` が NULL でも一意判定できるよう、data-model.md L627 準拠）。
 
 ### 4.4 Daily Rollup ジョブ
@@ -270,7 +270,7 @@ DailyRollupJob（毎日 00:20 UTC、対象 = 前日）
 ```
 
 - **加算 metric は hourly からロールアップ**（安価）。**distinct metric は生イベントから日窓で再計算**（正確）。「hourly の unique を足すと日次 unique を過大計上する」問題を回避するための明示ルール。
-- タイムゾーン: **バケットは UTC 固定**で保存（[data-model.md](./data-model.md) L57）。作者ダッシュボードの「Today/Yesterday」等の日境界は**表示層で作者ロケール（既定 Asia/Tokyo）に変換**して daily を範囲集約する。日次テーブルを UTC で持ち、表示で寄せる（保存を多重化しない）。
+- タイムゾーン: **バケットは UTC 固定**で保存（[data-model.md](../foundation/data-model.md) L57）。作者ダッシュボードの「Today/Yesterday」等の日境界は**表示層で作者ロケール（既定 Asia/Tokyo）に変換**して daily を範囲集約する。日次テーブルを UTC で持ち、表示で寄せる（保存を多重化しない）。
 
 ### 4.5 遅延・冪等性・再集計の保証
 
@@ -279,21 +279,21 @@ DailyRollupJob（毎日 00:20 UTC、対象 = 前日）
 | **遅延イベント** | hourly は直近 2〜3h を毎回重ね塗り。それより古い遅延は日次バックフィル or 手動 reaggregate コマンドで対象日を再計算 |
 | **冪等性** | 全 rollup は「対象バケットを数え直して置換」。何度実行しても同結果。ジョブの二重起動・リトライに耐える |
 | **再集計（reaggregate）** | 運用コマンド `bun run analytics:reaggregate --from=YYYY-MM-DD --to=…` で範囲指定の hourly→daily を再構築（集計ロジック修正・欠損復旧時） |
-| **ジョブ失敗** | rollup は独立・冪等なので、失敗回は次回スケジュールが自然に回復。アラートは worker 監視（[infrastructure.md](./infrastructure.md)）。生イベントは残っているのでデータロスなし |
+| **ジョブ失敗** | rollup は独立・冪等なので、失敗回は次回スケジュールが自然に回復。アラートは worker 監視（[infrastructure.md](../overview/infrastructure.md)）。生イベントは残っているのでデータロスなし |
 | **watermark** | 進捗管理が要る場合、`analytics_job_state`（最終成功 bucket）を持ち、そこから重ね塗り幅ぶん遡って再開。ただし冪等なので厳密 watermark は必須でない |
 
-### 4.6 保持期間・パーティション（→ [data-model.md](./data-model.md) 未決 6 / [infrastructure.md](./infrastructure.md)）
+### 4.6 保持期間・パーティション（→ [data-model.md](../foundation/data-model.md) 未決 6 / [infrastructure.md](../overview/infrastructure.md)）
 
 - **`analytics_events`（生）**: `occurred_at` で**月次 range パーティション**。ダッシュボードは集計表を読むので、生イベントは集計後は基本参照されない。**保持は既定 90 日**（Realtime＋再集計猶予＋監査に十分）、古いパーティションは `DETACH`→アーカイブ/DROP。
 - **`analytics_hourly`**: **保持 90 日**（Episode 詳細の時間別グラフ用）。
 - **`analytics_daily`**: **無期限（長期）保持**。作者の長期トレンド・Retention の源泉。行サイズが小さく安価。
-- パーティション/保持の具体運用は [infrastructure.md](./infrastructure.md) に委譲。導入時期は生イベント量が閾値を超えた時点（初期は単一テーブルで可）。
+- パーティション/保持の具体運用は [infrastructure.md](../overview/infrastructure.md) に委譲。導入時期は生イベント量が閾値を超えた時点（初期は単一テーブルで可）。
 
 ---
 
 ## 5. ダッシュボード算出定義
 
-すべての Query は **`analytics_daily`/`analytics_hourly`（と Realtime のみ生イベント）だけ**を読む。認可は [auth.md](./auth.md) に従い **Owner/Admin/Writer** のみ（[routing.md](./routing.md) §3.5）。すべて `novel_id` でスコープする。
+すべての Query は **`analytics_daily`/`analytics_hourly`（と Realtime のみ生イベント）だけ**を読む。認可は [auth.md](../foundation/auth.md) に従い **Owner/Admin/Writer** のみ（[routing.md](../foundation/routing.md) §3.5）。すべて `novel_id` でスコープする。
 
 ### 5.1 期間セレクタ（共通, PRD §30）
 
@@ -356,7 +356,7 @@ drop[n]   (%) = funnel[n-1] - funnel[n]               -- 直前話からの離�
 
 | 列 | 定義 | 元 metric |
 |---|---|---|
-| Episode | 話番号・タイトル | novel 構造（[data-model.md](./data-model.md) episodes） |
+| Episode | 話番号・タイトル | novel 構造（[data-model.md](../foundation/data-model.md) episodes） |
 | Readers | その話の unique 読者 | `unique_readers`(episode) |
 | % of Ep.1 | `step[n]/step[1]` | 上式 |
 | Drop from prev | `funnel[n-1]-funnel[n]` | 上式（大きい行を強調表示） |
@@ -404,7 +404,7 @@ active_total = count(distinct visitor_key)
 per_episode[episode_id] = count(distinct visitor_key) grouped by episode_id
 ```
 
-- **island からポーリング**（`GET /api/studio/.../analytics/realtime`、[routing.md](./routing.md) §3.5, [frontend.md](./frontend.md) §1.1）。更新間隔は **15–30 秒**で十分（秒単位不要）。将来 SSE 化余地。
+- **island からポーリング**（`GET /api/studio/.../analytics/realtime`、[routing.md](../foundation/routing.md) §3.5, [frontend.md](../overview/frontend.md) §1.1）。更新間隔は **15–30 秒**で十分（秒単位不要）。将来 SSE 化余地。
 - 直近 5 分窓の生イベント distinct なので**軽量**（`(novel_id, occurred_at)` index で範囲を絞る）。集計 rollup とは独立。
 - Episode 別内訳を出す（PRD §34 の例）。**最小母数マスク（§7）は Realtime にも適用**: 人数が k 未満のセルは「<5」等でまるめる。
 
@@ -431,12 +431,12 @@ per_episode[episode_id] = count(distinct visitor_key) grouped by episode_id
 
 | 保証 | 実装 |
 |---|---|
-| **集計値のみ露出** | ダッシュボード Query は `analytics_hourly/daily`（＝集計済み）と Realtime の distinct カウントのみ返す。**生 `analytics_events` を作者に見せる API は存在しない**（[routing.md](./routing.md) に個別イベント取得ルートを作らない） |
+| **集計値のみ露出** | ダッシュボード Query は `analytics_hourly/daily`（＝集計済み）と Realtime の distinct カウントのみ返す。**生 `analytics_events` を作者に見せる API は存在しない**（[routing.md](../foundation/routing.md) に個別イベント取得ルートを作らない） |
 | **`user_id` を返さない** | `analytics_events.user_id` は Unique 統合の内部キーにのみ使用。DTO・View・chart API のいずれにも user_id / handle / session_id を含めない。Query の SELECT に個人識別列を出さない |
 | **最小母数マスク（k-匿名）** | 集計セルの母数が **k（既定 5）未満**なら、その値を `< k` 等にまるめる or 非表示。特に Realtime の episode 別、Acquisition の細分、Funnel 末尾話・Retention コホートなど**少人数で個人が推定されうるセル**に適用 |
 | **クエリ語・URL の非保存** | `search_click` はクエリ原文でなく `query_hash`、`referrer` は PII query を除去（§3.5, §5.5） |
 | **IP/UA 非保存** | bot 判定に使ったのち破棄。`analytics_events` に残さない（§3.5） |
-| **本人履歴との分離** | 読者本人の「続きから読む」履歴は reading ドメインの `reading_progress`（本人閲覧専用、[data-model.md](./data-model.md) L449）にあり、**analytics とは別テーブル・別用途**。作者分析は analytics 集計のみ参照 |
+| **本人履歴との分離** | 読者本人の「続きから読む」履歴は reading ドメインの `reading_progress`（本人閲覧専用、[data-model.md](../foundation/data-model.md) L449）にあり、**analytics とは別テーブル・別用途**。作者分析は analytics 集計のみ参照 |
 
 - **最小母数 k は設定値**（既定 5）。Overview のような大母数指標には実質影響せず、粒度の細かい/新規作品の指標でのみ効く。
 - これらは Query 層（read 側）で強制する。`AnalyticsReadRepository` の各メソッドが**マスク後の値のみ**返す設計にし、View で誤って生値を出せないようにする。
@@ -446,22 +446,22 @@ per_episode[episode_id] = count(distinct visitor_key) grouped by episode_id
 ## 7. パフォーマンスと非機能
 
 - **収集ホットパス**: Controller はパース＋202 のみ。novel_id 解決・重複除去はキャッシュ/後段へ寄せ、DB 書き込みは単純 append。読書 SSR と物理プロセス（web）を共有するが、書き込み先スキーマが分離され集計は worker 側（PRD §55）。
-- **ダッシュボード**: 集計表を読むだけ・`novel_id` index で絞る・N+1 を作らない（Query 層集約、[frontend.md](./frontend.md) §8）。グラフは island（Analytics Graph）が chart API から JSON を取得（[routing.md](./routing.md) §3.5）。
+- **ダッシュボード**: 集計表を読むだけ・`novel_id` index で絞る・N+1 を作らない（Query 層集約、[frontend.md](../overview/frontend.md) §8）。グラフは island（Analytics Graph）が chart API から JSON を取得（[routing.md](../foundation/routing.md) §3.5）。
 - **集計負荷分離**: rollup は `analytics-worker`。web の応答時間に影響させない。
-- **スケール余地**: 生イベント量増大時は月次パーティション → analytics を別 DB/サービスへ（PRD §51, §54, [architecture.md](./architecture.md) §10）。FK 無し設計がこれを可能にする。
+- **スケール余地**: 生イベント量増大時は月次パーティション → analytics を別 DB/サービスへ（PRD §51, §54, [architecture.md](../overview/architecture.md) §10）。FK 無し設計がこれを可能にする。
 
 ---
 
 ## 8. 相互リンク早見
 
-- テーブル定義: [data-model.md](./data-model.md) `analytics` スキーマ（`analytics_events` / `analytics_hourly` / `analytics_daily`）
-- ルート・エンドポイント区分: [routing.md](./routing.md) §3.5, §4
-- worker・パーティション・保持運用: [infrastructure.md](./infrastructure.md)
-- イベント発火元（読書 island・進捗計測）: [reading.md](./reading.md), [frontend.md](./frontend.md) §4.3
+- テーブル定義: [data-model.md](../foundation/data-model.md) `analytics` スキーマ（`analytics_events` / `analytics_hourly` / `analytics_daily`）
+- ルート・エンドポイント区分: [routing.md](../foundation/routing.md) §3.5, §4
+- worker・パーティション・保持運用: [infrastructure.md](../overview/infrastructure.md)
+- イベント発火元（読書 island・進捗計測）: [reading.md](./reading.md), [frontend.md](../overview/frontend.md) §4.3
 - Ranking への素データ供給（unique/completion）: [discovery.md](./discovery.md)
 - social 正カウンタ（Like/Star/Follow 現在値）: [social-notification.md](./social-notification.md)
-- 認可（Owner/Admin/Writer）: [auth.md](./auth.md)
-- 全体像: [architecture.md](./architecture.md) §7
+- 認可（Owner/Admin/Writer）: [auth.md](../foundation/auth.md)
+- 全体像: [architecture.md](../overview/architecture.md) §7
 
 ---
 

@@ -2,7 +2,7 @@
 
 > 対象: 全ドメインの PostgreSQL スキーマ設計。テーブル名・カラム名・制約・index。
 > 正典は PRD §6,7,8,9,10,12,13,14,15,16,18,19,20,21,22,23,26,36,37,53。
-> **本書は全設計の backbone。** 他文書（[auth.md](./auth.md) / [writing-revision.md](./writing-revision.md) / [collaboration-fork.md](./collaboration-fork.md) / [reading.md](./reading.md) / [social-notification.md](./social-notification.md) / [discovery.md](./discovery.md) / [analytics.md](./analytics.md) / [moderation.md](./moderation.md)）はここで定義したテーブル名／カラム名を正典として参照する。命名を変える場合は本書を先に更新すること。
+> **本書は全設計の backbone。** 他文書（[auth.md](./auth.md) / [writing-revision.md](../domains/writing-revision.md) / [collaboration-fork.md](../domains/collaboration-fork.md) / [reading.md](../domains/reading.md) / [social-notification.md](../domains/social-notification.md) / [discovery.md](../domains/discovery.md) / [analytics.md](../domains/analytics.md) / [moderation.md](../domains/moderation.md)）はここで定義したテーブル名／カラム名を正典として参照する。命名を変える場合は本書を先に更新すること。
 > 現状は scaffold（Phase 0 完了）。本書は「これから作る目標形」を示す。
 
 ## サマリー
@@ -12,7 +12,7 @@
 - **物理スキーマを 2 つに分割**する: transactional は `public`、分析は `analytics`。分析イベントは transactional を汚さず、将来別サービスへ切り出せる（PRD §53, §51）。
 - **一意性はアプリ任せにせず DB 制約で強制**する: `users.handle`、`novels.slug`、`likes(user_id, episode_id)`、`stars(user_id, novel_id)`、`reviews(user_id, novel_id)`、`novel_tags(novel_id, tag_id)` など（PRD §6,20,21）。
 - **Fork の帰属（`forks.source_novel_id`）と Revision 履歴（`episode_revisions`）は物理的に削除しない**設計にし、PRD §12・§15 の「上書き禁止／帰属削除禁止」を DB レベルで担保する。
-- **ランキングは動的計算＋集計スナップショット**の二段構え（`ranking_snapshots`）とし、素データは `analytics_daily` と social カウンタから供給する（PRD §26、詳細は [discovery.md](./discovery.md)）。
+- **ランキングは動的計算＋集計スナップショット**の二段構え（`ranking_snapshots`）とし、素データは `analytics_daily` と social カウンタから供給する（PRD §26、詳細は [discovery.md](../domains/discovery.md)）。
 
 ---
 
@@ -77,7 +77,7 @@ export const softDelete = {
 - **一覧・検索の主経路に複合 index**（§4 に集約）。並び順に合わせ末尾へ `created_at DESC` 等を含める。
 - **Soft Delete 対象の主一覧 index は `WHERE deleted_at IS NULL` の部分 index**にし、生存行のみ小さく保つ。
 - **一意制約**は `UNIQUE` 制約 or 部分 unique index（Soft Delete と両立させる場合は `WHERE deleted_at IS NULL`）。
-- **全文検索**（PRD §23）は初期は `pg_trgm` + `GIN`（`novels.title/catchphrase/description`）。将来 `tsvector`/外部検索へ拡張可（[discovery.md](./discovery.md)）。
+- **全文検索**（PRD §23）は初期は `pg_trgm` + `GIN`（`novels.title/catchphrase/description`）。将来 `tsvector`/外部検索へ拡張可（[discovery.md](../domains/discovery.md)）。
 - **JSONB 列**（`notifications.payload`, `analytics_events.props`）は必要になった時点で式 index を追加。初期は張らない。
 
 ### 1.6 Soft Delete 対象（明示）
@@ -95,8 +95,8 @@ export const softDelete = {
 ### 1.7 Analytics と Transactional の物理分離（PRD §53, §51）
 
 - **Postgres スキーマを分割**: transactional は `public`、分析は **`analytics`** スキーマ。
-- `analytics.*` テーブルは transactional に **FK を張らない**（`novel_id`/`episode_id`/`user_id` は緩い参照＝ただの `uuid` 列）。これにより将来 analytics を別 DB / 別サービスへ切り出せる（[analytics.md](./analytics.md)）。
-- Drizzle は `pgSchema("analytics")` で名前空間を分ける。Migration 運用（生成・適用）は [infrastructure.md](./infrastructure.md) に従い、本書では重複記述しない。
+- `analytics.*` テーブルは transactional に **FK を張らない**（`novel_id`/`episode_id`/`user_id` は緩い参照＝ただの `uuid` 列）。これにより将来 analytics を別 DB / 別サービスへ切り出せる（[analytics.md](../domains/analytics.md)）。
+- Drizzle は `pgSchema("analytics")` で名前空間を分ける。Migration 運用（生成・適用）は [infrastructure.md](../overview/infrastructure.md) に従い、本書では重複記述しない。
 
 ```ts
 import { pgSchema } from "drizzle-orm/pg-core";
@@ -186,7 +186,7 @@ erDiagram
 | id | uuid | PK | | UUIDv7 |
 | handle | text | NOT NULL, UNIQUE | unique | `/@{handle}`。`^[a-z0-9_]{3,30}$`（CHECK）。大文字小文字無視のため小文字保存 |
 | display_name | text | NOT NULL | | 表示名 |
-| icon_url | text | NULL | | プロフィール画像 URL（表紙同様アップロードは storage 経由、[infrastructure.md](./infrastructure.md)） |
+| icon_url | text | NULL | | プロフィール画像 URL（表紙同様アップロードは storage 経由、[infrastructure.md](../overview/infrastructure.md)） |
 | bio | text | NULL | | 自己紹介 |
 | external_links | jsonb | NOT NULL default `'[]'` | | `[{label,url}]`。最大 5 件を app 検証 |
 | email | citext | UNIQUE, NULL | unique(部分) | ログイン識別子。OAuth のみ時は NULL 可 |
@@ -287,7 +287,7 @@ export const users = pgTable("users", {
 | episode_no | integer | NOT NULL | | 作品内の通し番号（表示用）。Chapter 有無に依らず Novel 内で連番 |
 | order_index | integer | NOT NULL | | 並び順（章内 or 全体）。疎採番 |
 | title | text | NOT NULL | | |
-| body | text | NOT NULL default `''` | | **現在の本文**（最新 Revision と一致）。プレーンテキスト（記法変換は表示層。[text-notation.md](./text-notation.md)） |
+| body | text | NOT NULL default `''` | | **現在の本文**（最新 Revision と一致）。プレーンテキスト（記法変換は表示層。[text-notation.md](../domains/text-notation.md)） |
 | char_count | integer | NOT NULL default 0 | | 本文文字数 |
 | status | episode_status | NOT NULL default `draft` | idx | draft/published |
 | visibility | visibility | NULL | | 継承既定は Novel。個別上書き可（NULL=Novel に従う） |
@@ -321,7 +321,7 @@ export const episodes = pgTable("episodes", {
 
 ---
 
-### writing（PRD §12。詳細フロー・状態機械は [writing-revision.md](./writing-revision.md)）
+### writing（PRD §12。詳細フロー・状態機械は [writing-revision.md](../domains/writing-revision.md)）
 
 #### `episode_revisions`（append-only・上書き禁止）
 
@@ -336,11 +336,11 @@ export const episodes = pgTable("episodes", {
 | char_count | integer | NOT NULL default 0 | | |
 | change_note | text | NULL | | 変更メモ（PRD §12「必要に応じて変更内容も記録」） |
 | restored_from_id | uuid | NULL, FK→episode_revisions(self) | | 復元操作で作られた Revision の元 |
-| source_proposal_id | uuid | NULL, FK→change_proposals, ON DELETE SET NULL | | Change Proposal の Accept で生成された場合の提案元。`editor_id` は提案者（実際に書いた人）を指す（[collaboration-fork.md](./collaboration-fork.md)） |
+| source_proposal_id | uuid | NULL, FK→change_proposals, ON DELETE SET NULL | | Change Proposal の Accept で生成された場合の提案元。`editor_id` は提案者（実際に書いた人）を指す（[collaboration-fork.md](../domains/collaboration-fork.md)） |
 
 - **一意**: `UNIQUE(episode_id, revision_no)`。
 - **不変**: **UPDATE/DELETE しない追記専用**。復元は「過去 Revision の内容で新 Revision を追記し、`episodes.body` を更新」する（PRD §12）。
-- **決定 / 理由 / 代替案**: 全文スナップショット保存を採用。理由は復元・差分表示が単純で、小説本文は 1 Episode 数 KB〜数十 KB と小さく容量許容。代替は差分（delta）チェーンだが復元コスト・整合リスクが高く不採用。将来サイズが問題化したら古い Revision を圧縮 or 差分化する（[writing-revision.md](./writing-revision.md) の未決事項）。
+- **決定 / 理由 / 代替案**: 全文スナップショット保存を採用。理由は復元・差分表示が単純で、小説本文は 1 Episode 数 KB〜数十 KB と小さく容量許容。代替は差分（delta）チェーンだが復元コスト・整合リスクが高く不採用。将来サイズが問題化したら古い Revision を圧縮 or 差分化する（[writing-revision.md](../domains/writing-revision.md) の未決事項）。
 
 #### `scheduled_publishes`（公開予約）
 
@@ -352,11 +352,11 @@ export const episodes = pgTable("episodes", {
 | status | text | NOT NULL default `pending` | idx | `pending`/`done`/`canceled` |
 | executed_at | timestamptz | NULL | | 実行時刻 |
 
-- **index**: `(status, scheduled_at)`（due 抽出）。実行主体は将来の `worker`（PRD §54, [infrastructure.md](./infrastructure.md)）。初期は起動時/リクエスト時ポーリングでも可。
+- **index**: `(status, scheduled_at)`（due 抽出）。実行主体は将来の `worker`（PRD §54, [infrastructure.md](../overview/infrastructure.md)）。初期は起動時/リクエスト時ポーリングでも可。
 
 ---
 
-### collaboration（PRD §13。権限マトリクスは [collaboration-fork.md](./collaboration-fork.md) と [auth.md](./auth.md)）
+### collaboration（PRD §13。権限マトリクスは [collaboration-fork.md](../domains/collaboration-fork.md) と [auth.md](./auth.md)）
 
 #### `collaborators`
 
@@ -388,7 +388,7 @@ export const episodes = pgTable("episodes", {
 
 ---
 
-### fork（PRD §14,15,16。系譜・帰属設計は [collaboration-fork.md](./collaboration-fork.md)）
+### fork（PRD §14,15,16。系譜・帰属設計は [collaboration-fork.md](../domains/collaboration-fork.md)）
 
 #### `forks`（append-only・帰属削除禁止）
 
@@ -402,7 +402,7 @@ export const episodes = pgTable("episodes", {
 
 - **一意**: `forked_novel_id`（unique）。
 - **不変**: 帰属レコードは **UPDATE/DELETE しない**。「Forked from」表示は `source_novel_id` を辿って常時生成（PRD §14）。UI から削除する導線を作らない（PRD §15）。
-- **強制の二層化**: 上記に加え、行の UPDATE/DELETE を DB トリガで拒否し、Novel 更新 DTO を allow-list 化して帰属抑制フィールドを持てないようにする（[collaboration-fork.md](./collaboration-fork.md) §2.5）。
+- **強制の二層化**: 上記に加え、行の UPDATE/DELETE を DB トリガで拒否し、Novel 更新 DTO を allow-list 化して帰属抑制フィールドを持てないようにする（[collaboration-fork.md](../domains/collaboration-fork.md) §2.5）。
 
 #### `fork_requests`（Fork Policy = Approval Required 用。PRD §15）
 
@@ -416,7 +416,7 @@ export const episodes = pgTable("episodes", {
 | decided_at | timestamptz | NULL | | |
 
 - **一意**: 未処理の重複申請を防ぐ `UNIQUE(source_novel_id, requester_id) WHERE status='pending'`（部分 unique index）。
-- Fork Policy が `allowed` の Novel はこのフローを経ず即 Fork。`disabled` は申請自体を拒否。`approval_required` のときのみ本表を使い、`approved` で `forks` に行追加（[collaboration-fork.md](./collaboration-fork.md) §2.4, §2.6）。
+- Fork Policy が `allowed` の Novel はこのフローを経ず即 Fork。`disabled` は申請自体を拒否。`approval_required` のときのみ本表を使い、`approved` で `forks` に行追加（[collaboration-fork.md](../domains/collaboration-fork.md) §2.4, §2.6）。
 
 #### `change_proposals`（PR 型。PRD §16）
 
@@ -448,7 +448,7 @@ export const episodes = pgTable("episodes", {
 
 ---
 
-### reading（PRD §18,19。詳細は [reading.md](./reading.md)）
+### reading（PRD §18,19。詳細は [reading.md](../domains/reading.md)）
 
 #### `reading_progress`
 
@@ -463,7 +463,7 @@ export const episodes = pgTable("episodes", {
 | last_read_at | timestamptz | NOT NULL default now() | idx | 最終閲覧日時 |
 
 - **一意**: `UNIQUE(user_id, episode_id)`（Episode 単位の進捗）。「続きから読む」は `WHERE user_id=? ORDER BY last_read_at DESC` を novel_id で絞って取得。
-- **プライバシー（PRD §58）**: これは**本人閲覧専用**。作者/他者に「誰がどこまで読んだか」を出さない。分析は `analytics` 側で集計値のみ（[analytics.md](./analytics.md)）。
+- **プライバシー（PRD §58）**: これは**本人閲覧専用**。作者/他者に「誰がどこまで読んだか」を出さない。分析は `analytics` 側で集計値のみ（[analytics.md](../domains/analytics.md)）。
 
 #### `library_entries`
 
@@ -478,7 +478,7 @@ export const episodes = pgTable("episodes", {
 
 ---
 
-### social（PRD §20,21。詳細は [social-notification.md](./social-notification.md)）
+### social（PRD §20,21。詳細は [social-notification.md](../domains/social-notification.md)）
 
 #### `likes`（Episode 単位・1user1episode）
 
@@ -514,7 +514,7 @@ export const episodes = pgTable("episodes", {
 | deleted_at | timestamptz | NULL | | Soft Delete（モデレーション） |
 
 - **一意**: `UNIQUE(user_id, novel_id) WHERE deleted_at IS NULL`（1 作品 1 レビュー、再投稿可）。
-- **備考**: `reviews.stars` と `stars.value` は別軸（Review 内の評点 vs 単独 Star）。両方保持する（PRD が別項目として定義）。整合ポリシーは [social-notification.md](./social-notification.md) の未決事項。
+- **備考**: `reviews.stars` と `stars.value` は別軸（Review 内の評点 vs 単独 Star）。両方保持する（PRD が別項目として定義）。整合ポリシーは [social-notification.md](../domains/social-notification.md) の未決事項。
 
 #### `comments`（Episode 単位）
 
@@ -552,7 +552,7 @@ export const episodes = pgTable("episodes", {
 
 ---
 
-### discovery（PRD §23,26。アルゴリズムは [discovery.md](./discovery.md)）
+### discovery（PRD §23,26。アルゴリズムは [discovery.md](../domains/discovery.md)）
 
 #### `tags`
 
@@ -584,11 +584,11 @@ export const episodes = pgTable("episodes", {
 | score | numeric(12,4) | NOT NULL | | 時間減衰スコア |
 
 - **一意**: `UNIQUE(period, bucket_date, novel_id)`、表示用 `(period, bucket_date, rank)`。
-- **決定 / 理由 / 代替案**: ランキングは **動的計算＋スナップショット併用**。理由: PRD §26 は Unique Readers・Completion・Likes・Stars・Bookmarks・Follows の**加重＋時間減衰**で、毎リクエスト算出は重く N+1 リスク（PRD §55）。素データ（Unique Readers/Completion）は `analytics.analytics_daily`、social 系は各カウンタから供給し、**定期ジョブでスコアを算出して本表に固定**、表示は本表を読むだけにする。代替は完全動的（負荷過大で不採用）／マテビュー（更新粒度制御がしにくく不採用）。式・重み・減衰係数は [discovery.md](./discovery.md) に定義。
+- **決定 / 理由 / 代替案**: ランキングは **動的計算＋スナップショット併用**。理由: PRD §26 は Unique Readers・Completion・Likes・Stars・Bookmarks・Follows の**加重＋時間減衰**で、毎リクエスト算出は重く N+1 リスク（PRD §55）。素データ（Unique Readers/Completion）は `analytics.analytics_daily`、social 系は各カウンタから供給し、**定期ジョブでスコアを算出して本表に固定**、表示は本表を読むだけにする。代替は完全動的（負荷過大で不採用）／マテビュー（更新粒度制御がしにくく不採用）。式・重み・減衰係数は [discovery.md](../domains/discovery.md) に定義。
 
 ---
 
-### notification（PRD §22。詳細は [social-notification.md](./social-notification.md)）
+### notification（PRD §22。詳細は [social-notification.md](../domains/social-notification.md)）
 
 #### `notifications`
 
@@ -606,7 +606,7 @@ export const episodes = pgTable("episodes", {
 
 ---
 
-### analytics（別スキーマ `analytics`・transactional に FK なし。PRD §36。詳細 [analytics.md](./analytics.md)）
+### analytics（別スキーマ `analytics`・transactional に FK なし。PRD §36。詳細 [analytics.md](../domains/analytics.md)）
 
 #### `analytics.analytics_events`（生イベント・append-only）
 
@@ -627,8 +627,8 @@ export const episodes = pgTable("episodes", {
 | occurred_at | timestamptz | NOT NULL default now() | idx | 発生時刻（UTC） |
 
 - **append-only**。`created_at`/`updated_at` は持たず `occurred_at` を採用。**FK なし**（分離のため）。
-- **index**: `(novel_id, event_type, occurred_at)`、`(occurred_at)`。将来 `occurred_at` で**月次パーティション**（[analytics.md](./analytics.md), [infrastructure.md](./infrastructure.md)）。
-- **書き込みは fire-and-forget** で読書操作をブロックしない（PRD §55, [architecture.md](./architecture.md) §7）。
+- **index**: `(novel_id, event_type, occurred_at)`、`(occurred_at)`。将来 `occurred_at` で**月次パーティション**（[analytics.md](../domains/analytics.md), [infrastructure.md](../overview/infrastructure.md)）。
+- **書き込みは fire-and-forget** で読書操作をブロックしない（PRD §55, [architecture.md](../overview/architecture.md) §7）。
 
 #### `analytics.analytics_hourly` / `analytics.analytics_daily`（集計）
 
@@ -646,7 +646,7 @@ export const episodes = pgTable("episodes", {
 
 ---
 
-### moderation（PRD §37。詳細は [moderation.md](./moderation.md)）
+### moderation（PRD §37。詳細は [moderation.md](../domains/moderation.md)）
 
 #### `reports`
 
@@ -722,13 +722,13 @@ export const episodes = pgTable("episodes", {
 | reports | idx(status,created_at) / idx(target_type,target_id) | 管理キュー（PRD §37） |
 | blocks / mutes | UNIQUE(blocker_id,blocked_id) / UNIQUE(muter_id,muted_id) | 重複防止 |
 
-**N+1 回避の指針**: 一覧（Home/検索/ランキング/目次）は `novels` にカウンタ列（`like_count`, `star_avg`, `follow_count`, `total_char_count`）を denormalize し、行取得だけで並べ替え・表示できるようにする。集計値の整合はイベント時更新＋定期整合バッチで担保（Application の Query 層に寄せる。[architecture.md](./architecture.md) §9）。
+**N+1 回避の指針**: 一覧（Home/検索/ランキング/目次）は `novels` にカウンタ列（`like_count`, `star_avg`, `follow_count`, `total_char_count`）を denormalize し、行取得だけで並べ替え・表示できるようにする。集計値の整合はイベント時更新＋定期整合バッチで担保（Application の Query 層に寄せる。[architecture.md](../overview/architecture.md) §9）。
 
 ---
 
 ## 5. マイグレーション運用
 
-- Drizzle Kit による生成・適用（`bun run db:generate` / `bun run db:migrate`）。手順・環境変数・パーティション/拡張（`citext`, `pg_trgm`）の有効化タイミングは **[infrastructure.md](./infrastructure.md) に集約**し、本書では重複記述しない。
+- Drizzle Kit による生成・適用（`bun run db:generate` / `bun run db:migrate`）。手順・環境変数・パーティション/拡張（`citext`, `pg_trgm`）の有効化タイミングは **[infrastructure.md](../overview/infrastructure.md) に集約**し、本書では重複記述しない。
 - スキーマ barrel は `src/infrastructure/database/schema/`（CLAUDE.md）。ドメインごとにファイル分割し barrel で再 export。
 - enum への値追加は migration で `ALTER TYPE ... ADD VALUE`。**既存値の削除・改名はしない**（後方互換のため）。
 
@@ -736,12 +736,12 @@ export const episodes = pgTable("episodes", {
 
 ## 6. 未決事項
 
-1. **`citext` vs `lower()` 一意 index**: `email`/`handle` の大小無視を拡張 `citext` で行うか式 index で行うか。拡張導入可否は [infrastructure.md](./infrastructure.md) と要調整。
-2. **Genre の管理形態**: 固定 enum（本書の既定）か `genres` マスタ表か。運用でジャンル追加頻度が高いなら表化。→ [discovery.md](./discovery.md)。
-3. **Review と Star の関係**: `reviews.stars` と単独 `stars.value` を独立に保つか、Review 投稿時に `stars` を自動同期するか（PRD が別項目のため現状は独立）。→ [social-notification.md](./social-notification.md)。
+1. **`citext` vs `lower()` 一意 index**: `email`/`handle` の大小無視を拡張 `citext` で行うか式 index で行うか。拡張導入可否は [infrastructure.md](../overview/infrastructure.md) と要調整。
+2. **Genre の管理形態**: 固定 enum（本書の既定）か `genres` マスタ表か。運用でジャンル追加頻度が高いなら表化。→ [discovery.md](../domains/discovery.md)。
+3. **Review と Star の関係**: `reviews.stars` と単独 `stars.value` を独立に保つか、Review 投稿時に `stars` を自動同期するか（PRD が別項目のため現状は独立）。→ [social-notification.md](../domains/social-notification.md)。
 4. **Comment のネスト深さ**: 本書は「フラット＋1 段返信」を採用。Paragraph Comment（PRD §20.4 将来）導入時に `paragraph_ref` 列と設計見直し。
-5. **Revision の長期保存戦略**: 全文スナップショットの容量増に対する圧縮/差分化のしきい値。→ [writing-revision.md](./writing-revision.md)。
-6. **analytics のパーティション/保持期間**: `analytics_events` の月次パーティション導入時期と古いパーティションの retention。→ [analytics.md](./analytics.md) / [infrastructure.md](./infrastructure.md)。
-7. **user_status 変更履歴表**の要否（監査要件次第）。→ [moderation.md](./moderation.md)。
+5. **Revision の長期保存戦略**: 全文スナップショットの容量増に対する圧縮/差分化のしきい値。→ [writing-revision.md](../domains/writing-revision.md)。
+6. **analytics のパーティション/保持期間**: `analytics_events` の月次パーティション導入時期と古いパーティションの retention。→ [analytics.md](../domains/analytics.md) / [infrastructure.md](../overview/infrastructure.md)。
+7. **user_status 変更履歴表**の要否（監査要件次第）。→ [moderation.md](../domains/moderation.md)。
 8. **Custom Collection**（PRD §19 将来）の `collections` / `collection_entries` スキーマ。
-9. **カウンタ整合方式**: トランザクション内即時更新 vs 非同期 worker 再集計の採用境界。→ [architecture.md](./architecture.md) §9 / [infrastructure.md](./infrastructure.md)。
+9. **カウンタ整合方式**: トランザクション内即時更新 vs 非同期 worker 再集計の採用境界。→ [architecture.md](../overview/architecture.md) §9 / [infrastructure.md](../overview/infrastructure.md)。

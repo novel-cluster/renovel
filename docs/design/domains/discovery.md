@@ -2,8 +2,8 @@
 
 > 対象: Discovery ドメイン — Search / Filter / Sort / Ranking / Recommendation / Home。
 > 正典は PRD §23, §24, §25, §26, §27, §28, §55。本書は実装に落とすための決定を記す。
-> テーブル名・カラム名は [data-model.md](./data-model.md) を正典とし、本書はそれを参照する（命名の再定義はしない）。
-> レイヤ・依存方針は [architecture.md](./architecture.md)、画面/island は [frontend.md](./frontend.md)、拡張（`pg_trgm` 等）の有効化は [infrastructure.md](./infrastructure.md) に従う。
+> テーブル名・カラム名は [data-model.md](../foundation/data-model.md) を正典とし、本書はそれを参照する（命名の再定義はしない）。
+> レイヤ・依存方針は [architecture.md](../overview/architecture.md)、画面/island は [frontend.md](../overview/frontend.md)、拡張（`pg_trgm` 等）の有効化は [infrastructure.md](../overview/infrastructure.md) に従う。
 > 現状は scaffold（Phase 0 完了）。本書は「これから作る目標形」を示す。
 
 ## サマリー
@@ -11,7 +11,7 @@
 - **日本語全文検索は `pgroonga`（PGroonga）を第一候補として採用**する。理由は N-gram（bi-gram）トークナイザで**分かち書き不要の部分一致・表記ゆれ耐性**を DB 単体で満たし、`LIKE '%...%'` の全走査や標準 `tsvector`(`simple`) の日本語未対応を回避できるため。導入不能な環境向けに **`pg_bigm`（bigram + GIN）へフォールバック**、初期スキャフォルドは既に用意済みの `pg_trgm` で暫定運用できる三段構えとする。
 - **検索対象は `novels.title / catchphrase / description`（本体）＋ `users.handle / display_name`（作者）＋ `tags.name / normalized`（タグ）** の 3 ソース。作品本文（Episode body）は初期の検索対象に含めない（PRD §23、コスト/ノイズ回避）。
 - **Filter（PRD §24）/ Sort（PRD §25）は Application の Query 層に集約**し、`novels` に denormalize 済みのカウンタ列（`total_char_count / like_count / star_avg / follow_count / published_at / updated_at`）を用いて **N+1 なしの単一クエリ**で解決する（PRD §55）。
-- **Ranking（PRD §26）は「時間減衰つき加重スコア」を定期バッチで算出し `ranking_snapshots` に固定**する。素データは `analytics.analytics_daily`（Unique Readers / Completion）と social カウンタ（Likes / Stars / Bookmarks / Follows）から供給し、表示は本表の読み取りのみ（動的計算＋スナップショット併用、[data-model.md](./data-model.md) §3 discovery）。
+- **Ranking（PRD §26）は「時間減衰つき加重スコア」を定期バッチで算出し `ranking_snapshots` に固定**する。素データは `analytics.analytics_daily`（Unique Readers / Completion）と social カウンタ（Likes / Stars / Bookmarks / Follows）から供給し、表示は本表の読み取りのみ（動的計算＋スナップショット併用、[data-model.md](../foundation/data-model.md) §3 discovery）。
 - **Recommendation 1.0 はルールベース**（同タグ／同作者／人気／新着の混成 + 既読・自作・非公開・ブロックの除外）。スコア式と重みを本書で定義し、将来の協調フィルタ（item-item / matrix factorization）へ差し替え可能な `Recommender` インターフェースで隠蔽する。
 - **Home はゲスト／ログインでブロック構成を出し分ける**（PRD §28）。各ブロックは独立した Read Query で、キャッシュ可能なもの（Ranking/New/Completed/Featured）と個人化されるもの（Continue Reading / Followed Updates / Recommendations）を分離する。
 
@@ -21,9 +21,9 @@
 
 Discovery は**読み取り専用（read-side）ドメイン**である。Novel/Social/Analytics が生成した状態を横断的に集約し、検索・並び替え・ランキング・推薦・Home として提示する。書き込み（Like/Star/Follow の登録等）は social ドメインの責務であり、Discovery はそれを消費するだけ。
 
-- **配置**: ユースケースは `application/queries/discovery/`（Read Query）に置く。Discovery 固有のドメインロジック（スコア式・ルール推薦）は `domain/discovery/services/` に純関数として持ち、Drizzle/Context に依存しない（[architecture.md](./architecture.md) §2）。
+- **配置**: ユースケースは `application/queries/discovery/`（Read Query）に置く。Discovery 固有のドメインロジック（スコア式・ルール推薦）は `domain/discovery/services/` に純関数として持ち、Drizzle/Context に依存しない（[architecture.md](../overview/architecture.md) §2）。
 - **Repository interface** は `domain/discovery/repositories/`（`SearchRepository` / `RankingRepository` / `RecommendationRepository`）、Drizzle 実装は `infrastructure/database/repositories/`。
-- **認可**: 検索・一覧・推薦の結果は必ず**公開可視性でフィルタ**する（`visibility='public'` かつ `deleted_at IS NULL` かつ `content_state='visible'`）。Unlisted/Private は検索・ランキング・推薦・Home に**一切出さない**（PRD §9, §56）。認可判定は Query 層で WHERE 句として強制し、UI 任せにしない（[auth.md](./auth.md)）。
+- **認可**: 検索・一覧・推薦の結果は必ず**公開可視性でフィルタ**する（`visibility='public'` かつ `deleted_at IS NULL` かつ `content_state='visible'`）。Unlisted/Private は検索・ランキング・推薦・Home に**一切出さない**（PRD §9, §56）。認可判定は Query 層で WHERE 句として強制し、UI 任せにしない（[auth.md](../foundation/auth.md)）。
 - ブロック（`blocks`）した相手の作品は、ログインユーザー向け結果から除外する（[moderation.md](./moderation.md)）。
 
 ---
@@ -71,7 +71,7 @@ Discovery は**読み取り専用（read-side）ドメイン**である。Novel/
 
 - 検索クエリ文字列も**同じ NFKC + lower + trim** を Application 側で適用してから投げる（表記ゆれの左右対称性）。
 - **タグ検索は 2 段**: まず `tags.normalized` で完全一致 → 該当タグの `novel_tags` から Novel を引く。部分一致タグ候補は PGroonga で `tags.name` を検索。
-- 検索モードは UI で切替（[frontend.md](./frontend.md) の Search Filter island）: `all`（本体横断）/ `author`（作者名）/ `tag`（タグ）。既定は `all`。
+- 検索モードは UI で切替（[frontend.md](../overview/frontend.md) の Search Filter island）: `all`（本体横断）/ `author`（作者名）/ `tag`（タグ）。既定は `all`。
 
 ### 2.5 インデックス設計
 
@@ -108,7 +108,7 @@ CREATE INDEX novels_bigm_title_idx ON novels USING gin (title gin_bigm_ops)
 -- catchphrase / description も同様。検索は LIKE '%kw%' が bigram index を使う
 ```
 
-暫定 `pg_trgm`（scaffold 既存、[data-model.md](./data-model.md) §1.5）の場合は `gin_trgm_ops` + `ILIKE` / `similarity()`。**いずれも `SearchRepository` の実装差分にとどめる**。
+暫定 `pg_trgm`（scaffold 既存、[data-model.md](../foundation/data-model.md) §1.5）の場合は `gin_trgm_ops` + `ILIKE` / `similarity()`。**いずれも `SearchRepository` の実装差分にとどめる**。
 
 ### 2.6 表記ゆれ・部分一致・N-gram の扱い
 
@@ -130,7 +130,7 @@ GET /search?q=...&mode=all&genre=...&status=ongoing&sort=popular&page=n
   → SearchResultsView（SSR, hono/jsx）
 ```
 
-- **一覧カードに必要な値（タイトル/作者/カウンタ/更新日）は 1 クエリ + 1 バッチで揃える**。作品ごとに `COUNT` を撃たない（`novels` のカウンタ列を使う、[data-model.md](./data-model.md) §4 の N+1 回避方針）。
+- **一覧カードに必要な値（タイトル/作者/カウンタ/更新日）は 1 クエリ + 1 バッチで揃える**。作品ごとに `COUNT` を撃たない（`novels` のカウンタ列を使う、[data-model.md](../foundation/data-model.md) §4 の N+1 回避方針）。
 - ページングは初期 `LIMIT/OFFSET`。深いページで OFFSET が重くなる場合は keyset（`(sort_key, id)` カーソル）へ移行（§7 未決事項）。
 
 ### 2.8 外部検索への退避余地
@@ -138,8 +138,8 @@ GET /search?q=...&mode=all&genre=...&status=ongoing&sort=popular&page=n
 将来アクセス増・関連度品質要件が上がった場合に OpenSearch/Meilisearch 等へ移せるよう、以下を最初から守る:
 
 - 呼び出し側は `SearchRepository` interface のみに依存（`searchNovels(query): Promise<SearchHit[]>`）。SQL/PGroonga はその実装詳細。
-- 検索対象の**インデックス投入イベント**を意識する: Novel の作成/更新/公開/削除時に「検索索引更新」を分離可能なフックにしておく（初期は index 同期が自動なので no-op、外部検索導入時に投入 worker を挿す）。[architecture.md](./architecture.md) §10 のスケール余地（`worker` 追加）と接続。
-- Compose に後から `opensearch` を足せる前提（[infrastructure.md](./infrastructure.md)）。
+- 検索対象の**インデックス投入イベント**を意識する: Novel の作成/更新/公開/削除時に「検索索引更新」を分離可能なフックにしておく（初期は index 同期が自動なので no-op、外部検索導入時に投入 worker を挿す）。[architecture.md](../overview/architecture.md) §10 のスケール余地（`worker` 追加）と接続。
+- Compose に後から `opensearch` を足せる前提（[infrastructure.md](../overview/infrastructure.md)）。
 
 ---
 
@@ -285,9 +285,9 @@ completion_rate_bayes(n) = (C · m + completes(n)) / (C · 1 + reads(n))
 | New | 動的（`published_at DESC`、スナップ不要） | — | クエリ直 or 軽量キャッシュ |
 | Completed | 日次 | 当日 | `period='completed'` |
 
-- **決定 / 理由 / 代替案**: ランキングは**定期バッチでスコア算出 → `ranking_snapshots` へ upsert し、表示は本表の読み取りのみ**（[data-model.md](./data-model.md) §3 discovery の決定に一致）。理由は毎リクエスト算出が重く N+1 リスク（PRD §55）である一方、多少の遅延は許容できるため。代替は (a) 完全動的（負荷過大）、(b) マテビュー（更新粒度と減衰の再計算制御がしにくい）で不採用。
+- **決定 / 理由 / 代替案**: ランキングは**定期バッチでスコア算出 → `ranking_snapshots` へ upsert し、表示は本表の読み取りのみ**（[data-model.md](../foundation/data-model.md) §3 discovery の決定に一致）。理由は毎リクエスト算出が重く N+1 リスク（PRD §55）である一方、多少の遅延は許容できるため。代替は (a) 完全動的（負荷過大）、(b) マテビュー（更新粒度と減衰の再計算制御がしにくい）で不採用。
 - **冪等な upsert**: `UNIQUE(period, bucket_date, novel_id)` に対し `ON CONFLICT ... DO UPDATE SET score, rank`。rank は score 降順の `row_number()` で確定。
-- **実行主体**: 初期は Bun のスケジュール（アプリ内 interval / 起動時ジョブ）で可。将来 `analytics-worker` / `worker` へ分離（[architecture.md](./architecture.md) §10, [infrastructure.md](./infrastructure.md)）。イベント収集をブロックしない（PRD §55）。
+- **実行主体**: 初期は Bun のスケジュール（アプリ内 interval / 起動時ジョブ）で可。将来 `analytics-worker` / `worker` へ分離（[architecture.md](../overview/architecture.md) §10, [infrastructure.md](../overview/infrastructure.md)）。イベント収集をブロックしない（PRD §55）。
 - **表示**: `GET /ranking/:period` は `SELECT ... FROM ranking_snapshots JOIN novels ... WHERE period=:p AND bucket_date=:latest ORDER BY rank LIMIT n`。Novel カード情報は JOIN で 1 クエリ取得（N+1 回避）。
 
 ### 4.7 バッチ擬似コード
@@ -390,22 +390,22 @@ weight(a): completed=5, star=4(value 反映可), follow=3, library=2.5, like=1.5
 
 ### 6.2 実装方針
 
-- 各ブロックは**独立した Read Query**（`application/queries/discovery/home/*`）。Home コントローラは並列に呼び出し、SSR で組み立て（[architecture.md](./architecture.md) §5.2）。
-- **共通ブロック（Ranking/New/Completed/Featured）はプロセス内 or Redis 短期キャッシュ**（将来 `redis` 追加、[infrastructure.md](./infrastructure.md)）。個人化ブロックはキャッシュしない or ユーザー別短 TTL。
+- 各ブロックは**独立した Read Query**（`application/queries/discovery/home/*`）。Home コントローラは並列に呼び出し、SSR で組み立て（[architecture.md](../overview/architecture.md) §5.2）。
+- **共通ブロック（Ranking/New/Completed/Featured）はプロセス内 or Redis 短期キャッシュ**（将来 `redis` 追加、[infrastructure.md](../overview/infrastructure.md)）。個人化ブロックはキャッシュしない or ユーザー別短 TTL。
 - 各カードは `novels` の denormalize 列で完結させ、ブロックごとに 1 クエリ（+ タグ/作者バッチ）で N+1 を避ける（PRD §55）。
-- **Featured** は当面「運営が選ぶ」キュレーション。初期実装は環境設定/管理フラグ（`novels.is_featured` 相当）か軽量な `featured_novels(novel_id, order, period)` 表を追加（§7 未決事項。data-model には未定義のため導入時に [data-model.md](./data-model.md) を先に更新）。
+- **Featured** は当面「運営が選ぶ」キュレーション。初期実装は環境設定/管理フラグ（`novels.is_featured` 相当）か軽量な `featured_novels(novel_id, order, period)` 表を追加（§7 未決事項。data-model には未定義のため導入時に [data-model.md](../foundation/data-model.md) を先に更新）。
 
 ---
 
 ## 7. 未決事項
 
-1. **PGroonga のコンテナ運用**: PGroonga 入り Postgres イメージの選定・ビルド、`pg_bigm` フォールバックの切替方針は [infrastructure.md](./infrastructure.md) と要調整（拡張有効化タイミング含む）。
+1. **PGroonga のコンテナ運用**: PGroonga 入り Postgres イメージの選定・ビルド、`pg_bigm` フォールバックの切替方針は [infrastructure.md](../overview/infrastructure.md) と要調整（拡張有効化タイミング含む）。
 2. **カナ揺れ（カタカナ⇄ひらがな）吸収**: NormalizerNFKC では吸収されない。派生正規化列 or PGroonga の追加ノーマライザ導入可否。
 3. **深いページングの keyset 化**: `LIMIT/OFFSET` の劣化点で `(sort_key, id)` カーソルへ移行するしきい値。
 4. **Ranking の重み・半減期のチューニング**: 初期値（§4.4/§4.3）は仮。実データで A/B・観測して調整。`ranking_config` の管理形態（環境変数 or 設定表）。
 5. **Star value のスコア反映**: 件数ベースか value 加重か（§4.4, §5.2）。[social-notification.md](./social-notification.md) の Review/Star 整合方針と連動。
 6. **Rating ソート/Completed の少数バイアス補正**（ベイズ平均）のしきい値 `C` と全体平均 `m` の運用。
-7. **Genre の管理形態**: 固定 enum か `genres` マスタ表か（[data-model.md](./data-model.md) 未決事項 2 と共通）。フィルタ UI の選択肢供給に影響。
+7. **Genre の管理形態**: 固定 enum か `genres` マスタ表か（[data-model.md](../foundation/data-model.md) 未決事項 2 と共通）。フィルタ UI の選択肢供給に影響。
 8. **Recommendation の協調フィルタ移行**: オフライン計算の置き場（`recommendation_candidates` 集計表）と再計算間隔。
-9. **Featured の管理**: `novels.is_featured` か `featured_novels` 表か。導入時に [data-model.md](./data-model.md) を更新。
+9. **Featured の管理**: `novels.is_featured` か `featured_novels` 表か。導入時に [data-model.md](../foundation/data-model.md) を更新。
 10. **検索の関連度品質**: bigram で不足する場合の形態素解析 / 外部検索（OpenSearch）への切替判断基準（§2.8）。

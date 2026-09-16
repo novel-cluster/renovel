@@ -2,13 +2,13 @@
 
 > 対象: レイヤ別のテスト方針、フィクスチャ/ファクトリ、テスト DB 運用、CI 構成、カバレッジの考え方。
 > 正典は PRD §55（Performance）, §59（Security）, §45（Layer Structure）。ツールは `bun:test`（`bun test`）と Biome（`biome check`）— CLAUDE.md の Commands 節を正とする。
-> 認可判定の正典は [auth.md](./auth.md)、記法パーサの正典は [text-notation.md](./text-notation.md)、Revision の正典は [writing-revision.md](./writing-revision.md)、検索/ランキングの正典は [discovery.md](./discovery.md)、Analytics 非ブロッキング契約の正典は [analytics.md](./analytics.md)。本書はこれらを「どうテストするか」の観点でのみ扱い、仕様の再掲は最小限にする。
+> 認可判定の正典は [auth.md](../foundation/auth.md)、記法パーサの正典は [text-notation.md](../domains/text-notation.md)、Revision の正典は [writing-revision.md](../domains/writing-revision.md)、検索/ランキングの正典は [discovery.md](../domains/discovery.md)、Analytics 非ブロッキング契約の正典は [analytics.md](../domains/analytics.md)。本書はこれらを「どうテストするか」の観点でのみ扱い、仕様の再掲は最小限にする。
 > 現状は scaffold（Phase 0）。`app/src/application/services/health.service.ts` + `health.service.test.ts` が唯一の実装済みテストで、本書が定める型（フェイク Repository による Application Service 単体テスト）を既になぞっている。本書はこのパターンを全ドメインへ拡張するための目標形。
 
 ## サマリー
 
 - **テストピラミッドは DDD レイヤに沿って 5 段**: Domain 単体（最多・フェイク不要の純粋関数/クラス）→ Application Service 単体（Repository をフェイク/インメモリ化）→ Infrastructure Repository 統合（Podman の使い捨て Postgres に対して実行）→ Presentation 結合（Hono の `app.request()` でルート単位）→ E2E（主要フローのみ、最少数）。**上位レイヤほどテスト数は少なく、Domain 層に最も厚く投資する。**
-- **高リスク領域は数値目標よりも網羅を優先する**: (1) 認可判定（[auth.md](./auth.md) の Role マトリクス・Visibility×Status マトリクス）、(2) 記法パーサの XSS/エッジケース（[text-notation.md](./text-notation.md) §8 のテーブルをそのままテストケースの基盤にする）、(3) Revision の非破壊性（append-only・復元が新規追記になること）、(4) 検索/ランキングのスコア式、(5) Analytics 収集の非ブロッキング性（読書操作をブロックしない・失敗を握りつぶす）。これらは各領域の担当ドキュメントのテーブルを1行=1テストケースへ機械的に落とし込む。
+- **高リスク領域は数値目標よりも網羅を優先する**: (1) 認可判定（[auth.md](../foundation/auth.md) の Role マトリクス・Visibility×Status マトリクス）、(2) 記法パーサの XSS/エッジケース（[text-notation.md](../domains/text-notation.md) §8 のテーブルをそのままテストケースの基盤にする）、(3) Revision の非破壊性（append-only・復元が新規追記になること）、(4) 検索/ランキングのスコア式、(5) Analytics 収集の非ブロッキング性（読書操作をブロックしない・失敗を握りつぶす）。これらは各領域の担当ドキュメントのテーブルを1行=1テストケースへ機械的に落とし込む。
 - **Application Service のテストは実 DB を使わずフェイク Repository で行う**のが既定（`health.service.test.ts` の型を継続）。Repository interface を満たすインメモリ実装（テストごとの状態を持つ単純なオブジェクト/クラス）をフィクスチャとして `test/fakes/` に集約する。
 - **Infrastructure Repository の統合テストのみ実 Postgres を必要とし**、Podman で都度使い捨てコンテナを起動して migration を適用してから実行する。CI・ローカルとも同じ手順（`podman compose -f docker/docker-compose.test.yml`）を踏むことで環境差分を無くす。
 - **CI は `bun test` と `biome check` を必須ゲートにし**、Infrastructure/Presentation/E2E テストは Postgres コンテナが必要なため別ジョブに分離する。カバレッジは数値目標（80%など）を掲げず、上記「高リスク領域」の網羅チェックリストをレビュー基準にする。
@@ -33,7 +33,7 @@
                      ▼ 多数・速い・実行コスト低
 ```
 
-DDD のレイヤ図（[architecture.md](./architecture.md) §2）と対応させると、テスト戦略は「下のレイヤほど依存を持たないので厚くテストでき、上のレイヤほど依存を組み立てるコストが上がるので薄くする」という単純な原則に従う。
+DDD のレイヤ図（[architecture.md](../overview/architecture.md) §2）と対応させると、テスト戦略は「下のレイヤほど依存を持たないので厚くテストでき、上のレイヤほど依存を組み立てるコストが上がるので薄くする」という単純な原則に従う。
 
 ### 1.1 レイヤ別方針の一覧
 
@@ -59,9 +59,9 @@ DDD のレイヤ図（[architecture.md](./architecture.md) §2）と対応させ
 **対象**: Entity のドメインロジック（例: `Episode.publish()` の状態遷移検証）、Value Object（例: `Visibility`, `CollaboratorRole`, `CharCount`）、Policy（`CollaboratorPolicy.can()`, `NovelAccessPolicy.canView()`）、記法パーサ（`shared/text-notation`）、Revision Diff（`domain/writing/services/revision-diff-service.ts`）。
 
 **方針**:
-- 依存を一切持たない（Hono `Context` も Drizzle も import しない、[architecture.md](./architecture.md) §2 の制約そのものがテスト容易性の根拠）。よって `describe`/`it` に `beforeEach` でのセットアップすら基本的に不要。
+- 依存を一切持たない（Hono `Context` も Drizzle も import しない、[architecture.md](../overview/architecture.md) §2 の制約そのものがテスト容易性の根拠）。よって `describe`/`it` に `beforeEach` でのセットアップすら基本的に不要。
 - **境界値・異常系を網羅する**。Policy は「全 Role × 全 Action の組み合わせ表」をそのままテストマトリクスにする（§3.1）。
-- 記法パーサは [text-notation.md](./text-notation.md) §8 の 22 ケースのテーブルを**そのまま `it.each` 相当（`for` ループ + `it`）でテストへ機械変換**する。将来テーブルに行が増えたら、テストもその行を追加するだけで済む構造にする。
+- 記法パーサは [text-notation.md](../domains/text-notation.md) §8 の 22 ケースのテーブルを**そのまま `it.each` 相当（`for` ループ + `it`）でテストへ機械変換**する。将来テーブルに行が増えたら、テストもその行を追加するだけで済む構造にする。
 
 ```ts
 // domain/collaboration/services/collaborator-policy.test.ts（スケッチ）
@@ -164,7 +164,7 @@ describe('PublishEpisodeService', () => {
 
 **方針**:
 - **実 Postgres が必要**。フェイクでは UNIQUE 制約違反や CHECK 制約、Drizzle のクエリビルダのバグを検出できないため、このレイヤだけは実 DB に対して検証する。
-- **Podman ベースの使い捨て DB**（testcontainers 相当をコンテナランタイム＝Podman で実現）。[infrastructure.md](./infrastructure.md) の方針（`docker/` 配下は名称のみ Docker、実行は Podman）を踏襲し、専用の `docker/docker-compose.test.yml` を用意する。
+- **Podman ベースの使い捨て DB**（testcontainers 相当をコンテナランタイム＝Podman で実現）。[infrastructure.md](../overview/infrastructure.md) の方針（`docker/` 配下は名称のみ Docker、実行は Podman）を踏襲し、専用の `docker/docker-compose.test.yml` を用意する。
 
 ```yaml
 # docker/docker-compose.test.yml（案）
@@ -186,7 +186,7 @@ services:
   2. `DATABASE_URL=postgres://renovel:renovel@localhost:55432/renovel_test bun run db:migrate`（drizzle-kit migrate をテスト DB に適用）
   3. `bun test src/infrastructure` （Infrastructure 配下のみ実行するタグ/パス分離、§4）
   4. `podman compose -f docker/docker-compose.test.yml down -v`（コンテナ・ボリュームごと破棄）
-- **テスト間の分離**: 各テストファイル（または `describe` 単位）は、使用するテーブルに対して**トランザクションを開始し `ROLLBACK` で後始末**するか、テスト前後で対象テーブルを `TRUNCATE ... CASCADE` する。Bun 標準の `beforeEach`/`afterEach` にフックする。**決定**: トランザクション+ROLLBACK 方式を第一候補とする（高速・並列実行に強い）。ただし Scheduled Publish の worker テストのように「別トランザクション/別コネクションからの可視性」を検証したいケース（PRD の冪等性要件、[writing-revision.md](./writing-revision.md) §4.3）は TRUNCATE 方式に切り替える（トランザクション内では別コネクションから中身が見えないため）。
+- **テスト間の分離**: 各テストファイル（または `describe` 単位）は、使用するテーブルに対して**トランザクションを開始し `ROLLBACK` で後始末**するか、テスト前後で対象テーブルを `TRUNCATE ... CASCADE` する。Bun 標準の `beforeEach`/`afterEach` にフックする。**決定**: トランザクション+ROLLBACK 方式を第一候補とする（高速・並列実行に強い）。ただし Scheduled Publish の worker テストのように「別トランザクション/別コネクションからの可視性」を検証したいケース（PRD の冪等性要件、[writing-revision.md](../domains/writing-revision.md) §4.3）は TRUNCATE 方式に切り替える（トランザクション内では別コネクションから中身が見えないため）。
 - **何をテストするか**: 「保存して読み出したら同じ値が返る」という自明なラウンドトリップだけでなく、以下を優先する。
   - UNIQUE 制約（例: `collaborators` の Novel あたり `owner` 1 行のみ、`scheduled_publishes` の `UNIQUE(episode_id)`）が Repository 層で適切なドメインエラーにマップされること。
   - Soft Delete 対象テーブルで削除済み行がデフォルトクエリから除外されること。
@@ -200,10 +200,10 @@ services:
 - Hono アプリの `app.request(path, init)` を直接呼び出す結合テストとする（実サーバをポート起動しない、[Hono の標準テスト手法](https://hono.dev/)に準拠）。
 - **Application Service はモック/フェイクに差し替える**（DI コンテナ、`presentation/container.ts` にテスト用の差し替えポイントを用意）。Presentation 層のテストは「HTTP リクエスト → 正しい Service が正しい引数で呼ばれ、Service の結果/例外が正しい HTTP レスポンスに変換されるか」に限定し、Use Case の中身は再テストしない。
 - **必ずテストする横断的関心事**:
-  - 認証必須ルートで未ログイン（`c.get("user") === null`）時に 401/リダイレクトになること（`requireAuth()` middleware、[auth.md](./auth.md) §4.2）。
-  - `ForbiddenError`/`NotFoundError` が共通エラーハンドラで 403/404 に正しくマップされること（[auth.md](./auth.md) §4.3 の使い分け表を回帰テスト化）。
-  - CSRF middleware: 許可 Origin 以外からの状態変更リクエストが 403 になること（[auth.md](./auth.md) §5）。
-  - Rate Limit middleware: しきい値超過で 429 になること（[auth.md](./auth.md) §6 の主要経路のみ）。
+  - 認証必須ルートで未ログイン（`c.get("user") === null`）時に 401/リダイレクトになること（`requireAuth()` middleware、[auth.md](../foundation/auth.md) §4.2）。
+  - `ForbiddenError`/`NotFoundError` が共通エラーハンドラで 403/404 に正しくマップされること（[auth.md](../foundation/auth.md) §4.3 の使い分け表を回帰テスト化）。
+  - CSRF middleware: 許可 Origin 以外からの状態変更リクエストが 403 になること（[auth.md](../foundation/auth.md) §5）。
+  - Rate Limit middleware: しきい値超過で 429 になること（[auth.md](../foundation/auth.md) §6 の主要経路のみ）。
 
 ```ts
 // presentation/routes/episode.route.test.ts（スケッチ）
@@ -235,10 +235,10 @@ describe('POST /novels/:novelId/episodes/:episodeId/publish', () => {
 **方針**:
 - **本数を絞る**。候補フロー（1本ずつ、いずれも「読者/作者にとって致命的に壊れたら困る」導線）:
   1. サインアップ → ログイン → Novel 作成 → Episode 執筆（Autosave）→ Publish → Public 閲覧（ゲストで到達可能）。
-  2. Private Novel を非 Collaborator が閲覧しようとして 404 になる（[auth.md](./auth.md) の中核契約の E2E 裏取り）。
-  3. Fork（[collaboration-fork.md](./collaboration-fork.md)）→ 派生作品に原作の帰属表示が残る。
-  4. 検索でキーワード一致する Public Novel が表示され、Private/Unlisted が表示されない（[discovery.md](./discovery.md)）。
-  5. Episode 閲覧で Analytics イベントが送信されるが、送信の成否に関わらずページ表示・スクロール操作がブロックされない（[analytics.md](./analytics.md) の非ブロッキング契約、疑似ネットワーク遅延/失敗を注入して確認）。
+  2. Private Novel を非 Collaborator が閲覧しようとして 404 になる（[auth.md](../foundation/auth.md) の中核契約の E2E 裏取り）。
+  3. Fork（[collaboration-fork.md](../domains/collaboration-fork.md)）→ 派生作品に原作の帰属表示が残る。
+  4. 検索でキーワード一致する Public Novel が表示され、Private/Unlisted が表示されない（[discovery.md](../domains/discovery.md)）。
+  5. Episode 閲覧で Analytics イベントが送信されるが、送信の成否に関わらずページ表示・スクロール操作がブロックされない（[analytics.md](../domains/analytics.md) の非ブロッキング契約、疑似ネットワーク遅延/失敗を注入して確認）。
 - ブラウザ自動化ツール（Playwright 等）の採用可否・実行基盤は未決事項（§7）とし、1.0 初期は HTTP レベル（`fetch`/`app.request` を実サーバに対して行う）の E2E から始めてよい。
 
 ---
@@ -247,7 +247,7 @@ describe('POST /novels/:novelId/episodes/:episodeId/publish', () => {
 
 以下は「テスト密度を数値目標ではなく網羅性で管理する」ための領域別チェックリスト。各領域のドキュメントの表・状態遷移図を**そのままテストケースの入力**にする。
 
-### 3.1 認可判定（[auth.md](./auth.md)）
+### 3.1 認可判定（[auth.md](../foundation/auth.md)）
 
 | チェック項目 | ソース | テスト配置 |
 |---|---|---|
@@ -258,35 +258,35 @@ describe('POST /novels/:novelId/episodes/:episodeId/publish', () => {
 | `suspended`/`banned` のアクセス制御 | auth.md §4.4 表 | Application: `AuthorizationGuard` 単体 + Presentation 結合 |
 | Private/Draft への非 Collaborator アクセスが 404（存在秘匿） | auth.md §4.3 | Presentation + E2E フロー2（§2.5） |
 
-### 3.2 記法パーサ（[text-notation.md](./text-notation.md)）
+### 3.2 記法パーサ（[text-notation.md](../domains/text-notation.md)）
 
 - §8 の 22 テストケース表を**そのまま**移植する（1行=1 `it`）。XSS 系（表内 #10, #11, #12）は特に**必ず含める**——これらは他レイヤでは検出できない（Domain 層でしか純粋関数として再現できない）ため、記法パーサのテストが唯一の防衛線になる。
 - 追加すべき性質テスト: `renderNovelText` の出力に**生の `<`/`>` がユーザー入力由来で残らない**ことを、ランダム化した入力（fuzz 的な文字列: 記法文字と HTML 特殊文字を混在させた生成データ）に対しても確認する（境界ケースの取りこぼし検出、実装コストと相談の上で優先度は中）。
-- SSR と Editor Preview island が**同一関数を共有**していること自体は型/import のレベルで保証される設計（[text-notation.md](./text-notation.md) §7.3）なので、二重実装によるロジック乖離を検出するテストは不要（そもそも1実装しか存在しない）。
+- SSR と Editor Preview island が**同一関数を共有**していること自体は型/import のレベルで保証される設計（[text-notation.md](../domains/text-notation.md) §7.3）なので、二重実装によるロジック乖離を検出するテストは不要（そもそも1実装しか存在しない）。
 
-### 3.3 Revision の非破壊性・復元（[writing-revision.md](./writing-revision.md)）
+### 3.3 Revision の非破壊性・復元（[writing-revision.md](../domains/writing-revision.md)）
 
 | チェック項目 | 検証内容 |
 |---|---|
 | Append-only | `episode_revisions` に対する Repository が UPDATE/DELETE 相当のメソッドを公開していない（interface 自体に持たせない設計を型で強制。実行時テストは Infrastructure 層で「同一 `revision_no` の二重作成が UNIQUE 制約違反になる」ことを確認） |
 | Autosave は Revision を作らない | Application: `SaveEpisodeDraftService` 実行後、フェイク Revision Repository への保存呼び出しが 0 回であることを確認 |
 | 手動保存/Publish/Restore は Revision を作る | Application: 各 Service 実行後、フェイクへの保存呼び出しが 1 回であることを確認 |
-| no-op 保存（内容不変）で Revision を増やさない | Application: 同一 `body` で連続保存 → 2回目は Revision 未作成（[writing-revision.md](./writing-revision.md) §2.2） |
+| no-op 保存（内容不変）で Revision を増やさない | Application: 同一 `body` で連続保存 → 2回目は Revision 未作成（[writing-revision.md](../domains/writing-revision.md) §2.2） |
 | 復元は新規追記であり過去 Revision を書き換えない | Application: Restore 実行前後で対象より前の `revision_no` の内容が不変（フェイク Repository のスナップショット比較） |
 | `revision_no` の連番・`UNIQUE(episode_id, revision_no)` | Infrastructure 統合テスト（実 Postgres で制約違反を確認） |
-| Scheduled Publish の冪等性（二重公開防止） | Infrastructure 統合テスト: 複数「worker」相当の並行呼び出しをシミュレートし、`status='pending'` からの `UPDATE ... WHERE status='pending' RETURNING` が一方のみ成功することを確認（[writing-revision.md](./writing-revision.md) §4.3） |
+| Scheduled Publish の冪等性（二重公開防止） | Infrastructure 統合テスト: 複数「worker」相当の並行呼び出しをシミュレートし、`status='pending'` からの `UPDATE ... WHERE status='pending' RETURNING` が一方のみ成功することを確認（[writing-revision.md](../domains/writing-revision.md) §4.3） |
 
-### 3.4 検索/ランキングのスコア（[discovery.md](./discovery.md)）
+### 3.4 検索/ランキングのスコア（[discovery.md](../domains/discovery.md)）
 
 - スコア式（§4.3 の `score_A`/`score_B` と合算）は Domain の純粋関数として実装し、**既知の入力に対する期待値を手計算で用意した固定ケース**でテストする（例: イベント無し→スコア0、単一 like 1件・経過0日→`w_like` に一致、半減期経過後→スコアが約半分）。浮動小数点比較は許容誤差（`toBeCloseTo` 相当）を使う。
 - `ranking_snapshots` への冪等 upsert（`ON CONFLICT ... DO UPDATE`）は Infrastructure 統合テストで、同一 `(period, bucket_date, novel_id)` に対する再実行が行を増やさず値のみ更新することを確認する。
-- 検索の Visibility フィルタ（Public のみ対象、[discovery.md](./discovery.md) の PGroonga クエリ）は「Private/Unlisted/Hidden な Novel がヒットしない」ケースを Infrastructure 統合テストに含める（認可漏れが検索経由で情報漏洩する事故を防ぐ、[auth.md](./auth.md) §3.2 と接続）。
+- 検索の Visibility フィルタ（Public のみ対象、[discovery.md](../domains/discovery.md) の PGroonga クエリ）は「Private/Unlisted/Hidden な Novel がヒットしない」ケースを Infrastructure 統合テストに含める（認可漏れが検索経由で情報漏洩する事故を防ぐ、[auth.md](../foundation/auth.md) §3.2 と接続）。
 
-### 3.5 Analytics の非ブロッキング性（[analytics.md](./analytics.md)）
+### 3.5 Analytics の非ブロッキング性（[analytics.md](../domains/analytics.md)）
 
-- **同期処理でないことの確認**: `POST /api/analytics/events` の Controller/Application は、イベント保存が失敗（DB エラー・バリデーション失敗）しても例外を呼び出し元（読書ページのレンダリング/他リクエスト）に伝播させず、**常に `202` 相当を返す**ことを Presentation 結合テストで確認する（[analytics.md](./analytics.md) §「fire-and-forget」）。
+- **同期処理でないことの確認**: `POST /api/analytics/events` の Controller/Application は、イベント保存が失敗（DB エラー・バリデーション失敗）しても例外を呼び出し元（読書ページのレンダリング/他リクエスト）に伝播させず、**常に `202` 相当を返す**ことを Presentation 結合テストで確認する（[analytics.md](../domains/analytics.md) §「fire-and-forget」）。
 - **CSRF 免除の意図的な例外**であることを回帰テストで明示する（他ルートはCSRF必須だが、このルートだけ Origin/Referer 検証のみで許可されることをテストし、「うっかり CSRF 必須化してしまう」将来の変更を検知できるようにする）。
-- 冪等性: 同一イベントの重複配送（beacon の二重送信）が `analytics_events`（生ログ）には複数行残ってよいが、集計後の `analytics_daily` の unique 系指標が水増しされないことを Infrastructure/集計ロジックの統合テストで確認する（[analytics.md](./analytics.md) の distinct dedup 方針）。
+- 冪等性: 同一イベントの重複配送（beacon の二重送信）が `analytics_events`（生ログ）には複数行残ってよいが、集計後の `analytics_daily` の unique 系指標が水増しされないことを Infrastructure/集計ロジックの統合テストで確認する（[analytics.md](../domains/analytics.md) の distinct dedup 方針）。
 - 読書操作をブロックしないという性質は**E2E フロー5**（§2.5）でも裏取りする（Analytics エンドポイントに人為的な遅延/失敗を注入し、ページ操作の応答性に影響がないことを確認）。
 
 ---
@@ -357,7 +357,7 @@ CI プラットフォームは未決（§7）だが、ジョブ構成の方針�
 
 ## 8. 未決事項
 
-1. **CI プラットフォームの選定**（GitHub Actions / self-hosted runner 等）と、その上での Podman 実行可否。[infrastructure.md](./infrastructure.md) の Self Hosted 方針と合わせて検討。
+1. **CI プラットフォームの選定**（GitHub Actions / self-hosted runner 等）と、その上での Podman 実行可否。[infrastructure.md](../overview/infrastructure.md) の Self Hosted 方針と合わせて検討。
 2. **型チェック（`tsc --noEmit`）を CI ゲートに含めるか**、含める場合の実行速度対策（incremental build 等）。
 3. **E2E のツール選定**（Playwright 等のブラウザ自動化を導入するか、HTTP レベルの E2E に留めるか）。hono/jsx/dom island（Autosave, Reader Settings 等）の実ブラウザ挙動を検証したい場合はブラウザ自動化が望ましいが、導入コストとのトレードオフ。
 4. **`test:e2e` を必須マージゲートに昇格するタイミング**。当初は任意実行とし、フレーキーさが解消してから昇格する想定だが、判断基準は未確定。
@@ -370,10 +370,10 @@ CI プラットフォームは未決（§7）だが、ジョブ構成の方針�
 
 ## 関連ドキュメント
 
-- [architecture.md](./architecture.md) — レイヤ構成・依存の向き（テスト容易性の設計根拠）
-- [auth.md](./auth.md) — 認可マトリクス・403/404 使い分け（§3.1 のテスト網羅対象）
-- [text-notation.md](./text-notation.md) — 記法パーサのテストケース表（§3.2 でそのまま移植）
-- [writing-revision.md](./writing-revision.md) — Revision 状態遷移・Scheduled Publish 冪等性（§3.3）
-- [discovery.md](./discovery.md) — スコア式・PGroonga 検索（§3.4）
-- [analytics.md](./analytics.md) — fire-and-forget 契約（§3.5）
-- [infrastructure.md](./infrastructure.md) — Podman Compose 構成（テスト用 Postgres の起動基盤）
+- [architecture.md](../overview/architecture.md) — レイヤ構成・依存の向き（テスト容易性の設計根拠）
+- [auth.md](../foundation/auth.md) — 認可マトリクス・403/404 使い分け（§3.1 のテスト網羅対象）
+- [text-notation.md](../domains/text-notation.md) — 記法パーサのテストケース表（§3.2 でそのまま移植）
+- [writing-revision.md](../domains/writing-revision.md) — Revision 状態遷移・Scheduled Publish 冪等性（§3.3）
+- [discovery.md](../domains/discovery.md) — スコア式・PGroonga 検索（§3.4）
+- [analytics.md](../domains/analytics.md) — fire-and-forget 契約（§3.5）
+- [infrastructure.md](../overview/infrastructure.md) — Podman Compose 構成（テスト用 Postgres の起動基盤）

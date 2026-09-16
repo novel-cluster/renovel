@@ -23,7 +23,7 @@
 ## 2. UI コンポーネント: Kiwa UI
 
 - **Kiwa UI** を第一候補とする（PRD §40）。shadcn 系のレジストリ方式で、コンポーネントを `@/components` に取り込んで使う。
-- 設定は [`app/src/kiwa-ui.json`](../../app/src/kiwa-ui.json):
+- 設定は [`app/src/kiwa-ui.json`](../../../app/src/kiwa-ui.json):
   - `aliases.components` → `@/components`
   - `aliases.utils` → `@/lib/utils`（`cn()` を提供）
   - Tailwind css は `styles/globals.css`
