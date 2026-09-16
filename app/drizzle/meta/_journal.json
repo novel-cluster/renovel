@@ -8,6 +8,20 @@
       "when": 1789556722378,
       "tag": "0000_outstanding_nebula",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1789558339035,
+      "tag": "0001_eager_thor",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1789559338125,
+      "tag": "0002_loving_nocturne",
+      "breakpoints": true
     }
   ]
 }
