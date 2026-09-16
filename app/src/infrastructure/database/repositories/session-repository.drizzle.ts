@@ -33,6 +33,7 @@ export class DrizzleSessionRepository implements SessionRepository {
         handle: users.handle,
         displayName: users.displayName,
         status: users.status,
+        isAdmin: users.isAdmin,
       })
       .from(sessions)
       .innerJoin(users, eq(sessions.userId, users.id))
@@ -54,6 +55,7 @@ export class DrizzleSessionRepository implements SessionRepository {
         handle: row.handle,
         displayName: row.displayName,
         status: row.status,
+        isAdmin: row.isAdmin,
       },
     }
   }
