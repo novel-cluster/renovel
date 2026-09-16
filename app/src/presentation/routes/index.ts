@@ -5,6 +5,7 @@ import { getProfile } from '@/presentation/controllers/profile.controller'
 import type { AppEnv } from '@/presentation/env'
 import { authRoutes } from './auth.route'
 import { healthRoutes } from './health.route'
+import { libraryRoutes } from './library.route'
 import { settingsRoutes } from './settings.route'
 import { studioRoutes } from './studio.route'
 
@@ -20,6 +21,7 @@ export function registerRoutes(app: Hono<AppEnv>) {
   app.route('/', authRoutes)
   app.route('/settings', settingsRoutes)
   app.route('/studio', studioRoutes)
+  app.route('/library', libraryRoutes)
 
   // Public reading. Hono only recognizes a param at a segment start, so the whole
   // `@{handle}` segment is one regex param; controllers strip the `@`.

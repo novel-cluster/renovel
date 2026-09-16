@@ -11,6 +11,12 @@ export const SiteHeader: FC<{ user: AuthUser | null }> = ({ user }) => (
       <nav class="flex items-center gap-4 text-sm">
         {user ? (
           <>
+            <a class="text-muted-foreground hover:text-foreground" href="/studio">
+              スタジオ
+            </a>
+            <a class="text-muted-foreground hover:text-foreground" href="/library">
+              本棚
+            </a>
             <a class="text-muted-foreground hover:text-foreground" href={`/@${user.handle}`}>
               @{user.handle}
             </a>
