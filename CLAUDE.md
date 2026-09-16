@@ -89,3 +89,11 @@ Planned domains (PRD §42): `identity, novel, writing, collaboration, fork, read
 - TypeScript is `strict`; JSX is configured for `hono/jsx` (`jsxImportSource: "hono/jsx"`).
 - Commit messages follow Conventional Commits with a Japanese subject, e.g. `feat(app): 初期テンプレートを追加`.
 - **Do not add a `Co-Authored-By: Claude` trailer to commits, and do not add "Generated with Claude Code" / "🤖" credits to PR bodies.**
+
+### Git workflow (branch frequently, PR at breakpoints)
+
+- **Never commit directly to `develop` or `main`.** Branch off `develop` for every unit of work — cut branches **frequently** (one short-lived branch per logical change), don't pile unrelated work onto one branch.
+- Branch names use a Conventional-Commit-style type prefix + kebab slug: `feat/...`, `fix/...`, `docs/...`, `chore/...`, `refactor/...` (e.g. `docs/git-workflow`).
+- Commit in **small, frequent** steps within the branch (each commit one coherent change, Japanese Conventional-Commit subject).
+- At each natural breakpoint, **open a PR into `develop`** with `gh pr create --base develop` (Japanese title in Conventional-Commit form). **Do not merge — the maintainer merges.** After opening the PR, move on to the next unit on a **new** branch cut from `develop`.
+- A structural refactor (e.g. moving files) should still be one atomic commit so no intermediate state is broken, but it still goes on its own branch + PR.
