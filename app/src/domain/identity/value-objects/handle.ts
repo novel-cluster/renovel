@@ -11,11 +11,9 @@ export class Handle {
 
   static create(input: string): Handle {
     const normalized = input.trim().toLowerCase()
-    if (!HANDLE_RE.test(normalized)) {
-      throw new ValidationError(
-        'ハンドルは3〜30文字の英小文字・数字・アンダースコアで入力してください',
-      )
-    }
+    if (!HANDLE_RE.test(normalized)) throw new ValidationError(
+      'ハンドルは3〜30文字の英小文字・数字・アンダースコアで入力してください',
+    )
     return new Handle(normalized)
   }
 
