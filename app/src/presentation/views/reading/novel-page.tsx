@@ -1,6 +1,7 @@
 import type { FC } from 'hono/jsx'
 import type { NovelReadView } from '@/application/services/reading/read-novel.query'
 import type { NovelSocial } from '@/application/services/social/social.query'
+import type { ForkAttribution } from '@/domain/fork/fork'
 import type { LibraryState } from '@/domain/reading/entities/reading'
 import type { AuthUser } from '@/presentation/env'
 import { SiteHeader } from '@/presentation/views/components/site-header'
@@ -21,14 +22,16 @@ export const NovelPage: FC<{
   viewer: AuthUser | null
   social: NovelSocial
   tags: string[]
+  attribution: ForkAttribution | null
   resumeEpisodeNo?: number | null
   libraryState?: LibraryState | null
-}> = ({ view, viewer, social, tags, resumeEpisodeNo, libraryState }) => {
+}> = ({ view, viewer, social, tags, attribution, resumeEpisodeNo, libraryState }) => {
   const { novel, author, episodes, isOwner } = view
   const base = `/@${author.handle}/${novel.slug}`
   const firstNo = episodes[0]?.episodeNo ?? null
   const resumeNo = resumeEpisodeNo ?? null
   const canInteract = viewer !== null && !isOwner
+  const canFork = viewer !== null && !isOwner && novel.forkPolicy !== 'disabled'
 
   return (
     <Layout
@@ -46,6 +49,17 @@ export const NovelPage: FC<{
           ) : null}
         </div>
         <h1 class="mt-3 text-3xl font-semibold tracking-tight">{novel.title}</h1>
+        {attribution ? (
+          <p class="mt-1 text-xs text-muted-foreground">
+            Forked from{' '}
+            <a
+              class="hover:text-primary"
+              href={`/@${attribution.sourceAuthorHandle}/${attribution.sourceSlug}`}
+            >
+              「{attribution.sourceTitle}」（{attribution.sourceAuthorName}）
+            </a>
+          </p>
+        ) : null}
         {novel.catchphrase ? <p class="mt-2 text-muted-foreground">{novel.catchphrase}</p> : null}
         <p class="mt-3 text-sm">
           <a class="text-primary underline underline-offset-4" href={`/@${author.handle}`}>
@@ -112,6 +126,17 @@ export const NovelPage: FC<{
                 class="rounded-md border border-border px-3 py-2 text-sm hover:bg-muted aria-pressed:border-primary aria-pressed:text-primary"
               >
                 {social.following ? 'フォロー中' : 'フォロー'}
+              </button>
+            </form>
+          ) : null}
+
+          {canFork ? (
+            <form method="post" action={`${base}/fork`}>
+              <button
+                type="submit"
+                class="rounded-md border border-border px-3 py-2 text-sm hover:bg-muted"
+              >
+                Fork する
               </button>
             </form>
           ) : null}

@@ -1,5 +1,10 @@
 import type { Context } from 'hono'
-import type { Genre, PublicationStatus, Visibility } from '@/domain/novel/entities/novel'
+import type {
+  ForkPolicy,
+  Genre,
+  PublicationStatus,
+  Visibility,
+} from '@/domain/novel/entities/novel'
 import { container } from '@/presentation/container'
 import type { AppEnv } from '@/presentation/env'
 import { renderPage } from '@/presentation/views/render'
@@ -20,6 +25,7 @@ const GENRES: Genre[] = [
 ]
 const VISIBILITIES: Visibility[] = ['public', 'unlisted', 'private']
 const STATUSES: PublicationStatus[] = ['ongoing', 'completed', 'hiatus']
+const FORK_POLICIES: ForkPolicy[] = ['disabled', 'approval_required', 'allowed']
 
 function oneOf<T extends string>(value: unknown, allowed: readonly T[]): T | undefined {
   return typeof value === 'string' && (allowed as readonly string[]).includes(value)
@@ -30,8 +36,14 @@ function oneOf<T extends string>(value: unknown, allowed: readonly T[]): T | und
 export async function getStudio(c: Context<AppEnv>) {
   const viewer = c.get('user')
   if (!viewer) return c.redirect('/login')
-  const novels = await container.listStudioNovelsService.execute(viewer.id)
-  return renderPage(c, <StudioIndexPage novels={novels} viewer={viewer} />)
+  const [novels, invitations] = await Promise.all([
+    container.listStudioNovelsService.execute(viewer.id),
+    container.collaborationQuery.pendingInvitations(viewer.id),
+  ])
+  return renderPage(
+    c,
+    <StudioIndexPage novels={novels} invitations={invitations} viewer={viewer} />,
+  )
 }
 
 export function getNewNovel(c: Context<AppEnv>) {
@@ -92,6 +104,7 @@ export async function postUpdateNovel(c: Context<AppEnv>) {
       genre: body.genre === '' ? null : oneOf(body.genre, GENRES),
       visibility: oneOf(body.visibility, VISIBILITIES),
       publicationStatus: oneOf(body.publicationStatus, STATUSES),
+      forkPolicy: oneOf(body.forkPolicy, FORK_POLICIES),
       contentWarnings: parseWarnings(body.contentWarnings),
     })
     await container.setNovelTagsService.execute({

@@ -26,6 +26,11 @@ const STATUSES: [string, string][] = [
   ['completed', '完結'],
   ['hiatus', '休載中'],
 ]
+const FORK_POLICIES: [string, string][] = [
+  ['disabled', 'Fork 不可'],
+  ['approval_required', '承認制'],
+  ['allowed', 'Fork 許可'],
+]
 
 const Select: FC<{ label: string; name: string; value: string; options: [string, string][] }> = ({
   label,
@@ -69,6 +74,12 @@ export const NovelDashboardPage: FC<{
               href={`/studio/novels/${novel.id}/analytics`}
             >
               分析
+            </a>
+            <a
+              class="text-primary underline underline-offset-4"
+              href={`/studio/novels/${novel.id}/collaborators`}
+            >
+              共同制作
             </a>
             <a
               class="text-primary underline underline-offset-4"
@@ -120,6 +131,12 @@ export const NovelDashboardPage: FC<{
             name="tags"
             value={tags.join(', ')}
             help="カンマ区切り・最大10件（検索・発見に使われます）"
+          />
+          <Select
+            label="Fork ポリシー"
+            name="forkPolicy"
+            value={novel.forkPolicy}
+            options={FORK_POLICIES}
           />
           <SubmitButton label="設定を保存" />
         </form>

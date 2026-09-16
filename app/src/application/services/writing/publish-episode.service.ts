@@ -3,7 +3,7 @@ import type { EpisodeRepository } from '@/domain/novel/repositories/episode-repo
 import type { NovelRepository } from '@/domain/novel/repositories/novel-repository'
 import type { EpisodeRevisionRepository } from '@/domain/writing/repositories/episode-revision-repository'
 import { NotFoundError } from '@/shared/errors/app-error'
-import { ensureNovelOwner } from '../novel/ownership'
+import type { NovelAuthorizationService } from '../collaboration/novel-authorization.service'
 
 export interface PublishEpisodeInput {
   actorUserId: string
@@ -19,6 +19,7 @@ export class PublishEpisodeService {
     private readonly novels: NovelRepository,
     private readonly episodes: EpisodeRepository,
     private readonly revisions: EpisodeRevisionRepository,
+    private readonly authz: NovelAuthorizationService,
   ) {}
 
   async execute(input: PublishEpisodeInput): Promise<Episode> {
@@ -26,7 +27,7 @@ export class PublishEpisodeService {
     if (!episode) throw new NotFoundError('エピソードが見つかりません')
     const novel = await this.novels.findById(episode.novelId)
     if (!novel) throw new NotFoundError('作品が見つかりません')
-    ensureNovelOwner(novel, input.actorUserId)
+    await this.authz.ensureCan(novel, input.actorUserId, 'episode.publish')
 
     if (episode.status === 'published') return episode
 

@@ -143,14 +143,15 @@ Reader First の本丸。書いたものを快適に読める。
 
 **設計:** [collaboration-fork.md](./docs/design/domains/collaboration-fork.md)（招待・Role・Fork 系譜・帰属強制・Change Proposal） / [auth.md](./docs/design/foundation/auth.md)（Role 権限マトリクス） / [data-model.md](./docs/design/foundation/data-model.md)（collaborators/forks/fork_requests/change_proposals）
 
-- [ ] Collaborator 招待 + Role（Owner/Admin/Writer/Editor/Viewer、PRD §13）
-- [ ] Role ごとの権限をサーバ側で強制（PRD §59）
-- [ ] 共同編集（Revision との連携）
-- [ ] Fork（派生作品、原作帰属表示は削除不可、PRD §14）
-- [ ] Fork Policy（Disabled / Approval Required / Allowed、PRD §15）
-- [ ] （1.0 目標・優先度低）Change Proposal = PR 型（Accept/Reject/Comment、PRD §16）
+- [x] Collaborator 招待 + Role（Owner/Admin/Writer/Editor/Viewer、PRD §13）
+- [x] Role ごとの権限をサーバ側で強制（権限マトリクス・Policy、PRD §59）
+- [x] 共同編集（collaborator が Revision を刻む）
+- [x] Fork（派生作品・エピソード複製、原作帰属表示は削除不可、PRD §14）
+- [~] Fork Policy（Disabled / Allowed 実装、Approval Required は承認フロー後続、PRD §15）
+- [ ] （優先度低）Change Proposal = PR 型（Accept/Reject/Comment、PRD §16）— 後続
 
 **完了条件:** 作成→招待→共同執筆→Revision 確認→公開、および Fork ができる（成功の定義 Collaboration、PRD §62）。
+→ **達成**: 実 DB で 招待→承諾→writer で執筆(Revision)・settings は 403(ロール強制)、Fork→エピソード複製+「Forked from」帰属 を E2E 確認。Change Proposal と承認制 Fork は後続。
 
 ---
 

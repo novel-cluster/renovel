@@ -7,6 +7,14 @@ import {
   AnalyticsDashboardQuery,
   RecordAnalyticsEventService,
 } from '@/application/services/analytics/analytics.service'
+import { CollaborationQuery } from '@/application/services/collaboration/collaboration.query'
+import {
+  InviteCollaboratorService,
+  RemoveCollaboratorService,
+  RespondInvitationService,
+} from '@/application/services/collaboration/collaboration.service'
+import { ForkNovelService } from '@/application/services/collaboration/fork-novel.service'
+import { NovelAuthorizationService } from '@/application/services/collaboration/novel-authorization.service'
 import { SetNovelTagsService } from '@/application/services/discovery/set-novel-tags.service'
 import { HealthService } from '@/application/services/health.service'
 import { GetUserProfileService } from '@/application/services/identity/get-user-profile.service'
@@ -51,9 +59,14 @@ import { PublishEpisodeService } from '@/application/services/writing/publish-ep
 import { SaveEpisodeService } from '@/application/services/writing/save-episode.service'
 import { BunPasswordHasher } from '@/infrastructure/auth/bun-password-hasher'
 import { DrizzleAnalyticsEventRepository } from '@/infrastructure/database/repositories/analytics.drizzle'
+import {
+  DrizzleCollaboratorRepository,
+  DrizzleInvitationRepository,
+} from '@/infrastructure/database/repositories/collaboration.drizzle'
 import { DrizzleDiscoveryRepository } from '@/infrastructure/database/repositories/discovery.drizzle'
 import { DrizzleEpisodeRepository } from '@/infrastructure/database/repositories/episode-repository.drizzle'
 import { DrizzleEpisodeRevisionRepository } from '@/infrastructure/database/repositories/episode-revision-repository.drizzle'
+import { DrizzleForkRepository } from '@/infrastructure/database/repositories/fork.drizzle'
 import { DrizzleHealthRepository } from '@/infrastructure/database/repositories/health-repository.drizzle'
 import { DrizzleLibraryRepository } from '@/infrastructure/database/repositories/library-repository.drizzle'
 import { DrizzleNotificationRepository } from '@/infrastructure/database/repositories/notification.drizzle'
@@ -96,6 +109,10 @@ const discoveryRepository = new DrizzleDiscoveryRepository()
 const tagRepository = new DrizzleTagRepository()
 const rankingQuery = new RankingQuery(discoveryRepository)
 const analyticsEventRepository = new DrizzleAnalyticsEventRepository()
+const collaboratorRepository = new DrizzleCollaboratorRepository()
+const invitationRepository = new DrizzleInvitationRepository()
+const forkRepository = new DrizzleForkRepository()
+const novelAuthorizationService = new NovelAuthorizationService(collaboratorRepository)
 
 export const container = {
   healthService: new HealthService(new DrizzleHealthRepository()),
@@ -111,21 +128,35 @@ export const container = {
   novelRepository,
   episodeRepository,
   createNovelService: new CreateNovelService(novelRepository),
-  updateNovelService: new UpdateNovelService(novelRepository),
-  listStudioNovelsService: new ListStudioNovelsService(novelRepository),
-  getNovelStudioService: new GetNovelStudioService(novelRepository, episodeRepository),
-  createEpisodeService: new CreateEpisodeService(novelRepository, episodeRepository),
+  updateNovelService: new UpdateNovelService(novelRepository, novelAuthorizationService),
+  listStudioNovelsService: new ListStudioNovelsService(novelRepository, collaboratorRepository),
+  getNovelStudioService: new GetNovelStudioService(
+    novelRepository,
+    episodeRepository,
+    novelAuthorizationService,
+  ),
+  createEpisodeService: new CreateEpisodeService(
+    novelRepository,
+    episodeRepository,
+    novelAuthorizationService,
+  ),
   saveEpisodeService: new SaveEpisodeService(
     novelRepository,
     episodeRepository,
     episodeRevisionRepository,
+    novelAuthorizationService,
   ),
   publishEpisodeService: new PublishEpisodeService(
     novelRepository,
     episodeRepository,
     episodeRevisionRepository,
+    novelAuthorizationService,
   ),
-  getEpisodeEditorService: new GetEpisodeEditorService(novelRepository, episodeRepository),
+  getEpisodeEditorService: new GetEpisodeEditorService(
+    novelRepository,
+    episodeRepository,
+    novelAuthorizationService,
+  ),
   readNovelQuery: new ReadNovelQuery(novelRepository, episodeRepository, userRepository),
   // reading (Phase 3)
   recordReadingProgressService: new RecordReadingProgressService(readingProgressRepository),
@@ -175,7 +206,11 @@ export const container = {
   searchNovelsQuery: new SearchNovelsQuery(discoveryRepository),
   rankingQuery,
   homeQuery: new HomeQuery(discoveryRepository, rankingQuery),
-  setNovelTagsService: new SetNovelTagsService(tagRepository, novelRepository),
+  setNovelTagsService: new SetNovelTagsService(
+    tagRepository,
+    novelRepository,
+    novelAuthorizationService,
+  ),
   // analytics (Phase 6)
   recordAnalyticsEventService: new RecordAnalyticsEventService(analyticsEventRepository),
   analyticsDashboardQuery: new AnalyticsDashboardQuery(
@@ -183,6 +218,32 @@ export const container = {
     novelRepository,
     episodeRepository,
   ),
+  // collaboration & fork (Phase 7)
+  forkRepository,
+  inviteCollaboratorService: new InviteCollaboratorService(
+    novelAuthorizationService,
+    novelRepository,
+    userRepository,
+    collaboratorRepository,
+    invitationRepository,
+    notificationRepository,
+  ),
+  respondInvitationService: new RespondInvitationService(
+    invitationRepository,
+    collaboratorRepository,
+  ),
+  removeCollaboratorService: new RemoveCollaboratorService(
+    novelAuthorizationService,
+    novelRepository,
+    collaboratorRepository,
+  ),
+  collaborationQuery: new CollaborationQuery(
+    novelAuthorizationService,
+    novelRepository,
+    collaboratorRepository,
+    invitationRepository,
+  ),
+  forkNovelService: new ForkNovelService(novelRepository, episodeRepository, forkRepository),
 } as const
 
 export type Container = typeof container

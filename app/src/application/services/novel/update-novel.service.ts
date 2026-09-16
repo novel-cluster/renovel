@@ -1,5 +1,6 @@
 import type {
   ContentState,
+  ForkPolicy,
   Genre,
   Novel,
   PublicationStatus,
@@ -7,7 +8,7 @@ import type {
 } from '@/domain/novel/entities/novel'
 import type { NovelRepository, NovelUpdate } from '@/domain/novel/repositories/novel-repository'
 import { NotFoundError, ValidationError } from '@/shared/errors/app-error'
-import { ensureNovelOwner } from './ownership'
+import type { NovelAuthorizationService } from '../collaboration/novel-authorization.service'
 
 export interface UpdateNovelInput {
   actorUserId: string
@@ -20,18 +21,27 @@ export interface UpdateNovelInput {
   publicationStatus?: PublicationStatus
   contentState?: ContentState
   contentWarnings?: string[]
+  forkPolicy?: ForkPolicy
 }
 
 /** Update Novel settings (auth.md §3.1 — owner only). */
 export class UpdateNovelService {
-  constructor(private readonly novels: NovelRepository) {}
+  constructor(
+    private readonly novels: NovelRepository,
+    private readonly authz: NovelAuthorizationService,
+  ) {}
 
   async execute(input: UpdateNovelInput): Promise<Novel> {
     const novel = await this.novels.findById(input.novelId)
     if (!novel) throw new NotFoundError('作品が見つかりません')
-    ensureNovelOwner(novel, input.actorUserId)
+    const role = await this.authz.ensureCan(novel, input.actorUserId, 'novel.settings')
 
     const patch: NovelUpdate = {}
+    if (input.forkPolicy !== undefined) {
+      // Fork Policy is owner-only (auth.md §3.1).
+      if (role !== 'owner') throw new ValidationError('Fork Policy はオーナーのみ変更できます')
+      patch.forkPolicy = input.forkPolicy
+    }
     if (input.title !== undefined) {
       const title = input.title.trim()
       if (!title) throw new ValidationError('タイトルを入力してください')
