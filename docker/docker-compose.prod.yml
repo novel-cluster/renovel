@@ -54,12 +54,15 @@ services:
       migrate:
         condition: service_completed_successfully
 
+  # Only started when the `tunnel` profile is enabled (i.e. a token is set).
+  # Until then, web+postgres run internally and you can add the tunnel later.
   cloudflared:
     image: cloudflare/cloudflared:latest
+    profiles: ["tunnel"]
     restart: unless-stopped
     command: ["tunnel", "--no-autoupdate", "run"]
     environment:
-      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:?set CLOUDFLARE_TUNNEL_TOKEN}
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:-}
     depends_on:
       - web
 

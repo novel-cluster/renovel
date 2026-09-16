@@ -32,10 +32,19 @@ jobs:
         run: |
           set -euo pipefail
           test -n "$POSTGRES_PASSWORD" || { echo "::error::secret POSTGRES_PASSWORD is not set"; exit 1; }
-          test -n "$CLOUDFLARE_TUNNEL_TOKEN" || { echo "::error::secret CLOUDFLARE_TUNNEL_TOKEN is not set"; exit 1; }
+
+          # Enable the Cloudflare tunnel only when a token is configured; without
+          # it, web+postgres still deploy (internal), and the tunnel can be added later.
+          PROFILE=()
+          if [ -n "${CLOUDFLARE_TUNNEL_TOKEN:-}" ]; then
+            PROFILE=(--profile tunnel)
+            echo "cloudflared tunnel: enabled"
+          else
+            echo "::warning::CLOUDFLARE_TUNNEL_TOKEN not set — deploying without the public tunnel"
+          fi
 
           # migrate one-shot runs before web (depends_on: service_completed_successfully).
-          podman compose -f docker/docker-compose.prod.yml up -d --build --remove-orphans
+          podman compose "${PROFILE[@]}" -f docker/docker-compose.prod.yml up -d --build --remove-orphans
 
       - name: Show status
         if: always()
