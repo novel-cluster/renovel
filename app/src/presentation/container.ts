@@ -1,3 +1,9 @@
+import {
+  HomeQuery,
+  RankingQuery,
+  SearchNovelsQuery,
+} from '@/application/queries/discovery/discovery.query'
+import { SetNovelTagsService } from '@/application/services/discovery/set-novel-tags.service'
 import { HealthService } from '@/application/services/health.service'
 import { GetUserProfileService } from '@/application/services/identity/get-user-profile.service'
 import { LoginService } from '@/application/services/identity/login.service'
@@ -40,6 +46,7 @@ import { GetEpisodeEditorService } from '@/application/services/writing/edit-epi
 import { PublishEpisodeService } from '@/application/services/writing/publish-episode.service'
 import { SaveEpisodeService } from '@/application/services/writing/save-episode.service'
 import { BunPasswordHasher } from '@/infrastructure/auth/bun-password-hasher'
+import { DrizzleDiscoveryRepository } from '@/infrastructure/database/repositories/discovery.drizzle'
 import { DrizzleEpisodeRepository } from '@/infrastructure/database/repositories/episode-repository.drizzle'
 import { DrizzleEpisodeRevisionRepository } from '@/infrastructure/database/repositories/episode-revision-repository.drizzle'
 import { DrizzleHealthRepository } from '@/infrastructure/database/repositories/health-repository.drizzle'
@@ -55,6 +62,7 @@ import {
   DrizzleReviewRepository,
   DrizzleStarRepository,
 } from '@/infrastructure/database/repositories/social.drizzle'
+import { DrizzleTagRepository } from '@/infrastructure/database/repositories/tag.drizzle'
 import { DrizzleUserRepository } from '@/infrastructure/database/repositories/user-repository.drizzle'
 
 /**
@@ -79,6 +87,9 @@ const reviewRepository = new DrizzleReviewRepository()
 const commentRepository = new DrizzleCommentRepository()
 const followRepository = new DrizzleFollowRepository()
 const notificationRepository = new DrizzleNotificationRepository()
+const discoveryRepository = new DrizzleDiscoveryRepository()
+const tagRepository = new DrizzleTagRepository()
+const rankingQuery = new RankingQuery(discoveryRepository)
 
 export const container = {
   healthService: new HealthService(new DrizzleHealthRepository()),
@@ -153,6 +164,12 @@ export const container = {
   novelSocialQuery: new NovelSocialQuery(starRepository, reviewRepository, followRepository),
   listNotificationsService: new ListNotificationsService(notificationRepository),
   unreadNotificationCountService: new UnreadNotificationCountService(notificationRepository),
+  // discovery (Phase 5)
+  tagRepository,
+  searchNovelsQuery: new SearchNovelsQuery(discoveryRepository),
+  rankingQuery,
+  homeQuery: new HomeQuery(discoveryRepository, rankingQuery),
+  setNovelTagsService: new SetNovelTagsService(tagRepository, novelRepository),
 } as const
 
 export type Container = typeof container

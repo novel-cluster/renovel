@@ -1,4 +1,5 @@
 import type { Hono } from 'hono'
+import { getRanking, getSearch } from '@/presentation/controllers/discovery.controller'
 import { getHome } from '@/presentation/controllers/home.controller'
 import { getEpisodePage, getNovelPage } from '@/presentation/controllers/novel-read.controller'
 import { getProfile } from '@/presentation/controllers/profile.controller'
@@ -19,6 +20,8 @@ const HANDLE = '@[A-Za-z0-9_]{3,30}'
  */
 export function registerRoutes(app: Hono<AppEnv>) {
   app.get('/', getHome)
+  app.get('/search', getSearch)
+  app.get('/ranking', getRanking)
   app.route('/health', healthRoutes)
   app.route('/', authRoutes)
   app.route('/settings', settingsRoutes)

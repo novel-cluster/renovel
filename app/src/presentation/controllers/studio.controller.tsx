@@ -65,9 +65,15 @@ export async function getNovelDashboard(c: Context<AppEnv>) {
     viewer.id,
     c.req.param('novelId') ?? '',
   )
+  const tags = await container.tagRepository.listNovelTags(view.novel.id)
   return renderPage(
     c,
-    <NovelDashboardPage view={view} viewer={viewer} saved={c.req.query('saved') === '1'} />,
+    <NovelDashboardPage
+      view={view}
+      viewer={viewer}
+      tags={tags}
+      saved={c.req.query('saved') === '1'}
+    />,
   )
 }
 
@@ -88,13 +94,19 @@ export async function postUpdateNovel(c: Context<AppEnv>) {
       publicationStatus: oneOf(body.publicationStatus, STATUSES),
       contentWarnings: parseWarnings(body.contentWarnings),
     })
+    await container.setNovelTagsService.execute({
+      actorUserId: viewer.id,
+      novelId,
+      names: parseWarnings(body.tags) ?? [],
+    })
     return c.redirect(`/studio/novels/${novelId}?saved=1`)
   } catch (err) {
     if (err instanceof AppError) {
       const view = await container.getNovelStudioService.execute(viewer.id, novelId)
+      const tags = await container.tagRepository.listNovelTags(novelId)
       return renderPage(
         c,
-        <NovelDashboardPage view={view} viewer={viewer} error={err.message} />,
+        <NovelDashboardPage view={view} viewer={viewer} tags={tags} error={err.message} />,
         err.status,
       )
     }

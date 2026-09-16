@@ -9,6 +9,12 @@ export const SiteHeader: FC<{ user: AuthUser | null }> = ({ user }) => (
         ReNovel
       </a>
       <nav class="flex items-center gap-4 text-sm">
+        <a class="text-muted-foreground hover:text-foreground" href="/ranking">
+          ランキング
+        </a>
+        <a class="text-muted-foreground hover:text-foreground" href="/search">
+          探す
+        </a>
         {user ? (
           <>
             <a class="text-muted-foreground hover:text-foreground" href="/studio">

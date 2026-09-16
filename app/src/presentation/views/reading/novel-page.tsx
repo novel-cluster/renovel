@@ -20,9 +20,10 @@ export const NovelPage: FC<{
   view: NovelReadView
   viewer: AuthUser | null
   social: NovelSocial
+  tags: string[]
   resumeEpisodeNo?: number | null
   libraryState?: LibraryState | null
-}> = ({ view, viewer, social, resumeEpisodeNo, libraryState }) => {
+}> = ({ view, viewer, social, tags, resumeEpisodeNo, libraryState }) => {
   const { novel, author, episodes, isOwner } = view
   const base = `/@${author.handle}/${novel.slug}`
   const firstNo = episodes[0]?.episodeNo ?? null
@@ -67,6 +68,19 @@ export const NovelPage: FC<{
 
         {novel.description ? (
           <p class="mt-6 whitespace-pre-wrap text-sm leading-relaxed">{novel.description}</p>
+        ) : null}
+
+        {tags.length ? (
+          <div class="mt-4 flex flex-wrap gap-2">
+            {tags.map((tag) => (
+              <a
+                href={`/search?tag=${encodeURIComponent(tag)}`}
+                class="rounded-full border border-border px-2.5 py-0.5 text-xs text-muted-foreground hover:text-primary"
+              >
+                #{tag}
+              </a>
+            ))}
+          </div>
         ) : null}
 
         <div class="mt-6 flex flex-wrap items-center gap-3">

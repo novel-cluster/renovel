@@ -27,6 +27,7 @@ export async function getNovelPage(c: Context<AppEnv>) {
     ? await container.getLibraryStateService.execute(viewer.id, view.novel.id)
     : null
   const social = await container.novelSocialQuery.execute(view.novel.id, viewer?.id ?? null)
+  const tags = await container.tagRepository.listNovelTags(view.novel.id)
 
   return renderPage(
     c,
@@ -36,6 +37,7 @@ export async function getNovelPage(c: Context<AppEnv>) {
       resumeEpisodeNo={resumeEpisodeNo}
       libraryState={libraryState}
       social={social}
+      tags={tags}
     />,
   )
 }
