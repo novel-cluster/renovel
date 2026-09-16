@@ -105,13 +105,14 @@ Reader First の本丸。書いたものを快適に読める。
 
 **設計:** [discovery.md](./docs/design/domains/discovery.md)（日本語全文検索・Filter/Sort・ランキング・レコメンド・Home） / [data-model.md](./docs/design/foundation/data-model.md)（tags/novel_tags・集計方針）
 
-- [ ] Search（Title/Catchphrase/Description/User/Tag、PRD §23）+ Filter（PRD §24）+ Sort（PRD §25）
-- [ ] Ranking（Daily/Weekly/Monthly/New/Completed、時間減衰スコア、PRD §26）
-- [ ] Recommendation（初期は Rule Based、PRD §27）
-- [ ] Home（ログイン/ゲスト出し分け、PRD §28）
-- [ ] N+1 回避（Query 層で取得、PRD §55）
+- [x] Search（Title/Catchphrase/Description/User/Tag、PRD §23）+ Filter（PRD §24）+ Sort（PRD §25）— ILIKE 実装（PGroonga は後続、SearchRepository で隠蔽）
+- [x] Ranking（Daily/Weekly/Monthly/New/Completed、時間減衰スコア、PRD §26）— カウンタ由来スコア。analytics 由来は Phase 6 後に差替
+- [x] Recommendation（Rule Based＝人気、PRD §27）
+- [x] Home（ログイン/ゲスト出し分け、PRD §28）
+- [x] N+1 回避（Query 層で取得、PRD §55）
 
 **完了条件:** ゲスト/ログインの Home・検索・ランキング・おすすめから作品に到達できる。
+→ **達成**: 実 DB で 検索(タイトル/作者/タグ)・フィルタ/ソート・ランキング(日週月/新着/完結)・タグ編集・Home を E2E 確認。非公開作品は検索/ランキング/Home に出ない。日本語全文検索の PGroonga 化と analytics 由来ランキングは後続。
 
 ---
 
