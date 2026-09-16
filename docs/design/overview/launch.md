@@ -31,6 +31,54 @@ podman compose -f docker/docker-compose.prod.yml logs -f cloudflared
 
 ---
 
+## 1.1 CD: self-hosted runner による自動デプロイ
+
+`unischool` サーバは **Cloudflare Access 経由 SSH** でゲートされているため、GitHub クラウドランナーからの SSH は使わず、**サーバ上に self-hosted runner を常駐**させて `podman compose` をローカル実行する。ワークフローは [`.github/workflows/deploy.yml`](../../../.github/workflows/deploy.yml)（`main` への push / 手動実行、ラベル `unischool`）。
+
+### 一度だけ: サーバ側ブートストラップ
+
+```sh
+# 0) 前提: podman と `podman compose`（podman-compose もしくは docker-compose provider）が入っていること
+podman --version && podman compose version   # どちらも出れば OK
+# 例: dnf install -y podman podman-compose   /  pip install podman-compose
+
+# 1) デプロイユーザーを常駐可能に（rootless podman をログアウト後も動かす）
+loginctl enable-linger "$USER"
+
+# 2) リポジトリを一度 clone（runner の作業ディレクトリとは別で可。checkout は runner が行う）
+#    ※ 秘密情報は .env に置かず GitHub Secrets から渡すので、clone だけでよい
+
+# 3) GitHub Actions self-hosted runner を導入（Linux x64 例）
+mkdir -p ~/actions-runner && cd ~/actions-runner
+curl -o runner.tar.gz -L https://github.com/actions/runner/releases/latest/download/actions-runner-linux-x64.tar.gz
+tar xzf runner.tar.gz
+# 登録トークンを取得（どちらか）:
+#   - GitHub UI: repo Settings → Actions → Runners → New self-hosted runner
+#   - CLI:  gh api -X POST repos/novel-cluster/renovel/actions/runners/registration-token -q .token
+./config.sh --url https://github.com/novel-cluster/renovel \
+  --token <REGISTRATION_TOKEN> --labels unischool --name unischool-prod --unattended
+
+# 4) サービス化（デプロイユーザーとして常駐）
+sudo ./svc.sh install "$USER" && sudo ./svc.sh start
+```
+
+### 一度だけ: GitHub リポジトリ Secrets を設定
+
+`Settings → Secrets and variables → Actions` に:
+
+| Secret | 用途 |
+|---|---|
+| `POSTGRES_PASSWORD` | 本番 Postgres のパスワード（compose が参照） |
+| `CLOUDFLARE_TUNNEL_TOKEN` | cloudflared のトンネルトークン |
+
+> パスワードやトークンは**リポジトリに一切コミットしない**。SSH パスワード等も Secrets 経由。
+
+### 以降
+
+`main` に push（または Actions 画面から手動実行）すると、runner が checkout → `podman compose -f docker/docker-compose.prod.yml up -d --build`（migrate ワンショット → web → cloudflared）を実行し、Cloudflare Tunnel 経由で公開される。`concurrency` で多重デプロイを防止。
+
+---
+
 ## 2. セキュリティ点検（PRD §59）
 
 | 項目 | 状況 | 実装 |

@@ -4,8 +4,9 @@
 #
 #   podman compose -f docker/docker-compose.prod.yml up -d --build
 #
-# Required env (from a .env next to this file or the shell):
+# Required env (from the shell / GitHub Actions secrets / a .env next to this file):
 #   POSTGRES_PASSWORD, CLOUDFLARE_TUNNEL_TOKEN
+# Deployed by .github/workflows/deploy.yml on a self-hosted runner (label: unischool).
 services:
   postgres:
     image: postgres:17-alpine
@@ -46,7 +47,6 @@ services:
       NODE_ENV: production
       PORT: "3000"
       DATABASE_URL: postgres://renovel:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}@postgres:5432/renovel
-      SESSION_SECRET: ${SESSION_SECRET:?set SESSION_SECRET}
     # No `ports:` — reachable only through cloudflared on the internal network.
     depends_on:
       postgres:

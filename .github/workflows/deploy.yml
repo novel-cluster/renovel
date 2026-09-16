@@ -1,0 +1,49 @@
+name: Deploy (production)
+
+# Continuous deployment to the self-hosted unischool server via a self-hosted
+# GitHub Actions runner (label: `unischool`). The runner lives ON the server, so
+# it runs `podman compose` locally — no inbound SSH / Cloudflare Access needed.
+#
+# Runs on push to `main`, or manually. Set repo secrets first (see
+# docs/design/overview/launch.md §Deploy):
+#   POSTGRES_PASSWORD, CLOUDFLARE_TUNNEL_TOKEN
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Never run two deploys at once; cancel a superseded queued deploy.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: [self-hosted, unischool]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build & (re)start the production stack
+        env:
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          CLOUDFLARE_TUNNEL_TOKEN: ${{ secrets.CLOUDFLARE_TUNNEL_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "$POSTGRES_PASSWORD" || { echo "::error::secret POSTGRES_PASSWORD is not set"; exit 1; }
+          test -n "$CLOUDFLARE_TUNNEL_TOKEN" || { echo "::error::secret CLOUDFLARE_TUNNEL_TOKEN is not set"; exit 1; }
+
+          # migrate one-shot runs before web (depends_on: service_completed_successfully).
+          podman compose -f docker/docker-compose.prod.yml up -d --build --remove-orphans
+
+      - name: Show status
+        if: always()
+        run: |
+          podman compose -f docker/docker-compose.prod.yml ps
+          echo "--- cloudflared (last 20 lines) ---"
+          podman compose -f docker/docker-compose.prod.yml logs --tail 20 cloudflared || true
+
+      - name: Prune old images
+        if: success()
+        run: podman image prune -f || true
