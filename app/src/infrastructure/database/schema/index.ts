@@ -9,6 +9,7 @@
  * (see docs/design/overview/architecture.md §7, data-model.md §1.7).
  */
 
+export * from './analytics'
 export * from './discovery'
 export * from './enums'
 export * from './identity'
