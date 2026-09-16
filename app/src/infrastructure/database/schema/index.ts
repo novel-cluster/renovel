@@ -12,4 +12,5 @@
 export * from './enums'
 export * from './identity'
 export * from './novel'
+export * from './reading'
 export * from './writing'

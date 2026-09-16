@@ -15,6 +15,13 @@
       "when": 1789558339035,
       "tag": "0001_eager_thor",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1789559338125,
+      "tag": "0002_loving_nocturne",
+      "breakpoints": true
     }
   ]
 }
