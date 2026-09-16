@@ -1,4 +1,5 @@
 import type { Context } from 'hono'
+import { visitorId } from '@/presentation/analytics/visitor'
 import { container } from '@/presentation/container'
 import type { AppEnv } from '@/presentation/env'
 import { EpisodePage } from '@/presentation/views/reading/episode-page'
@@ -29,6 +30,23 @@ export async function getNovelPage(c: Context<AppEnv>) {
   const social = await container.novelSocialQuery.execute(view.novel.id, viewer?.id ?? null)
   const tags = await container.tagRepository.listNovelTags(view.novel.id)
 
+  // Fire-and-forget analytics (PRD §55). Only for publicly readable novels.
+  if (view.novel.visibility === 'public') {
+    void container.recordAnalyticsEventService
+      .execute({
+        eventType: 'novel_view',
+        novelId: view.novel.id,
+        actorId: viewer?.id ?? null,
+        sessionId: visitorId(c),
+        utm: {
+          source: c.req.query('utm_source') ?? null,
+          medium: c.req.query('utm_medium') ?? null,
+          campaign: c.req.query('utm_campaign') ?? null,
+        },
+      })
+      .catch(() => {})
+  }
+
   return renderPage(
     c,
     <NovelPage
@@ -57,6 +75,19 @@ export async function getEpisodePage(c: Context<AppEnv>) {
   if (viewer && view.episode.status === 'published') {
     void container.recordReadingProgressService
       .execute({ userId: viewer.id, novelId: view.novel.id, episodeId: view.episode.id })
+      .catch(() => {})
+  }
+
+  // Fire-and-forget episode view event (PRD §55).
+  if (view.episode.status === 'published') {
+    void container.recordAnalyticsEventService
+      .execute({
+        eventType: 'episode_view',
+        novelId: view.novel.id,
+        episodeId: view.episode.id,
+        actorId: viewer?.id ?? null,
+        sessionId: visitorId(c),
+      })
       .catch(() => {})
   }
 

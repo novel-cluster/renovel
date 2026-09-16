@@ -43,3 +43,35 @@
   })
   apply()
 })()
+
+// Analytics beacon (analytics.md): fire-and-forget episode_read_start on load and
+// episode_complete when the reader reaches the end. Never blocks reading.
+;(function () {
+  var body = document.getElementById('reader-body')
+  if (!body || !body.dataset.episodeId) return
+  var novelId = body.dataset.novelId
+  var episodeId = body.dataset.episodeId
+  function send(type) {
+    try {
+      fetch('/api/analytics/events', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ type: type, novelId: novelId, episodeId: episodeId }),
+        keepalive: true,
+      }).catch(function () {})
+    } catch (e) {}
+  }
+  send('episode_read_start')
+  var done = false
+  function onScroll() {
+    if (done) return
+    var rect = body.getBoundingClientRect()
+    if (rect.bottom <= window.innerHeight + 80) {
+      done = true
+      send('episode_complete')
+      window.removeEventListener('scroll', onScroll)
+    }
+  }
+  window.addEventListener('scroll', onScroll, { passive: true })
+  onScroll()
+})()

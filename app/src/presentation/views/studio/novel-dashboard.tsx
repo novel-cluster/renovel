@@ -63,12 +63,20 @@ export const NovelDashboardPage: FC<{
       <main class="mx-auto max-w-2xl px-6 py-12">
         <div class="flex items-center justify-between">
           <h1 class="text-2xl font-semibold tracking-tight">{novel.title}</h1>
-          <a
-            class="text-sm text-primary underline underline-offset-4"
-            href={`/@${viewer.handle}/${novel.slug}`}
-          >
-            公開ページを見る
-          </a>
+          <div class="flex gap-4 text-sm">
+            <a
+              class="text-primary underline underline-offset-4"
+              href={`/studio/novels/${novel.id}/analytics`}
+            >
+              分析
+            </a>
+            <a
+              class="text-primary underline underline-offset-4"
+              href={`/@${viewer.handle}/${novel.slug}`}
+            >
+              公開ページを見る
+            </a>
+          </div>
         </div>
 
         <form method="post" action={`/studio/novels/${novel.id}`} class="mt-6 space-y-4">

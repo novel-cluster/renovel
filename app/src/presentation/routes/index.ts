@@ -1,4 +1,5 @@
 import type { Hono } from 'hono'
+import { postAnalyticsEvent } from '@/presentation/controllers/analytics.controller'
 import { getRanking, getSearch } from '@/presentation/controllers/discovery.controller'
 import { getHome } from '@/presentation/controllers/home.controller'
 import { getEpisodePage, getNovelPage } from '@/presentation/controllers/novel-read.controller'
@@ -22,6 +23,7 @@ export function registerRoutes(app: Hono<AppEnv>) {
   app.get('/', getHome)
   app.get('/search', getSearch)
   app.get('/ranking', getRanking)
+  app.post('/api/analytics/events', postAnalyticsEvent)
   app.route('/health', healthRoutes)
   app.route('/', authRoutes)
   app.route('/settings', settingsRoutes)
