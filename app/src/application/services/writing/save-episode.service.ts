@@ -3,7 +3,8 @@ import type { EpisodeRepository } from '@/domain/novel/repositories/episode-repo
 import type { NovelRepository } from '@/domain/novel/repositories/novel-repository'
 import type { EpisodeRevisionRepository } from '@/domain/writing/repositories/episode-revision-repository'
 import { NotFoundError, ValidationError } from '@/shared/errors/app-error'
-import { countChars, ensureNovelOwner } from '../novel/ownership'
+import type { NovelAuthorizationService } from '../collaboration/novel-authorization.service'
+import { countChars } from '../novel/ownership'
 
 export interface SaveEpisodeInput {
   actorUserId: string
@@ -21,6 +22,7 @@ export class SaveEpisodeService {
     private readonly novels: NovelRepository,
     private readonly episodes: EpisodeRepository,
     private readonly revisions: EpisodeRevisionRepository,
+    private readonly authz: NovelAuthorizationService,
   ) {}
 
   async execute(input: SaveEpisodeInput): Promise<Episode> {
@@ -28,7 +30,7 @@ export class SaveEpisodeService {
     if (!episode) throw new NotFoundError('エピソードが見つかりません')
     const novel = await this.novels.findById(episode.novelId)
     if (!novel) throw new NotFoundError('作品が見つかりません')
-    ensureNovelOwner(novel, input.actorUserId)
+    await this.authz.ensureCan(novel, input.actorUserId, 'episode.edit')
 
     const title = input.title !== undefined ? input.title.trim() : episode.title
     if (!title) throw new ValidationError('タイトルを入力してください')

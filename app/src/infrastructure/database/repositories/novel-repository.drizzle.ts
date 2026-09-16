@@ -23,6 +23,7 @@ function toNovel(row: Row): Novel {
     publicationStatus: row.publicationStatus,
     contentState: row.contentState,
     contentWarnings: row.contentWarnings,
+    forkPolicy: row.forkPolicy,
     likeCount: row.likeCount,
     starAvg: Number(row.starAvg),
     starCount: row.starCount,

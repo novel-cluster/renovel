@@ -22,6 +22,20 @@ export const genre = pgEnum('genre', [
 ])
 export const contentState = pgEnum('content_state', ['visible', 'hidden'])
 export const forkPolicy = pgEnum('fork_policy', ['disabled', 'approval_required', 'allowed'])
+export const collaboratorRole = pgEnum('collaborator_role', [
+  'owner',
+  'admin',
+  'writer',
+  'editor',
+  'viewer',
+])
+export const invitationStatus = pgEnum('invitation_status', [
+  'pending',
+  'accepted',
+  'declined',
+  'revoked',
+  'expired',
+])
 
 // reading (Phase 3)
 export const libraryState = pgEnum('library_state', [

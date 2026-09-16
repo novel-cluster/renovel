@@ -1,4 +1,11 @@
-import type { ContentState, Genre, Novel, PublicationStatus, Visibility } from '../entities/novel'
+import type {
+  ContentState,
+  ForkPolicy,
+  Genre,
+  Novel,
+  PublicationStatus,
+  Visibility,
+} from '../entities/novel'
 
 export interface NewNovel {
   slug: string
@@ -15,6 +22,7 @@ export interface NovelUpdate {
   publicationStatus?: PublicationStatus
   contentState?: ContentState
   contentWarnings?: string[]
+  forkPolicy?: ForkPolicy
   publishedAt?: Date | null
 }
 

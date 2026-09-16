@@ -10,6 +10,7 @@ export type Genre =
   | 'essay'
   | 'other'
 export type ContentState = 'visible' | 'hidden'
+export type ForkPolicy = 'disabled' | 'approval_required' | 'allowed'
 
 /**
  * A Novel (data-model.md §novel). Visibility (who can see) and Publication
@@ -27,6 +28,7 @@ export interface Novel {
   publicationStatus: PublicationStatus
   contentState: ContentState
   contentWarnings: string[]
+  forkPolicy: ForkPolicy
   // Denormalized social counters (kept in sync by the social domain, Phase 4).
   likeCount: number
   starAvg: number

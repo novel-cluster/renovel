@@ -43,6 +43,13 @@
       "when": 1789565172147,
       "tag": "0005_typical_punisher",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1789565563166,
+      "tag": "0006_uneven_silver_samurai",
+      "breakpoints": true
     }
   ]
 }
