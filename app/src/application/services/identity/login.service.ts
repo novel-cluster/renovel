@@ -35,9 +35,7 @@ export class LoginService {
     const creds = await this.users.findCredentialsByEmail(email)
 
     const ok = await this.hasher.verify(input.password, creds?.passwordHash ?? null)
-    if (!creds || !ok) {
-      throw new UnauthorizedError('メールアドレスまたはパスワードが違います')
-    }
+    if (!creds || !ok) throw new UnauthorizedError('メールアドレスまたはパスワードが違います')
     if (creds.status === 'banned') {
       throw new ForbiddenError('このアカウントは利用できません')
     }
