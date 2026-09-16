@@ -122,17 +122,18 @@ Reader First の本丸。書いたものを快適に読める。
 
 **設計:** [analytics.md](./docs/design/domains/analytics.md)（イベント収集・集計パイプライン・各ダッシュボード算出・プライバシー） / [architecture §7](./docs/design/overview/architecture.md)（分離方針） / [data-model.md](./docs/design/foundation/data-model.md)（analytics スキーマ）
 
-- [ ] Analytics イベント収集基盤（transactional と分離、fire-and-forget、[architecture §7](./docs/design/overview/architecture.md)）
-- [ ] Event Store → 集計（`analytics_events → analytics_hourly/daily`）
-- [ ] Overview（PV/Unique/Like/Star/Comment/Review/Follow/Library、期間切替、PRD §30）
-- [ ] Episode Analytics（Views/Unique/平均読書時間/読了率/スクロール、PRD §31）
-- [ ] **Reading Funnel**（Episode 間の離脱可視化、PRD §32）
-- [ ] Acquisition（流入元 + UTM、PRD §33）
-- [ ] Realtime（現在の読者数、PRD §34）
-- [ ] Retention（翌日/7日/30日/新話公開後の復帰、PRD §35）
-- [ ] プライバシー: 集計のみ・個人行動履歴を出さない（PRD §58）
+- [x] Analytics イベント収集基盤（transactional と分離＝`analytics` スキーマ、fire-and-forget）
+- [~] Event Store → 集計（現状はイベントから直接クエリ。`analytics_hourly/daily` バッチ集計は後続）
+- [x] Overview（PV/Unique + Like/Star/Comment/Review/Follow、期間切替 7/30日、PRD §30）
+- [x] Episode Analytics（Views/Unique/読了、PRD §31）— 平均読書時間/スクロールは後続
+- [x] **Reading Funnel**（Episode 別の閲覧・読了率・第1話比、PRD §32）
+- [~] Acquisition（UTM を収集。ダッシュボード表示は後続、PRD §33）
+- [ ] Realtime（現在の読者数、PRD §34）— 後続
+- [ ] Retention（翌日/7日/30日、PRD §35）— 後続
+- [x] プライバシー: 集計のみ・個人行動履歴を出さない（PRD §58）
 
 **完了条件:** 作者が作成→公開→読者獲得→分析→改善のサイクルを回せる（成功の定義 Author、PRD §62）。
+→ **達成(コア)**: 実 DB で 閲覧イベント収集(分離スキーマ)→PV/unique/読了ファネル ダッシュボードを Owner 限定で E2E 確認。集計バッチ/Realtime/Retention/Acquisition 画面は後続。
 
 ---
 
