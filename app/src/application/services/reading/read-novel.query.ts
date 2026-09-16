@@ -87,14 +87,16 @@ export class ReadNovelQuery {
       throw new NotFoundError('エピソードが見つかりません')
     }
 
-    const list = isOwner
-      ? await this.episodes.listByNovel(novel.id)
-      : await this.episodes.listPublishedByNovel(novel.id)
+    const [list, author] = Promise.allSettled([
+      isOwner
+        ? this.episodes.listByNovel(novel.id)
+        : this.episodes.listPublishedByNovel(novel.id),
+      this.authorRef(novel.authorId)
+    ])
     const idx = list.findIndex((e) => e.episodeNo === episodeNo)
     const prevNo = idx > 0 ? list[idx - 1].episodeNo : null
     const nextNo = idx >= 0 && idx < list.length - 1 ? list[idx + 1].episodeNo : null
-
-    const author = await this.authorRef(novel.authorId)
+    
     return { novel, author, episode, prevNo, nextNo, isOwner }
   }
 
