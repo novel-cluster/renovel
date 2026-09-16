@@ -151,13 +151,15 @@ export class PostCommentService {
     if (!(await this.progress.hasRead(input.userId, input.episodeId))) {
       throw new ForbiddenError('エピソードを読むとコメントできます')
     }
-    await this.comments.create({
-      episodeId: input.episodeId,
-      userId: input.userId,
-      body,
-      parentId: input.parentId ?? null,
-    })
-    const novel = await this.novels.findById(episode.novelId)
+    const [_, novel] = await Promise.allSettled([
+      this.comments.create({
+        episodeId: input.episodeId,
+        userId: input.userId,
+        body,
+        parentId: input.parentId ?? null,
+      }),
+      this.novels.findById(episode.novelId)
+    ])
     if (novel) {
       await this.notifications.createMany([
         {
