@@ -103,14 +103,16 @@ export class UpsertReviewService {
     const novel = await this.novels.findById(input.novelId)
     if (!novel) throw new NotFoundError('作品が見つかりません')
 
-    const existing = await this.reviews.findByUser(input.userId, input.novelId)
-    await this.reviews.upsert({
-      userId: input.userId,
-      novelId: input.novelId,
-      stars: input.stars,
-      title,
-      body,
-    })
+    const [existing, _] = await Promise.allSettled([
+      this.reviews.findByUser(input.userId, input.novelId)
+      this.reviews.upsert({
+        userId: input.userId,
+        novelId: input.novelId,
+        stars: input.stars,
+        title,
+        body,
+      })
+    ]
     if (!existing) {
       await this.notifications.createMany([
         {
