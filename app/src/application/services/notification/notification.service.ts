@@ -5,8 +5,10 @@ export class ListNotificationsService {
   constructor(private readonly notifications: NotificationRepository) {}
 
   async execute(userId: string): Promise<NotificationView[]> {
-    const list = await this.notifications.listForUser(userId)
-    await this.notifications.markAllRead(userId)
+    const [list, _] = await Promise.all([
+      this.notifications.listForUser(userId),
+      this.notifications.markAllRead(userId)
+    ]
     return list
   }
 }
