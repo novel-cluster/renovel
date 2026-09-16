@@ -9,5 +9,10 @@ export async function getProfile(c: Context<AppEnv>) {
   // Route param captures the whole `@handle` segment; drop the leading `@`.
   const handle = (c.req.param('handle') ?? '').replace(/^@/, '')
   const profile = await container.getUserProfileService.execute(handle)
-  return renderPage(c, <ProfilePage profile={profile} viewer={c.get('user')} />)
+  const viewer = c.get('user')
+  const following =
+    viewer && viewer.id !== profile.id
+      ? await container.followRepository.isFollowingUser(viewer.id, profile.id)
+      : false
+  return renderPage(c, <ProfilePage profile={profile} viewer={viewer} following={following} />)
 }

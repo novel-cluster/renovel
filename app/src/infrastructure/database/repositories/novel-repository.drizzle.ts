@@ -23,6 +23,10 @@ function toNovel(row: Row): Novel {
     publicationStatus: row.publicationStatus,
     contentState: row.contentState,
     contentWarnings: row.contentWarnings,
+    likeCount: row.likeCount,
+    starAvg: Number(row.starAvg),
+    starCount: row.starCount,
+    followCount: row.followCount,
     publishedAt: row.publishedAt,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
@@ -88,6 +92,27 @@ export class DrizzleNovelRepository implements NovelRepository {
     await db
       .update(novels)
       .set({ totalCharCount: sql`${novels.totalCharCount} + ${delta}`, updatedAt: new Date() })
+      .where(eq(novels.id, id))
+  }
+
+  async addLikeCount(id: string, delta: number): Promise<void> {
+    await db
+      .update(novels)
+      .set({ likeCount: sql`${novels.likeCount} + ${delta}` })
+      .where(eq(novels.id, id))
+  }
+
+  async setStarAggregate(id: string, avg: number, count: number): Promise<void> {
+    await db
+      .update(novels)
+      .set({ starAvg: avg.toFixed(2), starCount: count })
+      .where(eq(novels.id, id))
+  }
+
+  async addFollowCount(id: string, delta: number): Promise<void> {
+    await db
+      .update(novels)
+      .set({ followCount: sql`${novels.followCount} + ${delta}` })
       .where(eq(novels.id, id))
   }
 }

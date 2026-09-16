@@ -52,9 +52,10 @@ const Select: FC<{ label: string; name: string; value: string; options: [string,
 export const NovelDashboardPage: FC<{
   view: StudioNovel
   viewer: AuthUser
+  tags: string[]
   error?: string
   saved?: boolean
-}> = ({ view, viewer, error, saved }) => {
+}> = ({ view, viewer, tags, error, saved }) => {
   const { novel, episodes } = view
   return (
     <Layout title={`${novel.title} | スタジオ`}>
@@ -105,6 +106,12 @@ export const NovelDashboardPage: FC<{
             name="contentWarnings"
             value={novel.contentWarnings.join(', ')}
             help="カンマ区切り（例: r15, violence）"
+          />
+          <Field
+            label="タグ"
+            name="tags"
+            value={tags.join(', ')}
+            help="カンマ区切り・最大10件（検索・発見に使われます）"
           />
           <SubmitButton label="設定を保存" />
         </form>

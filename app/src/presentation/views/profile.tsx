@@ -5,9 +5,10 @@ import { SiteHeader } from '@/presentation/views/components/site-header'
 import { Layout } from '@/presentation/views/layout'
 
 /** Public user profile at `/@{handle}` (routing.md §3.1). */
-export const ProfilePage: FC<{ profile: User; viewer: AuthUser | null }> = ({
+export const ProfilePage: FC<{ profile: User; viewer: AuthUser | null; following?: boolean }> = ({
   profile,
   viewer,
+  following,
 }) => {
   const isOwner = viewer?.id === profile.id
   return (
@@ -34,6 +35,16 @@ export const ProfilePage: FC<{ profile: User; viewer: AuthUser | null }> = ({
             >
               プロフィール編集
             </a>
+          ) : viewer ? (
+            <form method="post" action={`/users/${profile.id}/follow`} class="ml-auto">
+              <button
+                type="submit"
+                aria-pressed={following}
+                class="rounded-md border border-border px-3 py-1.5 text-sm hover:bg-muted aria-pressed:border-primary aria-pressed:text-primary"
+              >
+                {following ? 'フォロー中' : 'フォロー'}
+              </button>
+            </form>
           ) : null}
         </div>
 

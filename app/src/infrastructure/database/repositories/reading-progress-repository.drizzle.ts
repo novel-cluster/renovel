@@ -41,4 +41,13 @@ export class DrizzleReadingProgressRepository implements ReadingProgressReposito
       .limit(1)
     return row ? row.no : null
   }
+
+  async hasRead(userId: string, episodeId: string): Promise<boolean> {
+    const [row] = await db
+      .select({ id: readingProgress.id })
+      .from(readingProgress)
+      .where(and(eq(readingProgress.userId, userId), eq(readingProgress.episodeId, episodeId)))
+      .limit(1)
+    return row !== undefined
+  }
 }

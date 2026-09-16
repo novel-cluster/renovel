@@ -9,8 +9,11 @@
  * (see docs/design/overview/architecture.md §7, data-model.md §1.7).
  */
 
+export * from './discovery'
 export * from './enums'
 export * from './identity'
+export * from './notification'
 export * from './novel'
 export * from './reading'
+export * from './social'
 export * from './writing'

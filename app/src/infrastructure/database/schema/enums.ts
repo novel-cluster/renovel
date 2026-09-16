@@ -30,3 +30,17 @@ export const libraryState = pgEnum('library_state', [
   'completed',
   'favorite',
 ])
+
+// social & notification (Phase 4)
+export const notificationType = pgEnum('notification_type', [
+  'user_follow',
+  'novel_follow',
+  'like',
+  'star',
+  'review',
+  'comment',
+  'novel_update',
+  'collaboration_invite',
+  'fork',
+  'change_proposal',
+])
