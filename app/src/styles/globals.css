@@ -485,3 +485,21 @@
     transform: translateX(100%);
   }
 }
+
+/* Novel body notation (text-notation.md §2). */
+.emphasis-dots {
+  font-style: normal;
+  -webkit-text-emphasis: filled sesame;
+  text-emphasis: filled sesame;
+  -webkit-text-emphasis-position: over right;
+  text-emphasis-position: over right;
+}
+
+.novel-body p {
+  margin-block: 1.4em;
+  line-height: 1.9;
+}
+
+.novel-body rt {
+  font-size: 0.5em;
+}
