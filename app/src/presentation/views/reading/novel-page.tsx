@@ -254,6 +254,17 @@ export const NovelPage: FC<{
             <p class="text-sm text-muted-foreground">まだレビューはありません。</p>
           )}
         </section>
+
+        {canInteract ? (
+          <p class="mt-10 text-xs">
+            <a
+              class="text-muted-foreground hover:text-primary"
+              href={`/report?type=novel&id=${novel.id}`}
+            >
+              この作品を通報
+            </a>
+          </p>
+        ) : null}
       </main>
     </Layout>
   )

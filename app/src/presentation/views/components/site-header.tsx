@@ -32,6 +32,11 @@ export const SiteHeader: FC<{ user: AuthUser | null }> = ({ user }) => (
             <a class="text-muted-foreground hover:text-foreground" href="/settings/account">
               設定
             </a>
+            {user.isAdmin ? (
+              <a class="text-muted-foreground hover:text-foreground" href="/admin">
+                管理
+              </a>
+            ) : null}
             <form method="post" action="/logout" class="inline">
               <button type="submit" class="text-muted-foreground hover:text-foreground">
                 ログアウト

@@ -6,10 +6,17 @@ import {
 } from '@/presentation/controllers/collaboration.controller'
 import { getRanking, getSearch } from '@/presentation/controllers/discovery.controller'
 import { getHome } from '@/presentation/controllers/home.controller'
+import {
+  getReportForm,
+  postBlock,
+  postMute,
+  postReport,
+} from '@/presentation/controllers/moderation.controller'
 import { getEpisodePage, getNovelPage } from '@/presentation/controllers/novel-read.controller'
 import { getProfile } from '@/presentation/controllers/profile.controller'
 import type { AppEnv } from '@/presentation/env'
 import { requireAuth } from '@/presentation/middleware/require-auth'
+import { adminRoutes } from './admin.route'
 import { authRoutes } from './auth.route'
 import { healthRoutes } from './health.route'
 import { libraryRoutes } from './library.route'
@@ -36,7 +43,12 @@ export function registerRoutes(app: Hono<AppEnv>) {
   app.route('/library', libraryRoutes)
   app.route('/notifications', notificationsRoutes)
   app.route('/', socialRoutes)
+  app.route('/admin', adminRoutes)
   app.post('/invitations/:invitationId/respond', requireAuth, postRespondInvitation)
+  app.get('/report', requireAuth, getReportForm)
+  app.post('/report', requireAuth, postReport)
+  app.post('/users/:userId/block', requireAuth, postBlock)
+  app.post('/users/:userId/mute', requireAuth, postMute)
 
   // Public reading. Hono only recognizes a param at a segment start, so the whole
   // `@{handle}` segment is one regex param; controllers strip the `@`.
