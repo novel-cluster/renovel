@@ -161,10 +161,11 @@ Reader First の本丸。書いたものを快適に読める。
 
 **設計:** [moderation.md](./docs/design/domains/moderation.md)（Report/Block/Mute・Admin 対処・状態遷移） / [auth.md](./docs/design/foundation/auth.md)（Admin 権限） / [data-model.md](./docs/design/foundation/data-model.md)（reports/blocks/mutes/user_status）
 
-- [ ] User 機能: Report(User/Novel/Episode/Comment/Review) / Block / Mute（PRD §37）
-- [ ] Admin 機能: Report 管理 / Hide Novel・Episode / Delete Comment・Review / Suspend / Ban（PRD §37）
+- [x] User 機能: Report(User/Novel/Episode/Comment/Review) / Block / Mute（PRD §37）
+- [x] Admin 機能: Report 管理 / Hide Novel・Episode / Delete Comment・Review / Suspend / Ban（PRD §37）
 
 **完了条件:** 通報〜対処のモデレーション運用が回る。
+→ **達成**: 実 DB で 通報→Admin キュー→作品Hide(→404)/凍結/BAN(→セッション無効化) を E2E 確認。`is_admin` ガードで /admin は非管理者に 404。ブロック/ミュートの表示反映の細部は後続。
 
 ---
 

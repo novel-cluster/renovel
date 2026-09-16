@@ -23,6 +23,11 @@ import { LogoutService } from '@/application/services/identity/logout.service'
 import { SignupService } from '@/application/services/identity/signup.service'
 import { UpdateProfileService } from '@/application/services/identity/update-profile.service'
 import {
+  AdminModerationService,
+  BlockMuteService,
+  ReportContentService,
+} from '@/application/services/moderation/moderation.service'
+import {
   ListNotificationsService,
   UnreadNotificationCountService,
 } from '@/application/services/notification/notification.service'
@@ -69,6 +74,7 @@ import { DrizzleEpisodeRevisionRepository } from '@/infrastructure/database/repo
 import { DrizzleForkRepository } from '@/infrastructure/database/repositories/fork.drizzle'
 import { DrizzleHealthRepository } from '@/infrastructure/database/repositories/health-repository.drizzle'
 import { DrizzleLibraryRepository } from '@/infrastructure/database/repositories/library-repository.drizzle'
+import { DrizzleModerationRepository } from '@/infrastructure/database/repositories/moderation.drizzle'
 import { DrizzleNotificationRepository } from '@/infrastructure/database/repositories/notification.drizzle'
 import { DrizzleNovelRepository } from '@/infrastructure/database/repositories/novel-repository.drizzle'
 import { DrizzleReadingProgressRepository } from '@/infrastructure/database/repositories/reading-progress-repository.drizzle'
@@ -113,6 +119,7 @@ const collaboratorRepository = new DrizzleCollaboratorRepository()
 const invitationRepository = new DrizzleInvitationRepository()
 const forkRepository = new DrizzleForkRepository()
 const novelAuthorizationService = new NovelAuthorizationService(collaboratorRepository)
+const moderationRepository = new DrizzleModerationRepository()
 
 export const container = {
   healthService: new HealthService(new DrizzleHealthRepository()),
@@ -244,6 +251,10 @@ export const container = {
     invitationRepository,
   ),
   forkNovelService: new ForkNovelService(novelRepository, episodeRepository, forkRepository),
+  // moderation (Phase 8)
+  reportContentService: new ReportContentService(moderationRepository),
+  adminModerationService: new AdminModerationService(moderationRepository),
+  blockMuteService: new BlockMuteService(moderationRepository),
 } as const
 
 export type Container = typeof container

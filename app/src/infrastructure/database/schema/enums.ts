@@ -37,6 +37,16 @@ export const invitationStatus = pgEnum('invitation_status', [
   'expired',
 ])
 
+// moderation (Phase 8)
+export const reportTargetType = pgEnum('report_target_type', [
+  'user',
+  'novel',
+  'episode',
+  'comment',
+  'review',
+])
+export const reportStatus = pgEnum('report_status', ['open', 'reviewing', 'resolved', 'dismissed'])
+
 // reading (Phase 3)
 export const libraryState = pgEnum('library_state', [
   'reading',

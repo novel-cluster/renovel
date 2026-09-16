@@ -138,10 +138,15 @@ export const EpisodePage: FC<{
             <ul class="space-y-4">
               {social.comments.map((cm) => (
                 <li class="text-sm">
-                  <div class="text-xs text-muted-foreground">
+                  <div class="flex items-center gap-2 text-xs text-muted-foreground">
                     <a class="hover:text-primary" href={`/@${cm.authorHandle}`}>
                       {cm.authorName}
                     </a>
+                    {viewer && !cm.deleted ? (
+                      <a class="hover:text-primary" href={`/report?type=comment&id=${cm.id}`}>
+                        通報
+                      </a>
+                    ) : null}
                   </div>
                   <p class="mt-1 whitespace-pre-wrap">
                     {cm.deleted ? (

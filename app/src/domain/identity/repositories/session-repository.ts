@@ -20,6 +20,7 @@ export interface AuthUserRecord {
   handle: string
   displayName: string
   status: UserStatus
+  isAdmin: boolean
 }
 
 export interface AuthenticatedSession {

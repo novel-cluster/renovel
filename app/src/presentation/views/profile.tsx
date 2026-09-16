@@ -36,15 +36,39 @@ export const ProfilePage: FC<{ profile: User; viewer: AuthUser | null; following
               プロフィール編集
             </a>
           ) : viewer ? (
-            <form method="post" action={`/users/${profile.id}/follow`} class="ml-auto">
-              <button
-                type="submit"
-                aria-pressed={following}
-                class="rounded-md border border-border px-3 py-1.5 text-sm hover:bg-muted aria-pressed:border-primary aria-pressed:text-primary"
+            <div class="ml-auto flex items-center gap-2">
+              <form method="post" action={`/users/${profile.id}/follow`}>
+                <button
+                  type="submit"
+                  aria-pressed={following}
+                  class="rounded-md border border-border px-3 py-1.5 text-sm hover:bg-muted aria-pressed:border-primary aria-pressed:text-primary"
+                >
+                  {following ? 'フォロー中' : 'フォロー'}
+                </button>
+              </form>
+              <form method="post" action={`/users/${profile.id}/block`}>
+                <button
+                  type="submit"
+                  class="rounded-md border border-border px-2 py-1.5 text-xs hover:bg-muted"
+                >
+                  ブロック
+                </button>
+              </form>
+              <form method="post" action={`/users/${profile.id}/mute`}>
+                <button
+                  type="submit"
+                  class="rounded-md border border-border px-2 py-1.5 text-xs hover:bg-muted"
+                >
+                  ミュート
+                </button>
+              </form>
+              <a
+                class="rounded-md border border-border px-2 py-1.5 text-xs hover:bg-muted"
+                href={`/report?type=user&id=${profile.id}`}
               >
-                {following ? 'フォロー中' : 'フォロー'}
-              </button>
-            </form>
+                通報
+              </a>
+            </div>
           ) : null}
         </div>
 

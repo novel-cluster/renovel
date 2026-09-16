@@ -1,5 +1,6 @@
 import { sql } from 'drizzle-orm'
 import {
+  boolean,
   index,
   inet,
   jsonb,
@@ -33,6 +34,8 @@ export const users = pgTable(
     email: citext('email'),
     passwordHash: text('password_hash'),
     status: userStatus('status').notNull().default('active'),
+    // Site moderator flag (moderation.md). Kept simple as a boolean for 1.0.
+    isAdmin: boolean('is_admin').notNull().default(false),
     ...softDelete,
     ...timestamps,
   },
