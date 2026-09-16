@@ -52,15 +52,16 @@ ReNovel の中心。ここまでで「書いて公開できる」。
 
 **設計:** [data-model.md](./docs/design/foundation/data-model.md)（novels/chapters/episodes/episode_revisions） / [writing-revision.md](./docs/design/domains/writing-revision.md)（Episode 状態機械・Revision・Autosave・予約公開） / [text-notation.md](./docs/design/domains/text-notation.md)（ルビ・傍点・XSS 安全変換） / [routing.md](./docs/design/foundation/routing.md)（slug/URL） / [frontend §5](./docs/design/overview/frontend.md)（Editor island）
 
-- [ ] Novel ドメイン: `Novel→(任意)Chapter→Episode`、メタデータ（表紙画像なし、PRD §7）
-- [ ] Visibility(Public/Unlisted/Private) と Publication Status(Ongoing/Completed/Hiatus) を直交で実装（PRD §8–9）
-- [ ] Episode + **Revision**（`EpisodeRevision[]`、上書きしない・復元可、PRD §12）
-- [ ] Editor（island）: プレーンテキスト、自動保存 / 手動保存 / 文字数 / Preview（PRD §11, [frontend §5](./docs/design/overview/frontend.md)）
-- [ ] 記法変換: ルビ `｜文章《ルビ》` / 傍点 `《《文章》》`（サーバ側変換 + XSS 対策、[frontend §4.2](./docs/design/overview/frontend.md)）
-- [ ] Draft / Publish / **Scheduled Publish**
-- [ ] Content Warning（PRD §10）
+- [x] Novel ドメイン: `Novel→(任意)Chapter→Episode`、メタデータ（表紙画像なし、PRD §7）— Chapter はスキーマのみ（章立て UI は後続）
+- [x] Visibility(Public/Unlisted/Private) と Publication Status(Ongoing/Completed/Hiatus) を直交で実装（PRD §8–9）
+- [x] Episode + **Revision**（`EpisodeRevision[]`、上書きしない、PRD §12）— 手動保存/公開で追記。復元 UI は後続
+- [~] Editor（island）: 手動保存 / 文字数 / サーバ Preview 完了。**自動保存 island・ライブプレビューは後続 PR**
+- [x] 記法変換: ルビ `｜文章《ルビ》` / 傍点 `《《文章》》`（サーバ変換 + XSS 対策、`renderNovelText`、22 ケーステスト）
+- [~] Draft / Publish 完了。**Scheduled Publish はスキーマのみ**（worker 実行は後続）
+- [x] Content Warning（PRD §10）— 設定/表示
 
 **完了条件:** 作者が Novel を作り、記法付き Episode を執筆・Revision 管理し、公開できる。
+→ **達成**: 実 DB で 作成→執筆(記法)→保存(Revision)→公開→`/@{handle}/{slug}` 閲覧 を E2E 確認。private/draft は非権限者に 404。自動保存/予約公開/章立て/復元 UI は後続。
 
 ---
 
