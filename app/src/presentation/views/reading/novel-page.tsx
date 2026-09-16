@@ -1,5 +1,6 @@
 import type { FC } from 'hono/jsx'
 import type { NovelReadView } from '@/application/services/reading/read-novel.query'
+import type { NovelSocial } from '@/application/services/social/social.query'
 import type { LibraryState } from '@/domain/reading/entities/reading'
 import type { AuthUser } from '@/presentation/env'
 import { SiteHeader } from '@/presentation/views/components/site-header'
@@ -18,13 +19,15 @@ const LIBRARY_OPTIONS: [LibraryState, string][] = [
 export const NovelPage: FC<{
   view: NovelReadView
   viewer: AuthUser | null
+  social: NovelSocial
   resumeEpisodeNo?: number | null
   libraryState?: LibraryState | null
-}> = ({ view, viewer, resumeEpisodeNo, libraryState }) => {
+}> = ({ view, viewer, social, resumeEpisodeNo, libraryState }) => {
   const { novel, author, episodes, isOwner } = view
   const base = `/@${author.handle}/${novel.slug}`
   const firstNo = episodes[0]?.episodeNo ?? null
   const resumeNo = resumeEpisodeNo ?? null
+  const canInteract = viewer !== null && !isOwner
 
   return (
     <Layout
@@ -48,6 +51,13 @@ export const NovelPage: FC<{
             {author.displayName}
           </a>
         </p>
+        {novel.starCount > 0 || novel.followCount > 0 ? (
+          <p class="mt-1 text-sm text-muted-foreground">
+            {novel.starCount > 0 ? `★ ${novel.starAvg.toFixed(2)}（${novel.starCount}）` : ''}
+            {novel.starCount > 0 && novel.followCount > 0 ? ' · ' : ''}
+            {novel.followCount > 0 ? `フォロワー ${novel.followCount}` : ''}
+          </p>
+        ) : null}
 
         {novel.contentWarnings.length ? (
           <p class="mt-4 rounded-md bg-destructive/10 px-3 py-2 text-xs text-destructive">
@@ -80,6 +90,18 @@ export const NovelPage: FC<{
             <LibraryControls base={base} novelId={novel.id} state={libraryState ?? null} />
           ) : null}
 
+          {canInteract ? (
+            <form method="post" action={`/novels/${novel.id}/follow`}>
+              <button
+                type="submit"
+                aria-pressed={social.following}
+                class="rounded-md border border-border px-3 py-2 text-sm hover:bg-muted aria-pressed:border-primary aria-pressed:text-primary"
+              >
+                {social.following ? 'フォロー中' : 'フォロー'}
+              </button>
+            </form>
+          ) : null}
+
           {isOwner ? (
             <a
               href={`/studio/novels/${novel.id}`}
@@ -89,6 +111,24 @@ export const NovelPage: FC<{
             </a>
           ) : null}
         </div>
+
+        {canInteract ? (
+          <div class="mt-4 flex items-center gap-2 text-sm">
+            <span class="text-muted-foreground">評価</span>
+            {[1, 2, 3].map((v) => (
+              <form method="post" action={`/novels/${novel.id}/star`}>
+                <input type="hidden" name="value" value={String(v)} />
+                <button
+                  type="submit"
+                  aria-pressed={social.myStar === v}
+                  class="rounded-md border border-border px-3 py-1 hover:bg-muted aria-pressed:border-primary aria-pressed:text-primary"
+                >
+                  {'★'.repeat(v)}
+                </button>
+              </form>
+            ))}
+          </div>
+        ) : null}
 
         <h2 class="mt-10 mb-2 text-sm font-medium text-muted-foreground">目次</h2>
         {episodes.length ? (
@@ -113,6 +153,68 @@ export const NovelPage: FC<{
         ) : (
           <p class="text-sm text-muted-foreground">まだ公開されたエピソードはありません。</p>
         )}
+
+        <section class="mt-12">
+          <h2 class="mb-3 text-sm font-medium text-muted-foreground">
+            レビュー（{social.reviews.length}）
+          </h2>
+          {canInteract ? (
+            <form method="post" action={`/novels/${novel.id}/reviews`} class="mb-6 space-y-2">
+              <select
+                name="stars"
+                class="rounded-md border border-input bg-background px-2 py-2 text-sm"
+              >
+                {[1, 2, 3].map((v) => (
+                  <option value={String(v)} selected={social.myReview?.stars === v}>
+                    {'★'.repeat(v)}
+                  </option>
+                ))}
+              </select>
+              <input
+                name="title"
+                required
+                value={social.myReview?.title ?? ''}
+                placeholder="レビュータイトル"
+                class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              />
+              <textarea
+                name="body"
+                rows={3}
+                required
+                placeholder="レビュー本文"
+                class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              >
+                {social.myReview?.body ?? ''}
+              </textarea>
+              <button
+                type="submit"
+                class="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+              >
+                {social.myReview ? 'レビューを更新' : 'レビューを書く'}
+              </button>
+            </form>
+          ) : null}
+          {social.reviews.length ? (
+            <ul class="space-y-4">
+              {social.reviews.map((rv) => (
+                <li class="text-sm">
+                  <div class="flex items-baseline gap-2">
+                    <span class="text-primary">{'★'.repeat(rv.stars)}</span>
+                    <span class="font-medium">{rv.title}</span>
+                  </div>
+                  <p class="mt-1 whitespace-pre-wrap">{rv.body}</p>
+                  <div class="mt-1 text-xs text-muted-foreground">
+                    <a class="hover:text-primary" href={`/@${rv.authorHandle}`}>
+                      {rv.authorName}
+                    </a>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p class="text-sm text-muted-foreground">まだレビューはありません。</p>
+          )}
+        </section>
       </main>
     </Layout>
   )

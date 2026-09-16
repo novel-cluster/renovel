@@ -26,6 +26,7 @@ export async function getNovelPage(c: Context<AppEnv>) {
   const libraryState = viewer
     ? await container.getLibraryStateService.execute(viewer.id, view.novel.id)
     : null
+  const social = await container.novelSocialQuery.execute(view.novel.id, viewer?.id ?? null)
 
   return renderPage(
     c,
@@ -34,6 +35,7 @@ export async function getNovelPage(c: Context<AppEnv>) {
       viewer={viewer}
       resumeEpisodeNo={resumeEpisodeNo}
       libraryState={libraryState}
+      social={social}
     />,
   )
 }
@@ -56,5 +58,6 @@ export async function getEpisodePage(c: Context<AppEnv>) {
       .catch(() => {})
   }
 
-  return renderPage(c, <EpisodePage view={view} viewer={viewer} />)
+  const social = await container.episodeSocialQuery.execute(view.episode.id, viewer?.id ?? null)
+  return renderPage(c, <EpisodePage view={view} viewer={viewer} social={social} />)
 }

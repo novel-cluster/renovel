@@ -17,6 +17,9 @@ export const SiteHeader: FC<{ user: AuthUser | null }> = ({ user }) => (
             <a class="text-muted-foreground hover:text-foreground" href="/library">
               本棚
             </a>
+            <a class="text-muted-foreground hover:text-foreground" href="/notifications">
+              通知
+            </a>
             <a class="text-muted-foreground hover:text-foreground" href={`/@${user.handle}`}>
               @{user.handle}
             </a>

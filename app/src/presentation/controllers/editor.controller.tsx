@@ -49,6 +49,13 @@ export async function postPublishEpisode(c: Context<AppEnv>) {
   const viewer = c.get('user')
   if (!viewer) return c.redirect('/login')
   const { novelId, episodeId } = c.req.param()
-  await container.publishEpisodeService.execute({ actorUserId: viewer.id, episodeId })
+  const episode = await container.publishEpisodeService.execute({
+    actorUserId: viewer.id,
+    episodeId,
+  })
+  // Fan out a novel_update notification to followers (PRD §22), non-blocking.
+  void container.notifyNovelUpdateService
+    .execute({ novelId: episode.novelId, episodeId: episode.id, episodeNo: episode.episodeNo })
+    .catch(() => {})
   return c.redirect(`/studio/novels/${novelId}/episodes/${episodeId}?saved=1`)
 }
