@@ -10,7 +10,17 @@ import {
   ListStudioNovelsService,
 } from '@/application/services/novel/studio-novels.query'
 import { UpdateNovelService } from '@/application/services/novel/update-novel.service'
+import {
+  GetLibraryStateService,
+  ListLibraryService,
+  RemoveFromLibraryService,
+  SetLibraryStateService,
+} from '@/application/services/reading/library.service'
 import { ReadNovelQuery } from '@/application/services/reading/read-novel.query'
+import {
+  RecordReadingProgressService,
+  ResumeReadingService,
+} from '@/application/services/reading/reading-progress.service'
 import { CreateEpisodeService } from '@/application/services/writing/create-episode.service'
 import { GetEpisodeEditorService } from '@/application/services/writing/edit-episode.query'
 import { PublishEpisodeService } from '@/application/services/writing/publish-episode.service'
@@ -19,7 +29,9 @@ import { BunPasswordHasher } from '@/infrastructure/auth/bun-password-hasher'
 import { DrizzleEpisodeRepository } from '@/infrastructure/database/repositories/episode-repository.drizzle'
 import { DrizzleEpisodeRevisionRepository } from '@/infrastructure/database/repositories/episode-revision-repository.drizzle'
 import { DrizzleHealthRepository } from '@/infrastructure/database/repositories/health-repository.drizzle'
+import { DrizzleLibraryRepository } from '@/infrastructure/database/repositories/library-repository.drizzle'
 import { DrizzleNovelRepository } from '@/infrastructure/database/repositories/novel-repository.drizzle'
+import { DrizzleReadingProgressRepository } from '@/infrastructure/database/repositories/reading-progress-repository.drizzle'
 import { DrizzleSessionRepository } from '@/infrastructure/database/repositories/session-repository.drizzle'
 import { DrizzleUserRepository } from '@/infrastructure/database/repositories/user-repository.drizzle'
 
@@ -37,6 +49,8 @@ const passwordHasher = new BunPasswordHasher()
 const novelRepository = new DrizzleNovelRepository()
 const episodeRepository = new DrizzleEpisodeRepository()
 const episodeRevisionRepository = new DrizzleEpisodeRevisionRepository()
+const readingProgressRepository = new DrizzleReadingProgressRepository()
+const libraryRepository = new DrizzleLibraryRepository()
 
 export const container = {
   healthService: new HealthService(new DrizzleHealthRepository()),
@@ -68,6 +82,13 @@ export const container = {
   ),
   getEpisodeEditorService: new GetEpisodeEditorService(novelRepository, episodeRepository),
   readNovelQuery: new ReadNovelQuery(novelRepository, episodeRepository, userRepository),
+  // reading (Phase 3)
+  recordReadingProgressService: new RecordReadingProgressService(readingProgressRepository),
+  resumeReadingService: new ResumeReadingService(readingProgressRepository),
+  setLibraryStateService: new SetLibraryStateService(libraryRepository, novelRepository),
+  removeFromLibraryService: new RemoveFromLibraryService(libraryRepository),
+  getLibraryStateService: new GetLibraryStateService(libraryRepository),
+  listLibraryService: new ListLibraryService(libraryRepository),
 } as const
 
 export type Container = typeof container

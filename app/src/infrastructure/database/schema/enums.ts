@@ -22,3 +22,11 @@ export const genre = pgEnum('genre', [
 ])
 export const contentState = pgEnum('content_state', ['visible', 'hidden'])
 export const forkPolicy = pgEnum('fork_policy', ['disabled', 'approval_required', 'allowed'])
+
+// reading (Phase 3)
+export const libraryState = pgEnum('library_state', [
+  'reading',
+  'read_later',
+  'completed',
+  'favorite',
+])

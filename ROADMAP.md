@@ -71,13 +71,14 @@ Reader First の本丸。書いたものを快適に読める。
 
 **設計:** [reading.md](./docs/design/domains/reading.md)（Reading Progress・Library・Reader Settings 永続化・プライバシー） / [frontend §4](./docs/design/overview/frontend.md)（Reader Settings UI・CSS 変数） / [text-notation.md](./docs/design/domains/text-notation.md)（本文レンダリング） / [data-model.md](./docs/design/foundation/data-model.md)（reading_progress/library_entries）
 
-- [ ] 作品ページ / Episode 本文の SSR（不要 JS を配らない、PRD §55）
-- [ ] Reader Settings（Font Size / Line Height / Width / Font / **縦横** / Theme Light/Dark/Sepia）を CSS 変数で即時反映（[frontend §4.1](./docs/design/overview/frontend.md)）
-- [ ] Reading Progress（最後の Episode/位置・読了・「続きから読む」、PRD §18）
-- [ ] Library（Reading / Read Later / Completed / Favorite、PRD §19）
-- [ ] SEO/メタ（Public のみ index、OGP/canonical/Structured Data、PRD §56）
+- [x] 作品ページ / Episode 本文の SSR（不要 JS を配らない、PRD §55）— Phase 2 で公開ページ、Phase 3 で読書機能追加
+- [~] Reader Settings（文字サイズ / テーマ Light/Dark/Sepia / **縦横**）を CSS で即時反映（島, [frontend §4.1](./docs/design/overview/frontend.md)）— 行間/幅/フォント切替は後続
+- [x] Reading Progress（最後の Episode・「続きから読む」、PRD §18）— スクロール位置の精密記録は後続(analytics 連携)
+- [x] Library（Reading / Read Later / Completed / Favorite、PRD §19）
+- [~] SEO/メタ（Public のみ index、OGP/canonical、PRD §56）— Structured Data(JSON-LD) は後続
 
 **完了条件:** 発見→作品ページ→Episode 1→続きを読む→Library の読者フローが通る（成功の定義 Reader、PRD §62）。
+→ **達成**: 実 DB で エピソード閲覧→進捗記録→「続きから読む」→本棚追加/一覧、Reader Settings 島(文字/テーマ/縦書き)、公開=index・非公開/下書き=noindex を E2E 確認。
 
 ---
 
