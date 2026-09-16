@@ -3,6 +3,10 @@ import {
   RankingQuery,
   SearchNovelsQuery,
 } from '@/application/queries/discovery/discovery.query'
+import {
+  AnalyticsDashboardQuery,
+  RecordAnalyticsEventService,
+} from '@/application/services/analytics/analytics.service'
 import { SetNovelTagsService } from '@/application/services/discovery/set-novel-tags.service'
 import { HealthService } from '@/application/services/health.service'
 import { GetUserProfileService } from '@/application/services/identity/get-user-profile.service'
@@ -46,6 +50,7 @@ import { GetEpisodeEditorService } from '@/application/services/writing/edit-epi
 import { PublishEpisodeService } from '@/application/services/writing/publish-episode.service'
 import { SaveEpisodeService } from '@/application/services/writing/save-episode.service'
 import { BunPasswordHasher } from '@/infrastructure/auth/bun-password-hasher'
+import { DrizzleAnalyticsEventRepository } from '@/infrastructure/database/repositories/analytics.drizzle'
 import { DrizzleDiscoveryRepository } from '@/infrastructure/database/repositories/discovery.drizzle'
 import { DrizzleEpisodeRepository } from '@/infrastructure/database/repositories/episode-repository.drizzle'
 import { DrizzleEpisodeRevisionRepository } from '@/infrastructure/database/repositories/episode-revision-repository.drizzle'
@@ -90,6 +95,7 @@ const notificationRepository = new DrizzleNotificationRepository()
 const discoveryRepository = new DrizzleDiscoveryRepository()
 const tagRepository = new DrizzleTagRepository()
 const rankingQuery = new RankingQuery(discoveryRepository)
+const analyticsEventRepository = new DrizzleAnalyticsEventRepository()
 
 export const container = {
   healthService: new HealthService(new DrizzleHealthRepository()),
@@ -170,6 +176,13 @@ export const container = {
   rankingQuery,
   homeQuery: new HomeQuery(discoveryRepository, rankingQuery),
   setNovelTagsService: new SetNovelTagsService(tagRepository, novelRepository),
+  // analytics (Phase 6)
+  recordAnalyticsEventService: new RecordAnalyticsEventService(analyticsEventRepository),
+  analyticsDashboardQuery: new AnalyticsDashboardQuery(
+    analyticsEventRepository,
+    novelRepository,
+    episodeRepository,
+  ),
 } as const
 
 export type Container = typeof container

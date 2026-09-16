@@ -1,4 +1,5 @@
 import { Hono } from 'hono'
+import { getNovelAnalytics } from '@/presentation/controllers/analytics.controller'
 import {
   getEditor,
   postPublishEpisode,
@@ -24,6 +25,7 @@ studioRoutes.get('/novels/new', getNewNovel)
 studioRoutes.post('/novels', postCreateNovel)
 studioRoutes.get('/novels/:novelId', getNovelDashboard)
 studioRoutes.post('/novels/:novelId', postUpdateNovel)
+studioRoutes.get('/novels/:novelId/analytics', getNovelAnalytics)
 studioRoutes.post('/novels/:novelId/episodes', postCreateEpisode)
 studioRoutes.get('/novels/:novelId/episodes/:episodeId', getEditor)
 studioRoutes.post('/novels/:novelId/episodes/:episodeId', postSaveEpisode)

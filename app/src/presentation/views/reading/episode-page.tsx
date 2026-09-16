@@ -70,7 +70,12 @@ export const EpisodePage: FC<{
           </button>
         </div>
 
-        <article id="reader-body" class="novel-body mt-8 text-[1.05rem] leading-loose">
+        <article
+          id="reader-body"
+          data-novel-id={novel.id}
+          data-episode-id={episode.id}
+          class="novel-body mt-8 text-[1.05rem] leading-loose"
+        >
           {raw(renderNovelBody(episode.body))}
         </article>
 
