@@ -103,14 +103,16 @@ export class UpsertReviewService {
     const novel = await this.novels.findById(input.novelId)
     if (!novel) throw new NotFoundError('作品が見つかりません')
 
-    const existing = await this.reviews.findByUser(input.userId, input.novelId)
-    await this.reviews.upsert({
-      userId: input.userId,
-      novelId: input.novelId,
-      stars: input.stars,
-      title,
-      body,
-    })
+    const [existing, _] = await Promise.allSettled([
+      this.reviews.findByUser(input.userId, input.novelId)
+      this.reviews.upsert({
+        userId: input.userId,
+        novelId: input.novelId,
+        stars: input.stars,
+        title,
+        body,
+      })
+    ]
     if (!existing) {
       await this.notifications.createMany([
         {
@@ -149,13 +151,15 @@ export class PostCommentService {
     if (!(await this.progress.hasRead(input.userId, input.episodeId))) {
       throw new ForbiddenError('エピソードを読むとコメントできます')
     }
-    await this.comments.create({
-      episodeId: input.episodeId,
-      userId: input.userId,
-      body,
-      parentId: input.parentId ?? null,
-    })
-    const novel = await this.novels.findById(episode.novelId)
+    const [_, novel] = await Promise.allSettled([
+      this.comments.create({
+        episodeId: input.episodeId,
+        userId: input.userId,
+        body,
+        parentId: input.parentId ?? null,
+      }),
+      this.novels.findById(episode.novelId)
+    ])
     if (novel) {
       await this.notifications.createMany([
         {
