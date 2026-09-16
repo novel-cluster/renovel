@@ -16,7 +16,24 @@ export function createApp() {
   const app = new Hono<AppEnv>()
 
   app.use('*', logger())
-  app.use('*', secureHeaders())
+  // Security headers incl. CSP (PRD §59, architecture.md §9). All client JS is
+  // external under /static, so `script-src 'self'` is enough (no inline scripts).
+  app.use(
+    '*',
+    secureHeaders({
+      contentSecurityPolicy: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", 'data:', 'https:'],
+        connectSrc: ["'self'"],
+        baseUri: ["'self'"],
+        formAction: ["'self'"],
+        frameAncestors: ["'none'"],
+        objectSrc: ["'none'"],
+      },
+    }),
+  )
   // CSRF: Origin verification for state-changing requests (auth.md §5).
   app.use('*', csrf())
 

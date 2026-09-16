@@ -22,6 +22,7 @@ ReNovel の企画・設計ドキュメント索引。
 - [Architecture / 全体アーキテクチャ](./design/overview/architecture.md) — レイヤ構成・ドメイン分割・リクエストフロー
 - [Frontend / フロントエンド設計](./design/overview/frontend.md) — SSR + Islands、Kiwa UI、読書/執筆 UI、Reader Settings
 - [Infrastructure / インフラ設計](./design/overview/infrastructure.md) — Docker / Compose / Cloudflare Tunnel / デプロイ
+- [Launch / デプロイ手順・ローンチ点検](./design/overview/launch.md) — 本番手順、セキュリティ/パフォーマンス/A11y 点検
 - [Data Model / データモデル](./design/foundation/data-model.md) — 全ドメインの PostgreSQL スキーマ・ERD・enum・index（**他文書が参照する正典**）
 - [Routing / URL・ルート設計](./design/foundation/routing.md) — URL/slug 設計、全ルート表、SSR / island API / 分析エンドポイントの区分
 - [Auth / 認証・認可](./design/foundation/auth.md) — Session + OAuth、権限マトリクス、Visibility×Status アクセス判定、CSRF

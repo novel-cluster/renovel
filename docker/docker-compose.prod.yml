@@ -1,0 +1,67 @@
+# Production stack (run via Podman): app + PostgreSQL + Cloudflare Tunnel.
+# No ingress ports are published — the only path in is the Cloudflare Tunnel
+# (egress connection from `cloudflared`). See docs/design/overview/infrastructure.md.
+#
+#   podman compose -f docker/docker-compose.prod.yml up -d --build
+#
+# Required env (from a .env next to this file or the shell):
+#   POSTGRES_PASSWORD, CLOUDFLARE_TUNNEL_TOKEN
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: renovel
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+      POSTGRES_DB: renovel
+    volumes:
+      - renovel-pgdata:/var/lib/postgresql/data
+    # Internal only — never published to the host in production.
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U renovel -d renovel"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # One-shot: apply Drizzle migrations before the app starts.
+  migrate:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.prod
+    command: ["bun", "run", "db:migrate"]
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgres://renovel:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}@postgres:5432/renovel
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  web:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.prod
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      DATABASE_URL: postgres://renovel:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}@postgres:5432/renovel
+      SESSION_SECRET: ${SESSION_SECRET:?set SESSION_SECRET}
+    # No `ports:` — reachable only through cloudflared on the internal network.
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: ["tunnel", "--no-autoupdate", "run"]
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:?set CLOUDFLARE_TUNNEL_TOKEN}
+    depends_on:
+      - web
+
+volumes:
+  renovel-pgdata:
