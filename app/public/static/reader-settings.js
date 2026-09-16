@@ -36,7 +36,9 @@
     else if (t.dataset.action === 'vertical') s.vertical = !s.vertical
     try {
       localStorage.setItem(KEY, JSON.stringify(s))
-    } catch (err) {}
+    } catch (err) {
+      console.error(err)
+    }
     apply()
   })
   apply()
