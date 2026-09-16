@@ -485,3 +485,40 @@
     transform: translateX(100%);
   }
 }
+
+/* Novel body notation (text-notation.md §2). */
+.emphasis-dots {
+  font-style: normal;
+  -webkit-text-emphasis: filled sesame;
+  text-emphasis: filled sesame;
+  -webkit-text-emphasis-position: over right;
+  text-emphasis-position: over right;
+}
+
+.novel-body p {
+  margin-block: 1.4em;
+  line-height: 1.9;
+}
+
+.novel-body rt {
+  font-size: 0.5em;
+}
+
+/* Reader Settings island (frontend.md §4.1). */
+.sepia body {
+  background: #f4ecd8;
+  color: #5b4636;
+}
+.sepia .text-muted-foreground {
+  color: #8a7355;
+}
+.reader-vertical {
+  writing-mode: vertical-rl;
+  max-height: 78vh;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+:where(.reader-vertical) .emphasis-dots {
+  -webkit-text-emphasis-position: over right;
+  text-emphasis-position: right;
+}
