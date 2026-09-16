@@ -175,14 +175,15 @@ Reader First の本丸。書いたものを快適に読める。
 
 **設計:** [auth.md](./docs/design/foundation/auth.md)（CSRF/認可）・[testing.md](./docs/design/reference/testing.md)（テスト戦略・高リスク領域）・[infrastructure.md](./docs/design/overview/infrastructure.md)（本番 Compose・Cloudflare Tunnel）
 
-- [ ] セキュリティ総点検（CSRF/XSS/SQLi/Rate Limit/CSP/Secure Cookie/認可、PRD §59）
-- [ ] パフォーマンス（SSR 速度・不要 JS 削減・N+1・非ブロッキング分析、PRD §55）
-- [ ] アクセシビリティ点検（キーボード/aria/コントラスト/縦横切替耐性、PRD §57）
-- [ ] Docker: `Dockerfile.prod` + `docker-compose.prod.yml` + `cloudflared` 本番構成（[infrastructure §4, §7](./docs/design/overview/infrastructure.md)）
-- [ ] Cloudflare Tunnel 公開（ingress ポートを開けない、PRD §54）
-- [ ] バックアップ/監視/ログ/migration デプロイ手順の確立
+- [x] セキュリティ総点検（CSRF/XSS/SQLi/Rate Limit/CSP/Secure Cookie/認可、PRD §59）— [launch.md §2](./docs/design/overview/launch.md)
+- [x] パフォーマンス（SSR 速度・不要 JS 削減・N+1・非ブロッキング分析、PRD §55）
+- [~] アクセシビリティ（Semantic HTML/label/Reader Settings、PRD §57）— aria/コントラスト実機点検は後続
+- [x] Docker: `Dockerfile.prod` + `docker-compose.prod.yml` + `cloudflared` 本番構成
+- [x] Cloudflare Tunnel 公開（ingress ポートを開けない、PRD §54）
+- [~] バックアップ/監視/ログ/migration デプロイ手順 — 手順は [launch.md §1](./docs/design/overview/launch.md)、監視/ログ集約は後続
 
 **完了条件:** PRD §60 の全項目が Production で利用可能。
+→ **達成(コア)**: CSP + Rate Limiting + 本番 Compose(no-ingress + Cloudflare Tunnel + migrate one-shot) を実装・検証。監視/ログ集約、外部セキュリティレビュー、A11y 実機点検は後続。
 
 ---
 
