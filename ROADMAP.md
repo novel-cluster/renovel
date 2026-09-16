@@ -1,9 +1,10 @@
 # ReNovel ROADMAP
 
 ReNovel 1.0（[PRD §60 Definition of Done](./PRD.md)）に向けた開発ロードマップ。
-設計の詳細は [`docs/`](./docs/README.md)（[architecture](./docs/design/architecture.md) / [frontend](./docs/design/frontend.md) / [infrastructure](./docs/design/infrastructure.md)）を参照。
+設計の詳細は [`docs/`](./docs/README.md) を参照（全体: [architecture](./docs/design/architecture.md) / [frontend](./docs/design/frontend.md) / [infrastructure](./docs/design/infrastructure.md) / [data-model](./docs/design/data-model.md) / [routing](./docs/design/routing.md) / [auth](./docs/design/auth.md)、ドメイン別: [text-notation](./docs/design/text-notation.md) / [writing-revision](./docs/design/writing-revision.md) / [reading](./docs/design/reading.md) / [social-notification](./docs/design/social-notification.md) / [discovery](./docs/design/discovery.md) / [analytics](./docs/design/analytics.md) / [collaboration-fork](./docs/design/collaboration-fork.md) / [moderation](./docs/design/moderation.md)、他: [glossary](./docs/design/glossary.md) / [testing](./docs/design/testing.md)）。
 
 - **現状:** scaffold 段階。`app/src/index.ts` は Hono の Hello スタブ。Docker ファイルは空。
+- **設計:** Phase 1–9 の詳細設計は [`docs/design/`](./docs/README.md) に整備済み（データモデル・認証認可・各ドメイン仕様）。各フェーズ冒頭の「設計」行から該当ドキュメントへ辿れる。実装前に該当ドキュメントを読むこと。
 - **原則:** 各フェーズは Reader First / Text First を優先し、縦に薄く（1 機能を UI〜DB まで）通してから広げる。
 - フェーズ番号は依存順。番号が小さいものが土台。
 
@@ -33,6 +34,8 @@ ReNovel 1.0（[PRD §60 Definition of Done](./PRD.md)）に向けた開発ロー
 
 全機能の前提。読者=作者の統合アカウント（PRD §6）。
 
+**設計:** [auth.md](./docs/design/auth.md)（認証・認可・権限マトリクス） / [data-model.md](./docs/design/data-model.md)（users/sessions/oauth_accounts） / [routing.md](./docs/design/routing.md)（`/@{handle}`・`/studio`）
+
 - [ ] User / Handle / Profile ドメイン（`/@{handle}`）
 - [ ] Session 認証 + OAuth（Provider 決定、PRD §52）、認証コンテキストを `c.get("user")` に載せる
 - [ ] 認可の基盤（サーバ側で必ずチェック、PRD §59）
@@ -45,6 +48,8 @@ ReNovel 1.0（[PRD §60 Definition of Done](./PRD.md)）に向けた開発ロー
 ## Phase 2 — Novel & Writing（作品・執筆）★コア
 
 ReNovel の中心。ここまでで「書いて公開できる」。
+
+**設計:** [data-model.md](./docs/design/data-model.md)（novels/chapters/episodes/episode_revisions） / [writing-revision.md](./docs/design/writing-revision.md)（Episode 状態機械・Revision・Autosave・予約公開） / [text-notation.md](./docs/design/text-notation.md)（ルビ・傍点・XSS 安全変換） / [routing.md](./docs/design/routing.md)（slug/URL） / [frontend §5](./docs/design/frontend.md)（Editor island）
 
 - [ ] Novel ドメイン: `Novel→(任意)Chapter→Episode`、メタデータ（表紙画像なし、PRD §7）
 - [ ] Visibility(Public/Unlisted/Private) と Publication Status(Ongoing/Completed/Hiatus) を直交で実装（PRD §8–9）
@@ -62,6 +67,8 @@ ReNovel の中心。ここまでで「書いて公開できる」。
 
 Reader First の本丸。書いたものを快適に読める。
 
+**設計:** [reading.md](./docs/design/reading.md)（Reading Progress・Library・Reader Settings 永続化・プライバシー） / [frontend §4](./docs/design/frontend.md)（Reader Settings UI・CSS 変数） / [text-notation.md](./docs/design/text-notation.md)（本文レンダリング） / [data-model.md](./docs/design/data-model.md)（reading_progress/library_entries）
+
 - [ ] 作品ページ / Episode 本文の SSR（不要 JS を配らない、PRD §55）
 - [ ] Reader Settings（Font Size / Line Height / Width / Font / **縦横** / Theme Light/Dark/Sepia）を CSS 変数で即時反映（[frontend §4.1](./docs/design/frontend.md)）
 - [ ] Reading Progress（最後の Episode/位置・読了・「続きから読む」、PRD §18）
@@ -75,6 +82,8 @@ Reader First の本丸。書いたものを快適に読める。
 ## Phase 4 — Social & Notification（反応・通知）
 
 作品に反応が集まる。
+
+**設計:** [social-notification.md](./docs/design/social-notification.md)（Like/Star/Review/Comment/Follow・通知配信） / [data-model.md](./docs/design/data-model.md)（likes/stars/reviews/comments/follows/notifications）
 
 - [ ] Like（Episode 単位、1 user 1 Episode、取消可、PRD §20.1）
 - [ ] Star（Novel 単位 1–3、PRD §20.2）/ Review（Stars+Title+Body、PRD §20.3）
@@ -90,6 +99,8 @@ Reader First の本丸。書いたものを快適に読める。
 
 読者が作品にたどり着く導線。
 
+**設計:** [discovery.md](./docs/design/discovery.md)（日本語全文検索・Filter/Sort・ランキング・レコメンド・Home） / [data-model.md](./docs/design/data-model.md)（tags/novel_tags・集計方針）
+
 - [ ] Search（Title/Catchphrase/Description/User/Tag、PRD §23）+ Filter（PRD §24）+ Sort（PRD §25）
 - [ ] Ranking（Daily/Weekly/Monthly/New/Completed、時間減衰スコア、PRD §26）
 - [ ] Recommendation（初期は Rule Based、PRD §27）
@@ -103,6 +114,8 @@ Reader First の本丸。書いたものを快適に読める。
 ## Phase 6 — Analytics（作者分析）★差別化
 
 「作者向け Google Analytics」（PRD §29）。他サイトとの主要な差別化。
+
+**設計:** [analytics.md](./docs/design/analytics.md)（イベント収集・集計パイプライン・各ダッシュボード算出・プライバシー） / [architecture §7](./docs/design/architecture.md)（分離方針） / [data-model.md](./docs/design/data-model.md)（analytics スキーマ）
 
 - [ ] Analytics イベント収集基盤（transactional と分離、fire-and-forget、[architecture §7](./docs/design/architecture.md)）
 - [ ] Event Store → 集計（`analytics_events → analytics_hourly/daily`）
@@ -122,6 +135,8 @@ Reader First の本丸。書いたものを快適に読める。
 
 作品モデルにネイティブ組み込み（PRD §5）。
 
+**設計:** [collaboration-fork.md](./docs/design/collaboration-fork.md)（招待・Role・Fork 系譜・帰属強制・Change Proposal） / [auth.md](./docs/design/auth.md)（Role 権限マトリクス） / [data-model.md](./docs/design/data-model.md)（collaborators/forks/fork_requests/change_proposals）
+
 - [ ] Collaborator 招待 + Role（Owner/Admin/Writer/Editor/Viewer、PRD §13）
 - [ ] Role ごとの権限をサーバ側で強制（PRD §59）
 - [ ] 共同編集（Revision との連携）
@@ -137,6 +152,8 @@ Reader First の本丸。書いたものを快適に読める。
 
 健全な運用の担保。
 
+**設計:** [moderation.md](./docs/design/moderation.md)（Report/Block/Mute・Admin 対処・状態遷移） / [auth.md](./docs/design/auth.md)（Admin 権限） / [data-model.md](./docs/design/data-model.md)（reports/blocks/mutes/user_status）
+
 - [ ] User 機能: Report(User/Novel/Episode/Comment/Review) / Block / Mute（PRD §37）
 - [ ] Admin 機能: Report 管理 / Hide Novel・Episode / Delete Comment・Review / Suspend / Ban（PRD §37）
 
@@ -147,6 +164,8 @@ Reader First の本丸。書いたものを快適に読める。
 ## Phase 9 — Hardening & Launch（品質・本番化）
 
 1.0 リリース。
+
+**設計:** [auth.md](./docs/design/auth.md)（CSRF/認可）・[testing.md](./docs/design/testing.md)（テスト戦略・高リスク領域）・[infrastructure.md](./docs/design/infrastructure.md)（本番 Compose・Cloudflare Tunnel）
 
 - [ ] セキュリティ総点検（CSRF/XSS/SQLi/Rate Limit/CSP/Secure Cookie/認可、PRD §59）
 - [ ] パフォーマンス（SSR 速度・不要 JS 削減・N+1・非ブロッキング分析、PRD §55）
