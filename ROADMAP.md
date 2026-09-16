@@ -88,13 +88,14 @@ Reader First の本丸。書いたものを快適に読める。
 
 **設計:** [social-notification.md](./docs/design/domains/social-notification.md)（Like/Star/Review/Comment/Follow・通知配信） / [data-model.md](./docs/design/foundation/data-model.md)（likes/stars/reviews/comments/follows/notifications）
 
-- [ ] Like（Episode 単位、1 user 1 Episode、取消可、PRD §20.1）
-- [ ] Star（Novel 単位 1–3、PRD §20.2）/ Review（Stars+Title+Body、PRD §20.3）
-- [ ] Comment（Episode 単位、読了後、PRD §20.4）
-- [ ] Follow（User / Novel、PRD §21）
-- [ ] Notification（初期は In-App、対象イベント一覧 PRD §22）
+- [x] Like（Episode 単位、1 user 1 Episode、取消可、PRD §20.1）
+- [x] Star（Novel 単位 1–3、PRD §20.2）/ Review（Stars+Title+Body、PRD §20.3）
+- [x] Comment（Episode 単位、読了後、PRD §20.4）— reading_progress による読了ゲート
+- [x] Follow（User / Novel、PRD §21）
+- [x] Notification（In-App、like/star/review/comment/user_follow/novel_follow/novel_update、PRD §22）
 
 **完了条件:** 読者が評価・感想・フォローでき、作者に In-App 通知が届く。
+→ **達成**: 実 DB で いいね/コメント(読了ゲート)/星(1-3・平均キャッシュ)/レビュー/作品・ユーザーフォロー(カウンタ)、公開時の novel_update ファンアウト、通知一覧を E2E 確認。既読バッジ数値は後続。
 
 ---
 
