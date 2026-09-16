@@ -15,4 +15,6 @@ export interface ReadingProgressRepository {
   record(input: RecordProgressInput): Promise<void>
   /** episode_no of the user's most recently read episode in a novel, or null. */
   latestEpisodeNoForNovel(userId: string, novelId: string): Promise<number | null>
+  /** Whether the user has opened/read this episode (comment read-gate, PRD §20.4). */
+  hasRead(userId: string, episodeId: string): Promise<boolean>
 }

@@ -28,4 +28,8 @@ export interface NovelRepository {
   update(id: string, patch: NovelUpdate): Promise<Novel>
   /** Adjusts the denormalized `total_char_count` by a delta (data-model.md §novel). */
   addTotalCharCount(id: string, delta: number): Promise<void>
+  // Denormalized social counters, updated from the social domain (Phase 4).
+  addLikeCount(id: string, delta: number): Promise<void>
+  setStarAggregate(id: string, avg: number, count: number): Promise<void>
+  addFollowCount(id: string, delta: number): Promise<void>
 }

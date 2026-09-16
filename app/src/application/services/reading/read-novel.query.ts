@@ -1,9 +1,9 @@
+import type { UserRepository } from '@/domain/identity/repositories/user-repository'
 import type { Episode, EpisodeSummary } from '@/domain/novel/entities/episode'
 import type { Novel } from '@/domain/novel/entities/novel'
 import type { EpisodeRepository } from '@/domain/novel/repositories/episode-repository'
 import type { NovelRepository } from '@/domain/novel/repositories/novel-repository'
 import { canViewEpisode, canViewNovel } from '@/domain/novel/services/novel-access-policy'
-import type { UserRepository } from '@/domain/identity/repositories/user-repository'
 import { NotFoundError } from '@/shared/errors/app-error'
 
 export interface AuthorRef {
@@ -49,11 +49,9 @@ export class ReadNovelQuery {
     ) {
       throw new NotFoundError('作品が見つかりません')
     }
-    const [author, episodes] = await Promise.allSettled([
+    const [author, episodes] = await Promise.all([
       this.authorRef(novel.authorId),
-      isOwner
-        ? this.episodes.listByNovel(novel.id)
-        : this.episodes.listPublishedByNovel(novel.id)
+      isOwner ? this.episodes.listByNovel(novel.id) : this.episodes.listPublishedByNovel(novel.id),
     ])
     return { novel, author, episodes, isOwner }
   }
@@ -87,16 +85,14 @@ export class ReadNovelQuery {
       throw new NotFoundError('エピソードが見つかりません')
     }
 
-    const [list, author] = Promise.allSettled([
-      isOwner
-        ? this.episodes.listByNovel(novel.id)
-        : this.episodes.listPublishedByNovel(novel.id),
-      this.authorRef(novel.authorId)
+    const [list, author] = await Promise.all([
+      isOwner ? this.episodes.listByNovel(novel.id) : this.episodes.listPublishedByNovel(novel.id),
+      this.authorRef(novel.authorId),
     ])
     const idx = list.findIndex((e) => e.episodeNo === episodeNo)
     const prevNo = idx > 0 ? list[idx - 1].episodeNo : null
     const nextNo = idx >= 0 && idx < list.length - 1 ? list[idx + 1].episodeNo : null
-    
+
     return { novel, author, episode, prevNo, nextNo, isOwner }
   }
 

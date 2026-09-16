@@ -27,6 +27,11 @@ export interface Novel {
   publicationStatus: PublicationStatus
   contentState: ContentState
   contentWarnings: string[]
+  // Denormalized social counters (kept in sync by the social domain, Phase 4).
+  likeCount: number
+  starAvg: number
+  starCount: number
+  followCount: number
   publishedAt: Date | null
   createdAt: Date
   updatedAt: Date
