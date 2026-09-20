@@ -45,8 +45,8 @@ export class HomeQuery {
 
   async execute(viewerId: string | null): Promise<HomeView> {
     const [ranking, newest] = await Promise.all([
-      this.ranking.execute({ window: 'week', limit: 6 }),
-      this.discovery.newest(6),
+      this.ranking.execute({ window: 'week', limit: 10 }),
+      this.discovery.newest(8),
     ])
     const recommended = viewerId ? await this.discovery.popular(viewerId, 6) : []
     return { ranking, newest, recommended }

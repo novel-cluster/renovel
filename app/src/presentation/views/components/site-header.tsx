@@ -1,10 +1,12 @@
 import type { FC } from 'hono/jsx'
 import type { AuthUser } from '@/presentation/env'
 
-/** Global header with auth-aware navigation. */
-export const SiteHeader: FC<{ user: AuthUser | null }> = ({ user }) => (
+/** Global header with auth-aware navigation. `wide` widens the bar for the home page. */
+export const SiteHeader: FC<{ user: AuthUser | null; wide?: boolean }> = ({ user, wide }) => (
   <header class="border-b border-border">
-    <div class="mx-auto flex max-w-3xl items-center justify-between px-6 py-4">
+    <div
+      class={`mx-auto flex items-center justify-between px-6 py-4 ${wide ? 'max-w-6xl' : 'max-w-3xl'}`}
+    >
       <a href="/" class="text-lg font-semibold tracking-tight">
         ReNovel
       </a>
