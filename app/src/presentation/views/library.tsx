@@ -16,7 +16,7 @@ export const LibraryPage: FC<{ items: LibraryItem[]; viewer: AuthUser }> = ({ it
   <Layout title="本棚 | ReNovel" noindex>
     <SiteHeader user={viewer} />
     <main class="mx-auto max-w-2xl px-6 py-12">
-      <h1 class="text-2xl font-semibold tracking-tight">本棚</h1>
+      <h1 class="border-b-2 border-primary pb-2 text-2xl font-bold tracking-tight">本棚</h1>
       {items.length ? (
         <ul class="mt-6 divide-y divide-border border-y border-border">
           {items.map((item) => (

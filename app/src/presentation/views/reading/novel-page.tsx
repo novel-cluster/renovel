@@ -4,6 +4,7 @@ import type { NovelSocial } from '@/application/services/social/social.query'
 import type { ForkAttribution } from '@/domain/fork/fork'
 import type { LibraryState } from '@/domain/reading/entities/reading'
 import type { AuthUser } from '@/presentation/env'
+import { SectionHeading } from '@/presentation/views/components/section-heading'
 import { SiteHeader } from '@/presentation/views/components/site-header'
 import { Layout } from '@/presentation/views/layout'
 
@@ -169,7 +170,9 @@ export const NovelPage: FC<{
           </div>
         ) : null}
 
-        <h2 class="mt-10 mb-2 text-sm font-medium text-muted-foreground">目次</h2>
+        <div class="mt-10">
+          <SectionHeading title="目次" />
+        </div>
         {episodes.length ? (
           <ol class="divide-y divide-border border-y border-border">
             {episodes.map((ep) => (
@@ -194,9 +197,7 @@ export const NovelPage: FC<{
         )}
 
         <section class="mt-12">
-          <h2 class="mb-3 text-sm font-medium text-muted-foreground">
-            レビュー（{social.reviews.length}）
-          </h2>
+          <SectionHeading title={`レビュー（${social.reviews.length}）`} />
           {canInteract ? (
             <form method="post" action={`/novels/${novel.id}/reviews`} class="mb-6 space-y-2">
               <select

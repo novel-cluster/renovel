@@ -1,6 +1,7 @@
 import type { FC } from 'hono/jsx'
 import type { User } from '@/domain/identity/entities/user'
 import type { AuthUser } from '@/presentation/env'
+import { SectionHeading } from '@/presentation/views/components/section-heading'
 import { SiteHeader } from '@/presentation/views/components/site-header'
 import { Layout } from '@/presentation/views/layout'
 
@@ -95,9 +96,10 @@ export const ProfilePage: FC<{ profile: User; viewer: AuthUser | null; following
           </ul>
         ) : null}
 
-        <p class="mt-10 text-xs text-muted-foreground">
-          まだ作品はありません（作品は Phase 2 で実装予定）。
-        </p>
+        <section class="mt-10">
+          <SectionHeading title="作品" />
+          <p class="text-sm text-muted-foreground">まだ公開作品がありません。</p>
+        </section>
       </main>
     </Layout>
   )

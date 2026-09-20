@@ -1,21 +1,13 @@
 import type { FC } from 'hono/jsx'
 import type { NovelCard, SortKey } from '@/domain/discovery/discovery'
 import type { AuthUser } from '@/presentation/env'
+import { GENRE_NAV, GenreNav } from '@/presentation/views/components/genre-nav'
+import { SectionHeading } from '@/presentation/views/components/section-heading'
 import { SiteHeader } from '@/presentation/views/components/site-header'
 import { Layout } from '@/presentation/views/layout'
 import { NovelCardGrid } from './novel-card'
 
-const GENRES: [string, string][] = [
-  ['', 'ジャンル：すべて'],
-  ['fantasy', 'ファンタジー'],
-  ['sf', 'SF'],
-  ['romance', '恋愛'],
-  ['mystery', 'ミステリー'],
-  ['horror', 'ホラー'],
-  ['literary', '文芸'],
-  ['essay', 'エッセイ'],
-  ['other', 'その他'],
-]
+const GENRES: [string, string][] = [['', 'ジャンル：すべて'], ...GENRE_NAV]
 const STATUSES: [string, string][] = [
   ['', '状態：すべて'],
   ['ongoing', '連載中'],
@@ -54,9 +46,10 @@ export const SearchPage: FC<{
   viewer: AuthUser | null
 }> = ({ results, state, searched, viewer }) => (
   <Layout title="検索 | ReNovel" noindex>
-    <SiteHeader user={viewer} />
-    <main class="mx-auto max-w-3xl px-6 py-10">
-      <h1 class="text-2xl font-semibold tracking-tight">作品を探す</h1>
+    <SiteHeader user={viewer} wide />
+    <GenreNav active={state.genre} />
+    <main class="mx-auto max-w-6xl px-6 py-8">
+      <h1 class="text-2xl font-bold tracking-tight">作品を探す</h1>
       <form method="get" action="/search" class="mt-4 flex flex-wrap items-center gap-2">
         <input
           name="q"
@@ -80,7 +73,10 @@ export const SearchPage: FC<{
 
       <div class="mt-8">
         {searched ? (
-          <NovelCardGrid novels={results} empty="該当する作品が見つかりませんでした。" />
+          <>
+            <SectionHeading title="検索結果" />
+            <NovelCardGrid novels={results} empty="該当する作品が見つかりませんでした。" />
+          </>
         ) : (
           <p class="text-sm text-muted-foreground">キーワードや条件を指定して検索してください。</p>
         )}
