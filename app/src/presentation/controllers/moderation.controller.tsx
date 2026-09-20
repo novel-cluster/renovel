@@ -63,11 +63,12 @@ export async function postMute(c: Context<AppEnv>) {
 // --- Admin ---
 
 export async function getAdmin(c: Context<AppEnv>) {
+  const viewer = c.get('user')
   const actor = admin(c)
-  if (!actor) return c.redirect('/login')
+  if (!viewer || !actor) return c.redirect('/login')
   const status = (c.req.query('status') as ReportStatus | 'all') ?? 'open'
   const reports = await container.adminModerationService.listReports(actor, status)
-  return renderPage(c, <AdminPage reports={reports} status={status} viewer={c.get('user')!} />)
+  return renderPage(c, <AdminPage reports={reports} status={status} viewer={viewer} />)
 }
 
 export async function postResolveReport(c: Context<AppEnv>) {

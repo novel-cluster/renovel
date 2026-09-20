@@ -6,7 +6,7 @@ import type { PasswordHasher } from '@/domain/identity/services/password-hasher'
  */
 export class BunPasswordHasher implements PasswordHasher {
   private readonly algorithm = 'argon2id'
-  
+
   async hash(plain: string): Promise<string> {
     return Bun.password.hash(plain, { algorithm: this.algorithm })
   }
