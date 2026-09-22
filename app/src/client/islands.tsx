@@ -1,5 +1,6 @@
 /** @jsxImportSource hono/jsx/dom */
 import { render } from 'hono/jsx/dom'
+import { CommentForm } from './islands/comment-form'
 import { FollowButton } from './islands/follow-button'
 import { LibraryRemove } from './islands/library-remove'
 import { LibrarySelect } from './islands/library-select'
@@ -17,6 +18,7 @@ const REGISTRY: Record<string, (props: any) => unknown> = {
   star: StarRating,
   library: LibrarySelect,
   'library-remove': LibraryRemove,
+  comment: CommentForm,
 }
 
 function mount() {

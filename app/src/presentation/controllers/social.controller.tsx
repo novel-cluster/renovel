@@ -42,6 +42,7 @@ export async function postComment(c: Context<AppEnv>) {
     body: String(body.body ?? ''),
     parentId: typeof body.parentId === 'string' && body.parentId ? body.parentId : null,
   })
+  if (wantsJson(c)) return c.json({ ok: true })
   return c.redirect(backTo(c))
 }
 

@@ -128,29 +128,43 @@ export const EpisodePage: FC<{
           )}
         </nav>
 
-        <section class="mt-12">
+        <section id="comment-section" class="mt-12">
           <h2 class="mb-3 text-sm font-medium text-muted-foreground">
-            コメント（{social.comments.length}）
+            コメント（<span id="comment-count">{social.comments.length}</span>）
           </h2>
           {viewer && episode.status === 'published' ? (
-            <form method="post" action={`/episodes/${episode.id}/comments`} class="mb-6 space-y-2">
-              <textarea
-                name="body"
-                rows={3}
-                required
-                placeholder="読み終えた感想を書く"
-                class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-              />
-              <button
-                type="submit"
-                class="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+            <span
+              data-island="comment"
+              data-props={JSON.stringify({
+                action: `/episodes/${episode.id}/comments`,
+                authorName: viewer.displayName,
+                authorHandle: viewer.handle,
+              })}
+            >
+              {/* No-JS fallback: a plain form POST. The island upgrades this in place. */}
+              <form
+                method="post"
+                action={`/episodes/${episode.id}/comments`}
+                class="mb-6 space-y-2"
               >
-                コメントする
-              </button>
-            </form>
+                <textarea
+                  name="body"
+                  rows={3}
+                  required
+                  placeholder="読み終えた感想を書く"
+                  class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                />
+                <button
+                  type="submit"
+                  class="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+                >
+                  コメントする
+                </button>
+              </form>
+            </span>
           ) : null}
           {social.comments.length ? (
-            <ul class="space-y-4">
+            <ul id="comment-list" class="space-y-4">
               {social.comments.map((cm) => (
                 <li class="text-sm">
                   <div class="flex items-center gap-2 text-xs text-muted-foreground">
@@ -174,7 +188,9 @@ export const EpisodePage: FC<{
               ))}
             </ul>
           ) : (
-            <p class="text-sm text-muted-foreground">まだコメントはありません。</p>
+            <p id="comment-empty" class="text-sm text-muted-foreground">
+              まだコメントはありません。
+            </p>
           )}
         </section>
       </main>
