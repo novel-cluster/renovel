@@ -1,11 +1,12 @@
 {
   "name": "app",
   "scripts": {
-    "dev": "bun run css && bun run --hot src/index.ts",
+    "dev": "bun run css && bun run build:islands && bun run --hot src/index.ts",
     "start": "bun run src/index.ts",
     "css": "tailwindcss -i ./src/styles/globals.css -o ./public/styles.css",
     "css:watch": "tailwindcss -i ./src/styles/globals.css -o ./public/styles.css --watch",
     "build:css": "tailwindcss -i ./src/styles/globals.css -o ./public/styles.css --minify",
+    "build:islands": "bun run scripts/build-islands.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",

@@ -29,7 +29,12 @@ export const EpisodePage: FC<{
       title={`${episode.title} | ${novel.title} | ReNovel`}
       canonical={canonical}
       noindex={!indexable}
-      head={<script src="/static/reader-settings.js" defer />}
+      head={
+        <>
+          <script src="/static/reader-settings.js" defer />
+          <script src="/static/islands.js" defer />
+        </>
+      }
     >
       <SiteHeader user={viewer} />
       <main class="mx-auto max-w-2xl px-6 py-10">
@@ -89,15 +94,25 @@ export const EpisodePage: FC<{
           )}
 
           {viewer && episode.status === 'published' ? (
-            <form method="post" action={`/episodes/${episode.id}/like`}>
-              <button
-                type="submit"
-                aria-pressed={social.liked}
-                class="rounded-md border border-border px-3 py-1.5 hover:bg-muted aria-pressed:border-primary aria-pressed:text-primary"
-              >
-                ♥ {social.likeCount}
-              </button>
-            </form>
+            <span
+              data-island="like"
+              data-props={JSON.stringify({
+                action: `/episodes/${episode.id}/like`,
+                liked: social.liked,
+                count: social.likeCount,
+              })}
+            >
+              {/* No-JS fallback: a plain form POST. The island upgrades this in place. */}
+              <form method="post" action={`/episodes/${episode.id}/like`}>
+                <button
+                  type="submit"
+                  aria-pressed={social.liked}
+                  class="rounded-md border border-border px-3 py-1.5 hover:bg-muted aria-pressed:border-primary aria-pressed:text-primary"
+                >
+                  ♥ {social.likeCount}
+                </button>
+              </form>
+            </span>
           ) : (
             <span class="text-muted-foreground">♥ {social.likeCount}</span>
           )}

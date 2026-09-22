@@ -8,4 +8,5 @@ node_modules/
 
 # build output
 public/styles.css
+public/static/islands.js
 dist/

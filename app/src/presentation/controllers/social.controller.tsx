@@ -16,10 +16,19 @@ function actor(c: Context<AppEnv>): string | null {
   return c.get('user')?.id ?? null
 }
 
+/** Client islands POST with `Accept: application/json`; no-JS forms want a redirect. */
+function wantsJson(c: Context<AppEnv>): boolean {
+  return (c.req.header('accept') ?? '').includes('application/json')
+}
+
 export async function postLike(c: Context<AppEnv>) {
   const userId = actor(c)
   if (!userId) return c.redirect('/login')
-  await container.toggleLikeService.execute({ userId, episodeId: c.req.param('episodeId') ?? '' })
+  const { liked } = await container.toggleLikeService.execute({
+    userId,
+    episodeId: c.req.param('episodeId') ?? '',
+  })
+  if (wantsJson(c)) return c.json({ liked })
   return c.redirect(backTo(c))
 }
 
@@ -51,10 +60,11 @@ export async function postStar(c: Context<AppEnv>) {
 export async function postNovelFollow(c: Context<AppEnv>) {
   const userId = actor(c)
   if (!userId) return c.redirect('/login')
-  await container.toggleNovelFollowService.execute({
+  const { following } = await container.toggleNovelFollowService.execute({
     userId,
     novelId: c.req.param('novelId') ?? '',
   })
+  if (wantsJson(c)) return c.json({ following })
   return c.redirect(backTo(c))
 }
 
@@ -75,9 +85,10 @@ export async function postReview(c: Context<AppEnv>) {
 export async function postUserFollow(c: Context<AppEnv>) {
   const followerId = actor(c)
   if (!followerId) return c.redirect('/login')
-  await container.toggleUserFollowService.execute({
+  const { following } = await container.toggleUserFollowService.execute({
     followerId,
     followeeId: c.req.param('userId') ?? '',
   })
+  if (wantsJson(c)) return c.json({ following })
   return c.redirect(backTo(c))
 }

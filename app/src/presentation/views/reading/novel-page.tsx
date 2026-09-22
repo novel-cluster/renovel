@@ -40,6 +40,7 @@ export const NovelPage: FC<{
       description={novel.catchphrase ?? undefined}
       canonical={base}
       noindex={novel.visibility !== 'public'}
+      head={<script src="/static/islands.js" defer />}
     >
       <SiteHeader user={viewer} />
       <main class="mx-auto max-w-2xl px-6 py-12">
@@ -120,15 +121,24 @@ export const NovelPage: FC<{
           ) : null}
 
           {canInteract ? (
-            <form method="post" action={`/novels/${novel.id}/follow`}>
-              <button
-                type="submit"
-                aria-pressed={social.following}
-                class="rounded-md border border-border px-3 py-2 text-sm hover:bg-muted aria-pressed:border-primary aria-pressed:text-primary"
-              >
-                {social.following ? 'フォロー中' : 'フォロー'}
-              </button>
-            </form>
+            <span
+              data-island="follow"
+              data-props={JSON.stringify({
+                action: `/novels/${novel.id}/follow`,
+                following: social.following,
+              })}
+            >
+              {/* No-JS fallback: a plain form POST. The island upgrades this in place. */}
+              <form method="post" action={`/novels/${novel.id}/follow`}>
+                <button
+                  type="submit"
+                  aria-pressed={social.following}
+                  class="rounded-md border border-border px-3 py-2 text-sm hover:bg-muted aria-pressed:border-primary aria-pressed:text-primary"
+                >
+                  {social.following ? 'フォロー中' : 'フォロー'}
+                </button>
+              </form>
+            </span>
           ) : null}
 
           {canFork ? (

@@ -16,6 +16,7 @@ export const ProfilePage: FC<{ profile: User; viewer: AuthUser | null; following
     <Layout
       title={`${profile.displayName} (@${profile.handle}) | ReNovel`}
       description={profile.bio ?? undefined}
+      head={<script src="/static/islands.js" defer />}
     >
       <SiteHeader user={viewer} />
       <main class="mx-auto max-w-2xl px-6 py-12">
@@ -38,15 +39,24 @@ export const ProfilePage: FC<{ profile: User; viewer: AuthUser | null; following
             </a>
           ) : viewer ? (
             <div class="ml-auto flex items-center gap-2">
-              <form method="post" action={`/users/${profile.id}/follow`}>
-                <button
-                  type="submit"
-                  aria-pressed={following}
-                  class="rounded-md border border-border px-3 py-1.5 text-sm hover:bg-muted aria-pressed:border-primary aria-pressed:text-primary"
-                >
-                  {following ? 'フォロー中' : 'フォロー'}
-                </button>
-              </form>
+              <span
+                data-island="follow"
+                data-props={JSON.stringify({
+                  action: `/users/${profile.id}/follow`,
+                  following: following ?? false,
+                })}
+              >
+                {/* No-JS fallback: a plain form POST. The island upgrades this in place. */}
+                <form method="post" action={`/users/${profile.id}/follow`}>
+                  <button
+                    type="submit"
+                    aria-pressed={following}
+                    class="rounded-md border border-border px-3 py-1.5 text-sm hover:bg-muted aria-pressed:border-primary aria-pressed:text-primary"
+                  >
+                    {following ? 'フォロー中' : 'フォロー'}
+                  </button>
+                </form>
+              </span>
               <form method="post" action={`/users/${profile.id}/block`}>
                 <button
                   type="submit"

@@ -7,10 +7,10 @@ WORKDIR /app
 COPY app/package.json app/bun.lock ./
 RUN bun install --frozen-lockfile
 
-# --- build: compile Tailwind CSS ---
+# --- build: compile Tailwind CSS + bundle client islands ---
 FROM deps AS build
 COPY app/ .
-RUN bun run build:css
+RUN bun run build:css && bun run build:islands
 
 # --- runtime: minimal image ---
 FROM oven/bun:1.3-alpine AS runtime
