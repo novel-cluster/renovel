@@ -56,7 +56,11 @@ export class SetStarService {
     private readonly notifications: NotificationRepository,
   ) {}
 
-  async execute(input: { userId: string; novelId: string; value: number }): Promise<void> {
+  async execute(input: {
+    userId: string
+    novelId: string
+    value: number
+  }): Promise<{ value: number; avg: number; count: number }> {
     if (!Number.isInteger(input.value) || input.value < 1 || input.value > 3) {
       throw new ValidationError('評価は1〜3で入力してください')
     }
@@ -76,6 +80,7 @@ export class SetStarService {
         },
       ])
     }
+    return { value: input.value, avg: agg.avg, count: agg.count }
   }
 }
 

@@ -1,7 +1,10 @@
 /** @jsxImportSource hono/jsx/dom */
 import { render } from 'hono/jsx/dom'
 import { FollowButton } from './islands/follow-button'
+import { LibraryRemove } from './islands/library-remove'
+import { LibrarySelect } from './islands/library-select'
 import { LikeButton } from './islands/like-button'
+import { StarRating } from './islands/star-rating'
 
 // Island registry. Each interactive element is SSR'd with a no-JS fallback and a
 // `data-island` marker; this bootstrap hydrates it into a reactive component so
@@ -11,6 +14,9 @@ import { LikeButton } from './islands/like-button'
 const REGISTRY: Record<string, (props: any) => unknown> = {
   like: LikeButton,
   follow: FollowButton,
+  star: StarRating,
+  library: LibrarySelect,
+  'library-remove': LibraryRemove,
 }
 
 function mount() {

@@ -49,11 +49,12 @@ export async function postStar(c: Context<AppEnv>) {
   const userId = actor(c)
   if (!userId) return c.redirect('/login')
   const body = await c.req.parseBody()
-  await container.setStarService.execute({
+  const result = await container.setStarService.execute({
     userId,
     novelId: c.req.param('novelId') ?? '',
     value: Number(body.value),
   })
+  if (wantsJson(c)) return c.json(result)
   return c.redirect(backTo(c))
 }
 

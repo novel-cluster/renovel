@@ -13,7 +13,7 @@ const STATE_LABEL: Record<LibraryState, string> = {
 
 /** Reader's library (PRD §19). Private page → noindex. */
 export const LibraryPage: FC<{ items: LibraryItem[]; viewer: AuthUser }> = ({ items, viewer }) => (
-  <Layout title="本棚 | ReNovel" noindex>
+  <Layout title="本棚 | ReNovel" noindex head={<script src="/static/islands.js" defer />}>
     <SiteHeader user={viewer} />
     <main class="mx-auto max-w-2xl px-6 py-12">
       <h1 class="border-b-2 border-primary pb-2 text-2xl font-bold tracking-tight">本棚</h1>
@@ -26,15 +26,21 @@ export const LibraryPage: FC<{ items: LibraryItem[]; viewer: AuthUser }> = ({ it
               </a>
               <span class="flex shrink-0 items-center gap-3 text-xs text-muted-foreground">
                 {STATE_LABEL[item.state]}
-                <form method="post" action="/library/remove">
-                  <input type="hidden" name="novelId" value={item.novelId} />
-                  <button
-                    type="submit"
-                    class="rounded border border-border px-2 py-1 hover:bg-muted"
-                  >
-                    外す
-                  </button>
-                </form>
+                <span
+                  data-island="library-remove"
+                  data-props={JSON.stringify({ novelId: item.novelId })}
+                >
+                  {/* No-JS fallback: a plain form POST. The island upgrades this in place. */}
+                  <form method="post" action="/library/remove">
+                    <input type="hidden" name="novelId" value={item.novelId} />
+                    <button
+                      type="submit"
+                      class="rounded border border-border px-2 py-1 hover:bg-muted"
+                    >
+                      外す
+                    </button>
+                  </form>
+                </span>
               </span>
             </li>
           ))}

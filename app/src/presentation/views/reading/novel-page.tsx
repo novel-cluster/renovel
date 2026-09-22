@@ -70,7 +70,11 @@ export const NovelPage: FC<{
         </p>
         {novel.starCount > 0 || novel.followCount > 0 ? (
           <p class="mt-1 text-sm text-muted-foreground">
-            {novel.starCount > 0 ? `★ ${novel.starAvg.toFixed(2)}（${novel.starCount}）` : ''}
+            {novel.starCount > 0 ? (
+              <span id="novel-star-agg">
+                ★ {novel.starAvg.toFixed(2)}（{novel.starCount}）
+              </span>
+            ) : null}
             {novel.starCount > 0 && novel.followCount > 0 ? ' · ' : ''}
             {novel.followCount > 0 ? `フォロワー ${novel.followCount}` : ''}
           </p>
@@ -117,7 +121,13 @@ export const NovelPage: FC<{
           ) : null}
 
           {viewer ? (
-            <LibraryControls base={base} novelId={novel.id} state={libraryState ?? null} />
+            <span
+              data-island="library"
+              data-props={JSON.stringify({ novelId: novel.id, state: libraryState ?? null })}
+            >
+              {/* No-JS fallback: a plain form POST. The island upgrades this in place. */}
+              <LibraryControls base={base} novelId={novel.id} state={libraryState ?? null} />
+            </span>
           ) : null}
 
           {canInteract ? (
@@ -165,18 +175,28 @@ export const NovelPage: FC<{
         {canInteract ? (
           <div class="mt-4 flex items-center gap-2 text-sm">
             <span class="text-muted-foreground">評価</span>
-            {[1, 2, 3].map((v) => (
-              <form method="post" action={`/novels/${novel.id}/star`}>
-                <input type="hidden" name="value" value={String(v)} />
-                <button
-                  type="submit"
-                  aria-pressed={social.myStar === v}
-                  class="rounded-md border border-border px-3 py-1 hover:bg-muted aria-pressed:border-primary aria-pressed:text-primary"
-                >
-                  {'★'.repeat(v)}
-                </button>
-              </form>
-            ))}
+            <span
+              class="flex items-center gap-2"
+              data-island="star"
+              data-props={JSON.stringify({
+                action: `/novels/${novel.id}/star`,
+                value: social.myStar ?? 0,
+              })}
+            >
+              {/* No-JS fallback: one form per star. The island upgrades this in place. */}
+              {[1, 2, 3].map((v) => (
+                <form method="post" action={`/novels/${novel.id}/star`}>
+                  <input type="hidden" name="value" value={String(v)} />
+                  <button
+                    type="submit"
+                    aria-pressed={social.myStar === v}
+                    class="rounded-md border border-border px-3 py-1 hover:bg-muted aria-pressed:border-primary aria-pressed:text-primary"
+                  >
+                    {'★'.repeat(v)}
+                  </button>
+                </form>
+              ))}
+            </span>
           </div>
         ) : null}
 
